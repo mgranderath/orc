@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="restconf-example"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:ex="http://example.org/example-last-modified">
+  <namespace uri="http://example.org/example-last-modified"/>
+  <prefix value="ex"/>
+  <extension name="uci">
+    <argument name="name"/>
+  </extension>
+  <ex:uci name="restconf"/>
+  <container name="state">
+    <ex:uci name="state"/>
+    <leaf-list name="op">
+      <ex:uci name="op"/>
+      <type name="string"/>
+    </leaf-list>
+  </container>
+</module>

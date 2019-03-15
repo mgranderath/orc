@@ -1,0 +1,17 @@
+module restconf-example {
+  namespace "http://example.org/example-last-modified";
+  prefix "ex";
+
+  extension uci {
+    argument name;
+  }
+
+  ex:uci "restconf";
+  container state {
+    ex:uci "state";
+    leaf-list op {
+      ex:uci "op";
+      type string;
+    }
+  }
+}
