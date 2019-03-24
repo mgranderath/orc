@@ -11,44 +11,6 @@
 
 #define IETF_YANG_VERSION "2016-06-21"
 
-struct json_object* value_in_modules(char* module) {
-  const map_str2str* iter = modulemap;
-  const map_str2str* end = modulemap + sizeof(modulemap) / sizeof(modulemap[0]);
-  int found = 0;
-  while (iter && iter < end) {
-    if (strlen(module) == strlen(iter->key) && strcmp(module, iter->key) == 0) {
-      found = 1;
-      break;
-    }
-    iter++;
-  }
-  if (!found) {
-    return NULL;
-  }
-  struct json_object* jobj = json_tokener_parse(iter->str);
-  return jobj;
-}
-
-int restconf_error(struct cgi_context *ctx) {
-  struct json_object *jobj = json_object_new_object();
-  struct json_object *ietf = json_object_new_object();
-  struct json_object *array = json_object_new_array();
-
-  struct json_object *error_message = json_object_new_object();
-  json_object_object_add(error_message, "error-type", json_object_new_string("protocol"));
-  json_object_object_add(error_message, "error-tag", json_object_new_string("unknown-element"));
-  json_object_array_add(array, error_message);
-  json_object_object_add(ietf, "error", array);
-  json_object_object_add(jobj, "ietf-restconf:errors", ietf);
-
-  printf("%s\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
-  json_object_put(error_message);
-  json_object_put(array);
-  json_object_put(ietf);
-  json_object_put(jobj);
-  return 0;
-}
-
 static int api_root(struct cgi_context *cgi) {
   content_type_json();
   headers_end();
@@ -67,9 +29,6 @@ static int api_root(struct cgi_context *cgi) {
 
 static int data_root(struct cgi_context *cgi, char** pathvec) {
   int retval = 1;
-  char** vec = NULL;
-  char* pathvec_modify = NULL;
-  json_object* module;
 
   if (pathvec[1] == NULL) {
     // root
@@ -84,41 +43,13 @@ static int data_root(struct cgi_context *cgi, char** pathvec) {
     goto done;
   }
 
-  pathvec_modify = str_dup(pathvec[1]);
-  vec = path2vec(pathvec_modify, ":");
-  if (vec == NULL) {
-    goto done;
-  }
-  if (vector_size(vec) < 2) {
-    retval = badrequest(cgi);
-    goto done;
-  }
-
-  module = value_in_modules(vec[0]);
-  if (!module) {
-    printf("Status: 400 Bad Request\r\n");
-    content_type_json();
-    headers_end();
-    restconf_error(cgi);
-    goto done;
-  }
-
-  content_type_json();
-  headers_end();
-
   if (strcmp(cgi->method, "GET") == 0) {
     retval = data_get(cgi, pathvec);
     goto done;
   }
 
   retval = 0;
-done:
-  if (vec) {
-    vector_free(vec);
-  }
-  if (pathvec_modify) {
-    free(pathvec_modify);
-  }
+  done:
   return retval;
 }
 
