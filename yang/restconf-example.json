@@ -1,0 +1,38 @@
+{
+  "type": "module",
+  "uci-package": "restconf",
+  "map": {
+    "state": {
+      "type": "container",
+      "uci-section": "state",
+      "map": {
+        "op": {
+          "type": "leaf-list",
+          "leaf-type": "int64",
+          "uci-option": "op",
+          "map": {
+          }
+        },
+        "num": {
+          "type": "leaf",
+          "leaf-type": "int8",
+          "uci-option": "numa",
+          "map": {
+          }
+        },
+        "list-test": {
+          "type": "list",
+          "uci-section-type": "list_test",
+          "map": {
+            "name": {
+              "type": "leaf",
+              "leaf-type": "string",
+              "uci-option": "name",
+              "map": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

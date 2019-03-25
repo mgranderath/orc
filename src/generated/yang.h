@@ -13,7 +13,7 @@ typedef struct map_str2str map_str2str;
 
 static const map_str2str modulemap[] = {
         {"restconf-example", "{'type': 'module', 'uci-package': 'restconf', 'map': {'state': {'type': 'container', 'uci-section': 'state',"
-                             " 'map': {'op': {'type': 'leaf-list', 'leaf-type': 'int64', 'uci-option': 'op', 'map': {}}, 'num': {'type': 'leaf', 'leaf-type': 'int8', 'uci-option': 'num', 'map': {}}}}}}"}
+                             " 'map': {'op': {'type': 'leaf-list', 'leaf-type': 'int64', 'uci-option': 'op', 'map': {}}, 'num': {'type': 'leaf', 'leaf-type': 'int8', 'uci-option': 'numa', 'map': {}}}}}}"}
 };
 
 enum yang_type {
