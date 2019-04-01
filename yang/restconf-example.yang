@@ -6,12 +6,47 @@ module restconf-example {
     argument name;
   }
 
-  ex:uci "restconf";
+  ex:uci-package "restconf";
   container state {
-    ex:uci "state";
+    ex:uci-section "state";
+
     leaf-list op {
-      ex:uci "op";
-      type string;
+      ex:uci-option "op";
+      type int64;
+    }
+
+    leaf num {
+      ex:uci-option "numa";
+      type int8;
+    }
+
+    list people {
+      ex:uci-section-type "people_list";
+      key "name age";
+
+      leaf name {
+        ex:uci-option "name";
+        type string;
+      }
+
+      leaf age {
+        ex:uci-option "age";
+        type int8;
+      }
+
+      leaf-list age-list {
+        ex:uci-option "age_list";
+        type int64;
+      }
+    }
+
+    container nested-state {
+      ex:uci-section "nested_state";
+
+      leaf top {
+        ex:uci-option "top";
+        type string;
+      }
     }
   }
 }

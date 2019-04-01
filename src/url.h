@@ -1,8 +1,5 @@
-//
-// Created by malte on 28.03.19.
-//
-
 #ifndef RESTCONF_URL_H
 #define RESTCONF_URL_H
-
-#endif //RESTCONF_URL_H
+char** clist_to_vec(char* list);
+void urldecode(char* dst, const char* src);
+#endif  // RESTCONF_URL_H

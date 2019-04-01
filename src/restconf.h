@@ -1,8 +1,5 @@
-//
-// Created by malte on 27.03.19.
-//
-
-#ifndef RESTCONF_RESTCONF_H
-#define RESTCONF_RESTCONF_H
-
-#endif //RESTCONF_RESTCONF_H
+#ifndef _RESTCONF_H
+#define _RESTCONF_H
+#define IETF_YANG_VERSION "2016-06-21"
+#define ROOT "/cgi-bin/restconf"
+#endif  //_RESTCONF_H

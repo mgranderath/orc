@@ -1,0 +1,43 @@
+{
+  "restconf-example:state": {
+    "num": 5,
+    "op": [
+      1998,
+      5,
+      12,
+      44,
+      54,
+      234,
+      25
+    ],
+    "people": [
+      {
+        "name": "malte",
+        "age": 20,
+        "age-list": [
+          20,
+          21,
+          22
+        ]
+      },
+      {
+        "name": "mati",
+        "age": 22,
+        "age-list": [
+          192,
+          12,
+          55,
+          99
+        ]
+      },
+      {
+        "name": "malte",
+        "age": 20,
+        "age-list": []
+      }
+    ],
+    "nested-state": {
+      "top": "test"
+    }
+  }
+}

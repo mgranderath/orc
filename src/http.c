@@ -1,15 +1,30 @@
-#include <string.h>
-#include <stdio.h>
 #include "http.h"
+#include <stdio.h>
+#include <string.h>
 #include "vector.h"
 
+/**
+ * Duplicates a string
+ * @param c the string to be duplicated
+ * @return the duplicated string
+ */
 char *str_dup(const char *c) {
   char *dup = malloc(strlen(c) + 1);
 
-  if (dup != NULL)
-      strcpy(dup, c);
+  if (dup != NULL) strcpy(dup, c);
 
   return dup;
+}
+
+// Official strndup source
+char *strn_dup(const char *s, size_t n) {
+  size_t len = strnlen(s, n);
+  char *new = (char *)malloc(len + 1);
+  if (new == NULL) {
+    return NULL;
+  }
+  new[len] = '\0';
+  return (char *)memcpy(new, s, len);
 }
 
 /**
@@ -19,7 +34,7 @@ char *str_dup(const char *c) {
  * @param identifier the identifier to split
  * @return char** vector of strings
  */
-char** path2vec(char* path, char* identifier) {
+char **path2vec(char *path, char *identifier) {
   char **vec = NULL;
   char *token = strtok(path, identifier);
   while (token != NULL) {
@@ -72,7 +87,8 @@ int forbidden(struct cgi_context *ctx) {
   printf("Content-Type: text/html\r\n\r\n");
 
   printf("<h1>Forbidden</h1>\n");
-  printf("The requested URL %s was forbidden.\n", ctx->path);;
+  printf("The requested URL %s was forbidden.\n", ctx->path);
+  ;
   return 0;
 }
 
@@ -105,10 +121,14 @@ int internal_server_error(struct cgi_context *ctx) {
   return 0;
 }
 
+/**
+ * Prints the content type and charset
+ */
 void content_type_json() {
   printf("Content-Type: application/yang-data+json;charset=utf-8;\n");
 }
 
-void headers_end() {
-  printf("\n\n");
-}
+/**
+ * prints the characters to end the header
+ */
+void headers_end() { printf("\n\n"); }

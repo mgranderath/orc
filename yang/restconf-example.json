@@ -20,14 +20,42 @@
           "map": {
           }
         },
-        "list-test": {
+        "people": {
           "type": "list",
-          "uci-section-type": "list_test",
+          "uci-section-type": "people_list",
+          "keys": [
+            "name",
+            "age"
+          ],
           "map": {
             "name": {
               "type": "leaf",
               "leaf-type": "string",
               "uci-option": "name",
+              "map": {}
+            },
+            "age": {
+              "type": "leaf",
+              "leaf-type": "int8",
+              "uci-option": "age",
+              "map": {}
+            },
+            "age-list": {
+              "type": "leaf-list",
+              "leaf-type": "int64",
+              "uci-option": "age_list",
+              "map": {}
+            }
+          }
+        },
+        "nested-state": {
+          "type": "container",
+          "uci-section": "nested_state",
+          "map": {
+            "top": {
+              "type": "leaf",
+              "leaf-type": "string",
+              "uci-option": "top",
               "map": {}
             }
           }
