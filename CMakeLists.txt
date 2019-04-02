@@ -22,6 +22,6 @@ add_executable(restconf
         src/restconf-method.h
         src/restconf.c
         src/vector.h
-        src/generated/yang.h src/restconf-uci.h src/rectconf-uci.c src/restconf-json.c src/restconf-json.h src/generated/yang.c src/restconf.h src/url.c src/url.h src/error.c src/error.h)
+        src/generated/yang.h src/restconf-uci.h src/rectconf-uci.c src/restconf-json.c src/restconf-json.h src/generated/yang.c src/restconf.h src/url.c src/url.h src/error.c src/error.h src/cmd.c src/cmd.h src/util.c src/util.h)
 
 target_link_libraries(restconf json-c uci ubox)

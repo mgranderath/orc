@@ -105,33 +105,84 @@ int verify_yang_json_type(yang_type type, json_type val_type) {
   return 0;
 }
 
+static error extract_key_values(struct json_object* keys,
+                                struct json_object* item,
+                                struct json_object** ret) {
+  struct json_object* values = json_object_new_object();
+  for (size_t keys_i = 0; keys_i < json_object_array_length(keys); keys_i++) {
+    const char* key = NULL;
+    struct json_object* key_value = NULL;
+    if ((key = json_object_get_string(
+             json_object_array_get_idx(keys, keys_i))) == NULL) {
+      return YANG_SCHEMA_ERROR;
+    }
+    json_object_object_get_ex(item, key, &key_value);
+    if (key_value == NULL) {
+      return KEY_NOT_PRESENT;
+    }
+    // Verify that key is leaf
+    json_object_object_add(values, key, key_value);
+  }
+  *ret = values;
+  return RE_OK;
+}
+
+static error check_mandatory_values(struct json_object* mandatory,
+                                    struct json_object* item) {
+  for (size_t mandatory_i = 0;
+       mandatory_i < json_object_array_length(mandatory); mandatory_i++) {
+    const char* key = NULL;
+    struct json_object* key_value = NULL;
+    if ((key = json_object_get_string(
+             json_object_array_get_idx(mandatory, mandatory_i))) == NULL) {
+      return YANG_SCHEMA_ERROR;
+    }
+    json_object_object_get_ex(item, key, &key_value);
+    if (key_value == NULL) {
+      return MANDATORY_NOT_PRESENT;
+    }
+  }
+  return RE_OK;
+}
+
 error json_yang_verify_list(struct json_object* list,
                             struct json_object* yang) {
+  int keys_exist = 1;
+  int mandatory_exist = 1;
   struct json_object* keys = NULL;
+  struct json_object* mandatory = NULL;
+  int singular_item = 0;
 
-  if (json_object_get_type(list) != json_type_array) {
-    return INVALID_TYPE;
+  switch (json_object_get_type(list)) {
+    case json_type_object:
+      singular_item = 1;
+      break;
+    case json_type_array:
+      break;
+    default:
+      return INVALID_TYPE;
   }
-  if ((keys = json_get_array(yang, "keys")) == NULL) {
+
+  if (!(keys = json_get_array(yang, "keys"))) {
     // No keys defined in YANG
-    return YANG_SCHEMA_ERROR;
+    keys_exist = 0;
+  }
+  if (!(mandatory = json_get_array(yang, "mandatory"))) {
+    mandatory_exist = 0;
   }
   for (size_t list_i = 0; list_i < json_object_array_length(list); list_i++) {
-    struct json_object* values = json_object_new_object();
-    for (size_t keys_i = 0; keys_i < json_object_array_length(keys); keys_i++) {
-      const char* key = NULL;
-      struct json_object* key_value = NULL;
-      if ((key = json_object_get_string(
-               json_object_array_get_idx(keys, keys_i))) == NULL) {
-        return YANG_SCHEMA_ERROR;
-      }
-      struct json_object* list_item = json_object_array_get_idx(list, list_i);
-      json_object_object_get_ex(list_item, key, &key_value);
-      if (key_value == NULL) {
+    struct json_object* values = NULL;
+    struct json_object* list_item = json_object_array_get_idx(list, list_i);
+    if (keys_exist) {
+      if (extract_key_values(keys, list_item, &values) != RE_OK) {
         return KEY_NOT_PRESENT;
       }
-      // Verify that key is leaf
-      json_object_object_add(values, key, key_value);
+    }
+
+    if (mandatory_exist) {
+      if (check_mandatory_values(mandatory, list_item) != RE_OK) {
+        return MANDATORY_NOT_PRESENT;
+      }
     }
 
     for (size_t verify_i = list_i + 1;
@@ -140,9 +191,9 @@ error json_yang_verify_list(struct json_object* list,
       json_object_object_foreach(values, key, value) {
         struct json_object* object_key_value = NULL;
         const char* key_value = json_object_get_string(value);
-        struct json_object* list_item =
+        struct json_object* list_item_verify =
             json_object_array_get_idx(list, verify_i);
-        json_object_object_get_ex(list_item, key, &object_key_value);
+        json_object_object_get_ex(list_item_verify, key, &object_key_value);
         if (key_value == NULL) {
           return KEY_NOT_PRESENT;
         }

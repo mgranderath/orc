@@ -2,7 +2,19 @@ module restconf-example {
   namespace "http://example.org/example-last-modified";
   prefix "ex";
 
-  extension uci {
+  extension uci-package {
+    argument name;
+  }
+
+  extension uci-section {
+    argument name;
+  }
+
+  extension uci-option {
+    argument name;
+  }
+
+  extension uci-section-type {
     argument name;
   }
 
@@ -31,6 +43,12 @@ module restconf-example {
 
       leaf age {
         ex:uci-option "age";
+        type int8;
+      }
+
+      leaf age2 {
+        mandatory true;
+        ex:uci-option "age2";
         type int8;
       }
 

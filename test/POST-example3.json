@@ -1,0 +1,31 @@
+{
+  "restconf-example:people": [
+    {
+      "name": "malte",
+      "age": 20,
+      "age2": 21,
+      "age-list": [
+        20,
+        21,
+        22
+      ]
+    },
+    {
+      "name": "mati",
+      "age": 22,
+      "age2": 23,
+      "age-list": [
+        192,
+        12,
+        55,
+        99
+      ]
+    },
+    {
+      "name": "mohit",
+      "age": 20,
+      "age2": 21,
+      "age-list": []
+    }
+  ]
+}

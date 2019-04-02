@@ -1,0 +1,7 @@
+{
+  "restconf-example:people": {
+    "name": "test user",
+    "age": 30,
+    "age2": 31
+  }
+}

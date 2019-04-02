@@ -13,20 +13,22 @@ typedef struct map_str2str map_str2str;
 
 static const map_str2str modulemap[] = {
     {"restconf-example",
-     "{\"type\": \"module\",\"uci-package\": \"restconf\",\"map\": {\"state\": "
-     "{\"type\": \"container\",\"uci-section\": \"state\",\"map\": {\"op\": "
-     "{\"type\": \"leaf-list\",\"leaf-type\": \"int64\",\"uci-option\": "
-     "\"op\",\"map\": {}},\"num\": {\"type\": \"leaf\",\"leaf-type\": "
-     "\"int8\",\"uci-option\": \"numa\",\"map\": {}},\"people\": {\"type\": "
-     "\"list\",\"uci-section-type\": \"people_list\",\"keys\": [\"name\", "
-     "\"age\"],\"map\": {\"name\": {\"type\": \"leaf\",\"leaf-type\": "
-     "\"string\",\"uci-option\": \"name\",\"map\": {}},\"age\": {\"type\": "
-     "\"leaf\",\"leaf-type\": \"int8\",\"uci-option\": \"age\",\"map\": "
-     "{}},\"age-list\": {\"type\": \"leaf-list\",\"leaf-type\": "
-     "\"int64\",\"uci-option\": \"age_list\",\"map\": {}}}},\"nested-state\": "
-     "{\"type\": \"container\",\"uci-section\": \"nested_state\",\"map\": "
-     "{\"top\": {\"type\": \"leaf\",\"leaf-type\": \"string\",\"uci-option\": "
-     "\"top\",\"map\": {}}}}}}}}"}};
+     "{\"type\": \"module\", \"map\": {\"state\": {\"type\": \"container\", "
+     "\"map\": {\"op\": {\"type\": \"leaf-list\", \"map\": {}, \"uci-option\": "
+     "\"op\", \"leaf-type\": \"int64\"}, \"num\": {\"type\": \"leaf\", "
+     "\"map\": {}, \"uci-option\": \"numa\", \"leaf-type\": \"int8\"}, "
+     "\"people\": {\"type\": \"list\", \"map\": {\"name\": {\"type\": "
+     "\"leaf\", \"map\": {}, \"uci-option\": \"name\", \"leaf-type\": "
+     "\"string\"}, \"age\": {\"type\": \"leaf\", \"map\": {}, \"uci-option\": "
+     "\"age\", \"leaf-type\": \"int8\"}, \"age2\": {\"type\": \"leaf\", "
+     "\"map\": {}, \"uci-option\": \"age2\", \"leaf-type\": \"int8\"}, "
+     "\"age-list\": {\"type\": \"leaf-list\", \"map\": {}, \"uci-option\": "
+     "\"age_list\", \"leaf-type\": \"int64\"}}, \"uci-section-type\": "
+     "\"people_list\", \"keys\": [\"name\", \"age\"], \"mandatory\": "
+     "[\"age2\"]}, \"nested-state\": {\"type\": \"container\", \"map\": "
+     "{\"top\": {\"type\": \"leaf\", \"map\": {}, \"uci-option\": \"top\", "
+     "\"leaf-type\": \"string\"}}, \"uci-section\": \"nested_state\"}}, "
+     "\"uci-section\": \"state\"}}, \"uci-package\": \"restconf\"}"}};
 
 enum yang_type {
   NONE,

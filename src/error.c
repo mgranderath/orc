@@ -50,6 +50,14 @@ int restconf_data_exists() {
   return 0;
 }
 
+int restconf_missing_element() {
+  printf("Status: 409 Conflict\r\n");
+  content_type_json();
+  headers_end();
+  restconf_error("missing-element");
+  return 0;
+}
+
 int restconf_data_missing() {
   printf("Status: 409 Conflict\r\n");
   content_type_json();
@@ -71,5 +79,71 @@ int restconf_unknown_namespace() {
   content_type_json();
   headers_end();
   restconf_error("unknown-namespace");
+  return 0;
+}
+
+int restconf_partial_operation() {
+  printf("Status: 500 Internal Server Error\r\n");
+  content_type_json();
+  headers_end();
+  restconf_error("partial-operation");
+  return 0;
+}
+
+int restconf_operation_failed() {
+  printf("Status: 412 Precondition Failed\r\n");
+  content_type_json();
+  headers_end();
+  restconf_error("operation-failed");
+  return 0;
+}
+
+int restconf_operation_failed_internal() {
+  printf("Status: 500 Internal Server Error\r\n");
+  content_type_json();
+  headers_end();
+  restconf_error("operation-failed");
+  return 0;
+}
+
+int restconf_unknown_element() {
+  printf("Status: 400 Bad Request\r\n");
+  content_type_json();
+  headers_end();
+  restconf_error("unknown-element");
+  return 0;
+}
+
+int print_error(error err) {
+  switch (err) {
+    case LEAF_NO_OPTION:
+    case YANG_SCHEMA_ERROR:
+    case INTERNAL:
+      restconf_operation_failed_internal();
+      break;
+    case NO_SUCH_ELEMENT:
+      restconf_unknown_element();
+      break;
+    case LIST_UNDEFINED_KEY:
+      restconf_operation_failed();
+      break;
+    case INVALID_TYPE:
+      restconf_malformed();
+      break;
+    case MANDATORY_NOT_PRESENT:
+    case KEY_NOT_PRESENT:
+      restconf_missing_element();
+      break;
+    case ELEMENT_ALREADY_EXISTS:
+    case IDENTICAL_KEYS:
+      restconf_data_exists();
+      break;
+    case LIST_NO_FILTER:
+    case MULTIPLE_OBJECTS:
+      restconf_badrequest();
+      break;
+    default:
+      break;
+  }
   return 0;
 }
