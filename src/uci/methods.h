@@ -26,9 +26,6 @@ struct uci_where {
 #define INIT_UCI_PATH() \
   { "", "", "", "", 0, 0 }
 
-int combine_to_path(struct uci_path *path, char *buffer, size_t size);
-int combine_to_anonymous_path(struct uci_path *path, int index, char *buffer,
-                              size_t size);
 int uci_read_option(char *path, char *buffer, size_t size);
 char **uci_read_list(char *path);
 int uci_path_exists(char *path);
@@ -37,6 +34,6 @@ int uci_write_option(char *path, const char *value);
 int uci_write_list(char *path, const char *value);
 int uci_list_length(struct uci_path *path);
 struct uci_section *uci_add_section_anon(char *package_name, char *type);
-int uci_add_section_named(char *package_name, char *type, char *name);
+int uci_add_section_named(char *package_name, const char *type, char *name);
 
 #endif  //_YANG_UCI_H

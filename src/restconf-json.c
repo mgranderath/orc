@@ -67,44 +67,6 @@ struct json_object* json_yang_type_format(yang_type type, const char* val) {
   return NULL;
 }
 
-int verify_yang_json_type(yang_type type, json_type val_type) {
-  switch (type) {
-    case BOOLEAN:
-      if (val_type != json_type_boolean) return 1;
-      break;
-    case EMPTY:
-      if (val_type != json_type_null) return 1;
-      break;
-    case IDENTITY_REF:
-      break;
-    case INT_8:
-    case INT_16:
-    case INT_32:
-    case UINT_8:
-    case UINT_16:
-    case UINT_32:
-      if (val_type != json_type_int) return 1;
-      break;
-    case LEAF_REF:
-      break;
-    case UINT_64:
-    case INT_64:
-    case DECIMAL_64:
-    case ENUMERATION:
-    case BITS:
-    case BINARY:
-    case STRING:
-    case INSTANCE_IDENTIFIER:
-      if (val_type != json_type_string) return 1;
-      break;
-    case UNION:
-      break;
-    default:
-      return 0;
-  }
-  return 0;
-}
-
 static error extract_key_values(struct json_object* keys,
                                 struct json_object* item,
                                 struct json_object** ret) {

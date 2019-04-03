@@ -13,15 +13,18 @@ include_directories($ENV{HOME}/github/openwrt/build_dir/target-x86_64_musl/ubox-
 
 link_directories($ENV{HOME}/github/openwrt/staging_dir/target-x86_64_musl/usr/lib/)
 
+file(GLOB restconf_SRC
+        "src/*.h"
+        "src/*.c"
+        "src/generated/*.h"
+        "src/generated/*.c"
+        "src/uci/*.h"
+        "src/uci/*.c"
+        "src/yang-verify.h"
+        "src/yang-verify.c"
+        )
+
 add_executable(restconf
-        src/cgi.c
-        src/cgi.h
-        src/http.c
-        src/http.h
-        src/restconf-method.c
-        src/restconf-method.h
-        src/restconf.c
-        src/vector.h
-        src/generated/yang.h src/restconf-uci.h src/rectconf-uci.c src/restconf-json.c src/restconf-json.h src/generated/yang.c src/restconf.h src/url.c src/url.h src/error.c src/error.h src/cmd.c src/cmd.h src/util.c src/util.h)
+        ${restconf_SRC})
 
 target_link_libraries(restconf json-c uci ubox)

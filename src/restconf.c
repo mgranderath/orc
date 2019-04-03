@@ -7,6 +7,7 @@
 #include "http.h"
 #include "restconf-json.h"
 #include "restconf-method.h"
+#include "util.h"
 #include "vector.h"
 
 static int api_root(struct cgi_context *cgi) {

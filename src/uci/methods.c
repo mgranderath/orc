@@ -1,55 +1,10 @@
+#include "methods.h"
 #include <string.h>
 #include <uci.h>
 #include "http.h"
-#include "restconf-uci.h"
+#include "uci-util.h"
+#include "util.h"
 #include "vector.h"
-
-/**
- * Combines the uci_path struct to a string
- * @param path the uci_path* to be combined
- * @param buffer char* into which the output should be copied
- * @param size the size of the buffer
- * @return EXIT_SUCCESS or EXIT_FAILURE
- */
-int combine_to_path(struct uci_path *path, char *buffer, size_t size) {
-  int retval = -1;
-  if (!path->option || strlen(path->option) == 0) {
-    retval = snprintf(buffer, size, "%s.%s", path->package, path->section);
-  } else {
-    retval = snprintf(buffer, size, "%s.%s.%s", path->package, path->section,
-                      path->option);
-  }
-  if (retval < 1) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-/**
- * Combines the uci_path struct and index into an anonymous section path
- * @param path the uci_path* to be combined
- * @param index the index of the anonymous section
- * @param buffer char* into which the output should be copied
- * @param size the size of the buffer
- * @return EXIT_SUCCESS or EXIT_FAILURE
- */
-int combine_to_anonymous_path(struct uci_path *path, int index, char *buffer,
-                              size_t size) {
-  int retval = -1;
-  if (!path->option || strlen(path->option) == 0) {
-    retval = snprintf(buffer, size, "%s.@%s[%d]", path->package,
-                      path->section_type, index);
-  } else {
-    retval = snprintf(buffer, size, "%s.@%s[%d].%s", path->package,
-                      path->section_type, index, path->option);
-  }
-  if (retval < 1) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
 
 /**
  * reads a uci option into a buffer by path
@@ -64,7 +19,7 @@ int uci_read_option(char *path, char *buffer, size_t size) {
     return 1;
   }
 
-  int UCI_LOOKUP_COMPLETE = (1 << 1);
+  unsigned int UCI_LOOKUP_COMPLETE = (1u << 1u);
 
   if ((uci_lookup_ptr(ctx, &ptr, path, true) != UCI_OK) ||
       (ptr.o == NULL || ptr.o->v.string == NULL)) {
@@ -93,7 +48,7 @@ char **uci_read_list(char *path) {
     return NULL;
   }
 
-  int UCI_LOOKUP_COMPLETE = (1 << 1);
+  unsigned int UCI_LOOKUP_COMPLETE = (1u << 1u);
 
   if ((uci_lookup_ptr(ctx, &ptr, path, true) != UCI_OK) ||
       (ptr.o == NULL || ptr.o->v.string == NULL)) {
@@ -121,7 +76,8 @@ int uci_path_exists(char *path) {
   if (!path_dup) {
     return 0;
   }
-  int UCI_LOOKUP_COMPLETE = (1 << 1);
+
+  unsigned int UCI_LOOKUP_COMPLETE = (1u << 1u);
 
   if ((uci_lookup_ptr(ctx, &ptr, path_dup, true) != UCI_OK) ||
       (ptr.s == NULL && ptr.o == NULL)) {
@@ -130,15 +86,10 @@ int uci_path_exists(char *path) {
     return 0;
   }
 
-  if (ptr.flags & UCI_LOOKUP_COMPLETE) {
-    uci_free_context(ctx);
-    free(path_dup);
-    return 1;
-  } else {
-    free(path_dup);
-    uci_free_context(ctx);
-    return 0;
-  }
+  uci_free_context(ctx);
+  free(path_dup);
+
+  return ptr.flags & UCI_LOOKUP_COMPLETE;
 }
 
 int uci_index_where(struct uci_where *where) {
@@ -156,11 +107,9 @@ int uci_index_where(struct uci_where *where) {
     for (int i = 0; i < where->key_value_length; i++) {
       char path_string[512];
       char buf[512];
-      int failed;
       path.option = (char *)where->key_value[i].key;
       combine_to_anonymous_path(&path, index, path_string, sizeof(path_string));
-      failed = uci_read_option(path_string, buf, sizeof(buf));
-      if (failed) {
+      if (uci_read_option(path_string, buf, sizeof(buf))) {
         index = -1;
         break;
       }
@@ -254,7 +203,7 @@ int uci_list_length(struct uci_path *path) {
       return -1;
     }
 
-    int UCI_LOOKUP_COMPLETE = (1 << 1);
+    unsigned int UCI_LOOKUP_COMPLETE = (1u << 1u);
 
     if ((uci_lookup_ptr(ctx, &ptr, path_string, true) != UCI_OK)) {
       uci_free_context(ctx);
@@ -292,7 +241,7 @@ struct uci_section *uci_add_section_anon(char *package_name, char *type) {
   return section;
 }
 
-int uci_add_section_named(char *package_name, char *type, char *name) {
+int uci_add_section_named(char *package_name, const char *type, char *name) {
   struct uci_ptr ptr;
   struct uci_context *ctx = uci_alloc_context();
   if (!ctx) {

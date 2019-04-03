@@ -1,31 +1,8 @@
 #include "http.h"
 #include <stdio.h>
 #include <string.h>
+#include "util.h"
 #include "vector.h"
-
-/**
- * Duplicates a string
- * @param c the string to be duplicated
- * @return the duplicated string
- */
-char *str_dup(const char *c) {
-  char *dup = malloc(strlen(c) + 1);
-
-  if (dup != NULL) strcpy(dup, c);
-
-  return dup;
-}
-
-// Official strndup source
-char *strn_dup(const char *s, size_t n) {
-  size_t len = strnlen(s, n);
-  char *new = (char *)malloc(len + 1);
-  if (new == NULL) {
-    return NULL;
-  }
-  new[len] = '\0';
-  return (char *)memcpy(new, s, len);
-}
 
 /**
  * @brief splits path into fields

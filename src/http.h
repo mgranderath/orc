@@ -14,7 +14,5 @@ void content_type_json();
 void headers_end();
 
 char **path2vec(char *path, char *identifier);
-char *str_dup(const char *c);
-char *strn_dup(const char *c, size_t to);
 
 #endif

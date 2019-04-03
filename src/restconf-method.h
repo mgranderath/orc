@@ -3,7 +3,7 @@
 
 #include "cgi.h"
 #include "error.h"
-#include "restconf-uci.h"
+#include "uci/methods.h"
 
 typedef char** rvec;
 
@@ -18,7 +18,5 @@ int data_post(struct cgi_context* cgi, char** pathvec, int root);
 struct json_object* build_recursive(struct json_object* jobj,
                                     struct uci_path* path, error* err,
                                     int root);
-struct json_object* get_list(struct json_object* jobj, struct uci_path* path,
-                             error* err);
 
 #endif

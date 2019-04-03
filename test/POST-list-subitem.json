@@ -1,0 +1,6 @@
+{
+  "restconf-example:age-list": [
+    12,
+    15
+  ]
+}

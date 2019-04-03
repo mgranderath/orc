@@ -1,6 +1,20 @@
 #include "cmd.h"
 #include "restconf-method.h"
+#include "uci-util.h"
 #include "vector.h"
+
+struct uci_write_pair *initialize_uci_write_pair(struct uci_path *path,
+                                                 char *value,
+                                                 enum uci_object_type type) {
+  uci_write_pair *output = malloc(sizeof(uci_write_pair));
+  if (!output) {
+    return NULL;
+  }
+  output->path = *path;
+  output->value = (char *)value;
+  output->type = list;
+  return output;
+}
 
 int free_uci_write_list(uci_write_pair **list) {
   for (size_t i = 0; i < vector_size(list); i++) {
@@ -31,6 +45,9 @@ int write_uci_write_list(uci_write_pair **write_list) {
     if (cmd->path.where && cmd->path.section_type) {
       int section_exists = section_already_created(
           section_list, cmd->path.section_type, cmd->path.index);
+      snprintf(local_path_string, sizeof(local_path_string), "%s.@%s[%d]",
+               cmd->path.package, cmd->path.section_type, cmd->path.index);
+      section_exists = section_exists || uci_path_exists(local_path_string);
       if (!section_exists) {
         uci_add_section_anon(cmd->path.package, cmd->path.section_type);
         struct path_section_pair output = {
