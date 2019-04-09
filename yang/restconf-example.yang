@@ -21,6 +21,7 @@ module restconf-example {
   ex:uci-package "restconf";
   container state {
     ex:uci-section "state";
+    ex:uci-section-type "state";
 
     leaf-list op {
       ex:uci-option "op";
@@ -60,6 +61,7 @@ module restconf-example {
 
     container nested-state {
       ex:uci-section "nested_state";
+      ex:uci-section-type "nested_state";
 
       leaf top {
         ex:uci-option "top";

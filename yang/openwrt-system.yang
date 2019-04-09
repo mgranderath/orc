@@ -1,0 +1,163 @@
+module openwrt-system {
+  namespace "https://to-be-added.com";
+  prefix "os";
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import openwrt-uci-extension {
+    prefix ex;
+  }
+
+  container system {
+    ex:uci-package "system";
+    ex:uci-section "OpenWrt";
+    ex:uci-section-type "system";
+
+    leaf hostname {
+      ex:uci-option "hostname";
+      type string;
+      description "The hostname of the system";
+    }
+
+    leaf buffersize {
+      ex:uci-option "buffersize";
+      type uint32;
+      description "Size of the kernel message buffer.";
+    }
+
+    leaf conloglevel {
+      ex:uci-option "conloglevel";
+      type uint8 {
+        range "0..7";
+      }
+      default 7;
+      description
+        "Number between 1-8. The maximum log level for kernel messages to be logged to the
+        console. Only messages with a level lower than this will be printed to the console.
+        Higher level messages have lower log level number. Highest level messages are ones with
+        log level 0. If you want more verbose messages in console put conloglevel to 8
+        if you want less messages lower conloglevel to 4 or even less.";
+    }
+
+    leaf cronloglevel {
+      ex:uci-option "cronloglevel";
+      type uint8;
+      default 5;
+      description
+        "The minimum level for cron messages to be logged to syslog. 0 will print all debug messages,
+         8 will log command executions, and 9 or higher will only log error messages.";
+    }
+
+    leaf klogconloglevel {
+      ex:uci-option "klogconloglevel";
+      type uint8;
+      default 7;
+      description
+        "The maximum log level for kernel messages to be logged to the console. Only messages with a level
+         lower than this will be printed to the console. Identical to conloglevel and will override it.";
+    }
+
+    leaf log_buffer_size {
+      ex:uci-option "lof_buffer_size";
+      type uint32;
+      default 16;
+      description
+        "Size of the log buffer of the “new” procd based system log, that is output by the logread command";
+    }
+
+    leaf log_file {
+      ex:uci-option "log_file";
+      type string;
+      description
+        "File to write log messages to (type file). The default is to not write a log in a file. The most
+         often used location for a system log file is /var/log/messages.";
+    }
+
+    leaf log_hostname {
+      type string;
+      description
+        "Hostname to send to remote syslog. If none is provided, the actual hostname is send.";
+    }
+
+    leaf log_ip {
+      ex:uci-option "log_ip";
+      type inet:ipv4-address;
+      description
+        "IP address of a syslog server to which the log messages should be sent in addition to the local destination.";
+    }
+
+    leaf log_port {
+      ex:uci-option "log_port";
+      type uint32;
+      description
+        "Port number of the remote syslog server";
+    }
+
+    leaf log_prefix {
+      ex:uci-option "log_prefix";
+      type string;
+      description
+        "Adds a prefix to all log messages send over network";
+    }
+
+    leaf log_proto {
+      ex:uci-option "log_proto";
+      type string {
+        pattern "(udp|tcp)";
+      }
+      default "udp";
+      description
+        "Sets the protocol to use for the connection";
+    }
+
+    leaf log_remote {
+      ex:uci-option "log_remote";
+      type boolean;
+      default false;
+      description "Enables remote logging.";
+    }
+
+    leaf log_size {
+      ex:uci-option "log_size";
+      type uint32;
+      default 16;
+      description "Size of the file or circular memory buffer in KiB.";
+    }
+
+    leaf log_trailer_null {
+      ex:uci-option "log_trailer_null";
+      type boolean;
+      default false;
+      description 'Use \0 instead of \n as trailer when using TCP.';
+    }
+
+    leaf log_type {
+      ex:uci-option "log_type";
+      type string {
+        pattern "(circular|file)";
+      }
+      description "Either circular or file.";
+    }
+
+    leaf urandom_seed {
+      ex:uci-option "urandom_seed";
+      type string;
+      default "0";
+      description "Path of the seed. Enables saving a new seed on each boot.";
+    }
+
+    leaf timezone {
+      ex:uci-option "timezone";
+      type string;
+      description "The time zone that date and time should be rendered in by default.";
+    }
+
+    leaf zonename {
+      ex:uci-option "zonename";
+      type string;
+      description "Only useful when using glibc and zoneinfo!";
+    }
+  }
+}

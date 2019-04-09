@@ -63,7 +63,7 @@ module ietf-interfaces {
     }
 
     identity interface-type {
-      base
+      base "";
       description
         "Base identity from which specific interface types are
        derived.";

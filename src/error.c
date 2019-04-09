@@ -67,7 +67,7 @@ int restconf_data_missing() {
 }
 
 int restconf_invalid_value() {
-  printf("Status: 400 Bad Request\r\n");
+  printf("Status: 404 Not Found\r\n");
   content_type_json();
   headers_end();
   restconf_error("invalid-value");
@@ -142,6 +142,8 @@ int print_error(error err) {
     case MULTIPLE_OBJECTS:
       restconf_badrequest();
       break;
+    case DELETING_KEY:
+      restconf_badrequest();
     default:
       break;
   }

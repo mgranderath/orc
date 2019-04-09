@@ -1,66 +1,76 @@
 {
   "type": "module",
-  "uci-package": "restconf",
   "map": {
     "state": {
       "type": "container",
-      "uci-section": "state",
       "map": {
         "op": {
           "type": "leaf-list",
-          "leaf-type": "int64",
+          "map": {},
           "uci-option": "op",
-          "map": {
-          }
+          "leaf-type": "int64"
         },
         "num": {
           "type": "leaf",
-          "leaf-type": "int8",
+          "map": {},
           "uci-option": "numa",
-          "map": {
-          }
+          "leaf-type": "int8"
         },
         "people": {
           "type": "list",
+          "map": {
+            "name": {
+              "type": "leaf",
+              "map": {},
+              "uci-option": "name",
+              "leaf-type": "string"
+            },
+            "age": {
+              "type": "leaf",
+              "map": {},
+              "uci-option": "age",
+              "leaf-type": "int8"
+            },
+            "age2": {
+              "type": "leaf",
+              "map": {},
+              "mandatory": true,
+              "uci-option": "age2",
+              "leaf-type": "int8"
+            },
+            "age-list": {
+              "type": "leaf-list",
+              "map": {},
+              "uci-option": "age_list",
+              "leaf-type": "int64"
+            }
+          },
           "uci-section-type": "people_list",
           "keys": [
             "name",
             "age"
           ],
-          "map": {
-            "name": {
-              "type": "leaf",
-              "leaf-type": "string",
-              "uci-option": "name",
-              "map": {}
-            },
-            "age": {
-              "type": "leaf",
-              "leaf-type": "int8",
-              "uci-option": "age",
-              "map": {}
-            },
-            "age-list": {
-              "type": "leaf-list",
-              "leaf-type": "int64",
-              "uci-option": "age_list",
-              "map": {}
-            }
-          }
+          "mandatory": [
+            "age2"
+          ]
         },
         "nested-state": {
           "type": "container",
-          "uci-section": "nested_state",
           "map": {
             "top": {
               "type": "leaf",
-              "leaf-type": "string",
+              "map": {},
               "uci-option": "top",
-              "map": {}
+              "leaf-type": "string"
             }
-          }
+          },
+          "uci-section": "nested_state",
+          "uci-section-type": "nested_state"
         }
-      }
+      },
+      "uci-section": "state",
+      "uci-section-type": "state"
     }
-  }
+  },
+  "uci-package": "restconf"
 }

@@ -15,7 +15,8 @@ enum error {
   KEY_NOT_PRESENT,
   IDENTICAL_KEYS,
   MANDATORY_NOT_PRESENT,
-  MULTIPLE_OBJECTS
+  MULTIPLE_OBJECTS,
+  DELETING_KEY
 };
 typedef enum error error;
 

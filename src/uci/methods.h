@@ -35,5 +35,8 @@ int uci_write_list(char *path, const char *value);
 int uci_list_length(struct uci_path *path);
 struct uci_section *uci_add_section_anon(char *package_name, char *type);
 int uci_add_section_named(char *package_name, const char *type, char *name);
+int uci_revert_package(char *package);
+int uci_delete_path(char *path, int commit);
+int uci_commit_package(char *package);
 
 #endif  //_YANG_UCI_H

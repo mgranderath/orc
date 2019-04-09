@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="openwrt-uci-extension"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+>
+    <namespace uri="https://to-be-added.com/uci"/>
+    <prefix value="ouci"/>
+    <extension name="uci-package">
+        <argument name="name"/>
+    </extension>
+    <extension name="uci-section">
+        <argument name="name"/>
+    </extension>
+    <extension name="uci-option">
+        <argument name="name"/>
+    </extension>
+    <extension name="uci-section-type">
+        <argument name="name"/>
+    </extension>
+</module>

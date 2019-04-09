@@ -260,3 +260,94 @@ int uci_add_section_named(char *package_name, const char *type, char *name) {
   uci_free_context(ctx);
   return 0;
 }
+
+int uci_revert_package(char *package) {
+  struct uci_ptr ptr;
+  struct uci_context *ctx = uci_alloc_context();
+  if (!ctx) {
+    return 1;
+  }
+
+  unsigned int UCI_LOOKUP_COMPLETE = (1u << 1u);
+
+  if ((uci_lookup_ptr(ctx, &ptr, package, true) != UCI_OK) || (ptr.p == NULL)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  if (!(ptr.flags & UCI_LOOKUP_COMPLETE)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  if (uci_revert(ctx, &ptr)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  uci_free_context(ctx);
+  return 0;
+}
+
+int uci_delete_path(char *path, int commit) {
+  struct uci_ptr ptr;
+  struct uci_context *ctx = uci_alloc_context();
+  if (!ctx) {
+    return 1;
+  }
+
+  unsigned int UCI_LOOKUP_COMPLETE = (1u << 1u);
+
+  if ((uci_lookup_ptr(ctx, &ptr, path, true) != UCI_OK) ||
+      (ptr.o == NULL && ptr.s == NULL)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  if (!(ptr.flags & UCI_LOOKUP_COMPLETE)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  if (uci_delete(ctx, &ptr)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  if (commit) {
+    uci_commit(ctx, &ptr.p, false);
+  } else {
+    uci_save(ctx, ptr.p);
+  }
+
+  uci_free_context(ctx);
+  return 0;
+}
+
+int uci_commit_package(char *package) {
+  struct uci_ptr ptr;
+  struct uci_context *ctx = uci_alloc_context();
+  if (!ctx) {
+    return 1;
+  }
+
+  unsigned int UCI_LOOKUP_COMPLETE = (1u << 1u);
+
+  if ((uci_lookup_ptr(ctx, &ptr, package, true) != UCI_OK) || (ptr.p == NULL)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  if (!(ptr.flags & UCI_LOOKUP_COMPLETE)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  if (uci_commit(ctx, &ptr.p, false)) {
+    uci_free_context(ctx);
+    return 1;
+  }
+
+  uci_free_context(ctx);
+  return 0;
+}

@@ -1,0 +1,20 @@
+module openwrt-uci-extension {
+    namespace "https://to-be-added.com/uci";
+    prefix "ouci";
+
+    extension uci-package {
+        argument name;
+    }
+
+    extension uci-section {
+        argument name;
+    }
+
+    extension uci-option {
+        argument name;
+    }
+
+    extension uci-section-type {
+        argument name;
+    }
+}

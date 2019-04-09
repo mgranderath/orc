@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns:ex="http://example.org/example-last-modified"
+        name="restconf-example"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1">
+    <namespace uri="http://example.org/example-last-modified"/>
+    <prefix value="ex"/>
+    <extension name="uci-package">
+        <argument name="name"/>
+    </extension>
+    <extension name="uci-section">
+        <argument name="name"/>
+    </extension>
+    <extension name="uci-option">
+        <argument name="name"/>
+    </extension>
+    <extension name="uci-section-type">
+        <argument name="name"/>
+    </extension>
+    <ex:uci-package name="restconf"/>
+    <container name="state">
+        <ex:uci-section name="state"/>
+        <ex:uci-section-type name="state"/>
+        <leaf-list name="op">
+            <ex:uci-option name="op"/>
+            <type name="int64"/>
+        </leaf-list>
+        <leaf name="num">
+            <ex:uci-option name="numa"/>
+            <type name="int8"/>
+        </leaf>
+        <list name="people">
+            <ex:uci-section-type name="people_list"/>
+            <key value="name age"/>
+            <leaf name="name">
+                <ex:uci-option name="name"/>
+                <type name="string"/>
+            </leaf>
+            <leaf name="age">
+                <ex:uci-option name="age"/>
+                <type name="int8"/>
+            </leaf>
+            <leaf name="age2">
+                <mandatory value="true"/>
+                <ex:uci-option name="age2"/>
+                <type name="int8"/>
+            </leaf>
+            <leaf-list name="age-list">
+                <ex:uci-option name="age_list"/>
+                <type name="int64"/>
+            </leaf-list>
+        </list>
+        <container name="nested-state">
+            <ex:uci-section name="nested_state"/>
+            <ex:uci-section-type name="nested_state"/>
+            <leaf name="top">
+                <ex:uci-option name="top"/>
+                <type name="string"/>
+            </leaf>
+        </container>
+    </container>
+</module>

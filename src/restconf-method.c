@@ -2,6 +2,7 @@
 #include "error.h"
 #include "http.h"
 #include "restconf-json.h"
+#include "restconf-verify.h"
 #include "uci/cmd.h"
 #include "uci/uci-get.h"
 #include "uci/uci-util.h"
@@ -13,15 +14,49 @@
 uci_write_pair **verify_content_yang(struct json_object *content,
                                      struct json_object *yang_node,
                                      struct uci_path *path, error *err,
-                                     int root) {
+                                     int root, int check_exists) {
   uci_write_pair **command_list = NULL;
+  const char *child_type = NULL;
+  if (!(child_type = json_get_string(yang_node, "type"))) {
+    *err = YANG_SCHEMA_ERROR;
+    return NULL;
+  }
+  if (strcmp(child_type, "leaf-list") == 0) {
+    if ((*err = restconf_verify_leaf_list(content, path, yang_node,
+                                          check_exists)) != RE_OK) {
+      return NULL;
+    }
+    json_array_forloop(content, index) {
+      json_object *item = json_object_array_get_idx(content, index);
+      const char *value = json_object_get_string(item);
+      uci_write_pair *output =
+          initialize_uci_write_pair(path, (char *)value, list);
+      if (!output) {
+        *err = INTERNAL;
+        return NULL;
+      }
+      vector_push_back(command_list, output);
+    }
+    return command_list;
+  } else if (strcmp(child_type, "leaf") == 0) {
+    if ((*err = restconf_verify_leaf(content, path, yang_node, check_exists)) !=
+        RE_OK) {
+      return NULL;
+    }
+    uci_write_pair *output = initialize_uci_write_pair(
+        path, (char *)json_object_get_string(content), option);
+    if (!output) {
+      *err = INTERNAL;
+      return NULL;
+    }
+    vector_push_back(command_list, output);
+    return command_list;
+  }
   json_object_object_foreach(content, key, val) {
     struct json_object *child = NULL;
-    const char *child_type = NULL;
     char *module = NULL;
     char *split_key = NULL;
-    char path_string[512];
-    if (split_module_top_level(key, &module, &split_key)) {
+    if (split_pair_by_char(key, &module, &split_key, ':')) {
       split_key = key;
     }
     if (module) {
@@ -40,12 +75,8 @@ uci_write_pair **verify_content_yang(struct json_object *content,
       return NULL;
     }
     if (strcmp(child_type, "leaf") == 0) {
-      if ((*err = yang_verify_leaf(val, child)) != RE_OK) {
-        return NULL;
-      }
-      uci_combine_to_path(path, path_string, sizeof(path_string));
-      if (uci_path_exists(path_string)) {
-        *err = ELEMENT_ALREADY_EXISTS;
+      if ((*err = restconf_verify_leaf(val, path, child, check_exists)) !=
+          RE_OK) {
         return NULL;
       }
       uci_write_pair *output = initialize_uci_write_pair(
@@ -56,12 +87,8 @@ uci_write_pair **verify_content_yang(struct json_object *content,
       }
       vector_push_back(command_list, output);
     } else if (strcmp(child_type, "leaf-list") == 0) {
-      if ((*err = yang_verify_leaf_list(val, child)) != RE_OK) {
-        return NULL;
-      }
-      uci_combine_to_path(path, path_string, sizeof(path_string));
-      if (uci_path_exists(path_string)) {
-        *err = ELEMENT_ALREADY_EXISTS;
+      if ((*err = restconf_verify_leaf_list(val, path, child, check_exists)) !=
+          RE_OK) {
         return NULL;
       }
       json_array_forloop(val, index) {
@@ -98,7 +125,7 @@ uci_write_pair **verify_content_yang(struct json_object *content,
           return NULL;
         }
       } else {
-        if (list_length != 0) {
+        if (list_length != 0 && check_exists) {
           *err = ELEMENT_ALREADY_EXISTS;
           return NULL;
         }
@@ -115,7 +142,7 @@ uci_write_pair **verify_content_yang(struct json_object *content,
           path->index = index;
           path->where = 1;
           uci_write_pair **tmp_list =
-              verify_content_yang(tmp, child, path, err, 0);
+              verify_content_yang(tmp, child, path, err, 0, check_exists);
           if (*err != RE_OK) {
             free_uci_write_list(tmp_list);
             return NULL;
@@ -130,7 +157,7 @@ uci_write_pair **verify_content_yang(struct json_object *content,
         path->index = list_length;
         path->where = 1;
         uci_write_pair **tmp_list =
-            verify_content_yang(val, child, path, err, 0);
+            verify_content_yang(val, child, path, err, 0, check_exists);
         if (*err != RE_OK) {
           free_uci_write_list(tmp_list);
           return NULL;
@@ -148,7 +175,8 @@ uci_write_pair **verify_content_yang(struct json_object *content,
         return NULL;
       }
       // TODO: Actual type checking implementation
-      uci_write_pair **tmp_list = verify_content_yang(val, child, path, err, 0);
+      uci_write_pair **tmp_list =
+          verify_content_yang(val, child, path, err, 0, check_exists);
       if (*err != RE_OK) {
         free_uci_write_list(tmp_list);
         return NULL;
@@ -164,9 +192,61 @@ uci_write_pair **verify_content_yang(struct json_object *content,
   return command_list;
 }
 
-error check_path(struct json_object **jobj, char **path, size_t start,
-                 size_t end, struct uci_path *uci) {
-  struct json_object *iter = *jobj;
+error get_list_item_where(struct json_object *yang, char *keylist,
+                          struct uci_path *uci) {
+  struct json_object *keys = NULL;
+  int array_length;
+
+  if (!(keys = json_get_array(yang, "keys"))) {
+    return YANG_SCHEMA_ERROR;
+  }
+  array_length = json_object_array_length(keys);
+  rvec keylist_vec = clist_to_vec(keylist);
+  if (!keylist_vec || array_length != vector_size(keylist_vec)) {
+    // not as many keys as keys specified
+    return LIST_UNDEFINED_KEY;
+  }
+  map_str2str key_value[array_length];
+  for (int index = 0; index < array_length; index++) {
+    struct json_object *key = NULL;
+    struct json_object *key_child = NULL;
+    const char *uci_option_name = NULL;
+    const char *yang_option_name = NULL;
+
+    key = json_object_array_get_idx(keys, index);
+    if (!key || json_object_get_type(key) != json_type_string) {
+      return YANG_SCHEMA_ERROR;
+    }
+    yang_option_name = json_object_get_string(key);
+    key_child = json_get_object_from_map(yang, yang_option_name);
+    if (!key_child) {
+      return LEAF_NO_OPTION;
+    }
+    uci_option_name = json_get_string(key_child, "uci-option");
+    if (uci_option_name == NULL) {
+      return LEAF_NO_OPTION;
+    }
+    key_value[index].key = uci_option_name;
+    key_value[index].str = keylist_vec[index];
+  }
+  struct uci_where where = {
+      .path = uci, .key_value = key_value, .key_value_length = array_length};
+  int where_index = uci_index_where(&where);
+  if (where_index == -1) {
+    return LIST_UNDEFINED_KEY;
+  }
+
+  uci->where = 1;
+  uci->index = where_index;
+  vector_free(keylist_vec);
+  return RE_OK;
+}
+
+error check_path(struct json_object **root_yang, char **path, size_t start,
+                 size_t end, struct uci_path *uci, int check_keys,
+                 char **parent) {
+  struct json_object *iter = *root_yang;
+  struct json_object *keys = NULL;
   size_t i;
   if (!path) {
     return INTERNAL;
@@ -176,104 +256,59 @@ error check_path(struct json_object **jobj, char **path, size_t start,
     char *obj = NULL;
     char *keylist = NULL;
     char *keylist_encoded = NULL;
-    char *delimiter = NULL;
     const char *type = NULL;
     struct json_object *child = NULL;
-    struct json_object *keys = NULL;
-    int array_length;
+    error err;
 
-    delimiter = strchr(path[i], '=');
-    if (delimiter) {
-      size_t index = (size_t)(delimiter - path[i]);
-      obj = strn_dup(path[i], index);
-      keylist_encoded = str_dup(path[i] + index + 1);
+    split_pair_by_char(path[i], &obj, &keylist_encoded, '=');
+    if (obj && keylist_encoded) {
       keylist = malloc(strlen(keylist_encoded) + 1);
       urldecode(keylist, keylist_encoded);
       free(keylist_encoded);
-      if (!obj || !keylist) {
-        // copying the individual components failed
-        return INTERNAL;
-      }
     }
 
     if (!(path_computed = obj)) {
       path_computed = path[i];
     }
 
-    child = json_get_object_from_map(iter, path_computed);
-    if (!child) {
+    if (parent) {
+      *parent = path_computed;
+    }
+
+    if (check_keys && keys && json_value_in_array(keys, path_computed)) {
+      return DELETING_KEY;
+    }
+    keys = NULL;
+
+    if (!(child = json_get_object_from_map(iter, path_computed))) {
       return NO_SUCH_ELEMENT;
     }
     get_path_from_yang(child, uci);
-    iter = child;
-    type = json_get_string(iter, "type");
-    if (type && strcmp(type, "list") != 0) {
-      if (keylist) {
-        free(keylist);
+    type = json_get_string(child, "type");
+    if (type && strcmp(type, "list") == 0) {
+      int next_is_end = i + 1 == end;
+      if (!keylist && !next_is_end) {
+        return LIST_NO_FILTER;
       }
-      if (obj) {
-        free(obj);
+
+      if ((err = get_list_item_where(child, keylist, uci)) != RE_OK) {
+        return err;
       }
-      continue;
-    }
-    int next_is_end = i + 1 == end;
-    if (!delimiter && !next_is_end) {
-      return LIST_NO_FILTER;
-    } else if (!delimiter && next_is_end) {
-      break;
-    }
 
-    keys = json_get_array(iter, "keys");
-    if (!keys) {
-      return YANG_SCHEMA_ERROR;
-    }
-    array_length = json_object_array_length(keys);
-    rvec keylist_vec = clist_to_vec(keylist);
-    if (!keylist_vec || array_length != vector_size(keylist_vec)) {
-      // not as many keys as keys specified
-      return LIST_UNDEFINED_KEY;
-    }
-    map_str2str key_value[array_length];
-    for (int index = 0; index < array_length; index++) {
-      struct json_object *key = NULL;
-      struct json_object *key_child = NULL;
-      const char *uci_option_name = NULL;
-      const char *yang_option_name = NULL;
-
-      key = json_object_array_get_idx(keys, index);
-      if (!key || json_object_get_type(key) != json_type_string) {
+      if (check_keys && !(keys = json_get_array(child, "keys"))) {
         return YANG_SCHEMA_ERROR;
       }
-      yang_option_name = json_object_get_string(key);
-      key_child = json_get_object_from_map(iter, yang_option_name);
-      if (!key_child) {
-        return LEAF_NO_OPTION;
-      }
-      uci_option_name = json_get_string(key_child, "uci-option");
-      if (uci_option_name == NULL) {
-        return LEAF_NO_OPTION;
-      }
-      key_value[index].key = uci_option_name;
-      key_value[index].str = keylist_vec[index];
-    }
-    struct uci_where where = {
-        .path = uci, .key_value = key_value, .key_value_length = array_length};
-    int where_index = uci_index_where(&where);
-    if (where_index == -1) {
-      return LIST_UNDEFINED_KEY;
     }
 
-    uci->where = 1;
-    uci->index = where_index;
-    vector_free(keylist_vec);
     if (keylist) {
       free(keylist);
     }
     if (obj) {
       free(obj);
     }
+    iter = child;
   }
-  *jobj = iter;
+  *root_yang = iter;
   return RE_OK;
 }
 
@@ -338,7 +373,7 @@ int data_get(struct cgi_context *cgi, char **pathvec) {
   int retval = 1;
   error err;
 
-  if (split_module_top_level(pathvec[1], &module_name, &top_level_name)) {
+  if (split_pair_by_char(pathvec[1], &module_name, &top_level_name, ':')) {
     retval = restconf_badrequest();
     goto done;
   }
@@ -357,7 +392,7 @@ int data_get(struct cgi_context *cgi, char **pathvec) {
     goto done;
   }
   get_path_from_yang(top_level, &uci);
-  err = check_path(&top_level, pathvec, 2, vector_size(pathvec), &uci);
+  err = check_path(&top_level, pathvec, 2, vector_size(pathvec), &uci, 0, NULL);
   if (!top_level || err != RE_OK) {
     retval = print_error(err);
     goto done;
@@ -421,6 +456,7 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
   char *module_name = NULL;
   char *top_level_name = NULL;
   char *content_raw = NULL;
+  char *root_key_copy = NULL;
   char *root_key = NULL;
   struct json_object *root_object = NULL;
   const char *type_string = NULL;
@@ -453,12 +489,12 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
   }
 
   if (root) {
-    if (split_module_top_level(root_key, &module_name, &top_level_name)) {
+    if (split_pair_by_char(root_key, &module_name, &top_level_name, ':')) {
       retval = restconf_badrequest();
       goto done;
     }
   } else {
-    if (split_module_top_level(pathvec[1], &module_name, &top_level_name)) {
+    if (split_pair_by_char(pathvec[1], &module_name, &top_level_name, ':')) {
       retval = restconf_badrequest();
       goto done;
     }
@@ -481,7 +517,8 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
     content = root_object;
     get_path_from_yang(content, &uci);
   } else {
-    err = check_path(&top_level, pathvec, 2, vector_size(pathvec), &uci);
+    err =
+        check_path(&top_level, pathvec, 2, vector_size(pathvec), &uci, 1, NULL);
     if (!top_level || err != RE_OK) {
       retval = print_error(err);
       goto done;
@@ -512,8 +549,8 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
     retval = restconf_operation_failed_internal();
     goto done;
   }
-
-  cmds = verify_content_yang(content, top_level, &uci, &err, !root);
+  root_key_copy = str_dup(root_key);
+  cmds = verify_content_yang(content, top_level, &uci, &err, !root, 1);
   if (err != RE_OK) {
     retval = print_error(err);
     goto done;
@@ -532,7 +569,7 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
     slash = "/";
   }
   printf("Location: %s%s%s%s%s\r\n", protocol, cgi->host, cgi->path_full, slash,
-         root_key);
+         root_key_copy);
   headers_end();
 done:
   if (module_name) {
@@ -543,6 +580,293 @@ done:
   }
   if (cmds) {
     free_uci_write_list(cmds);
+  }
+  if (root_key_copy) {
+    free(root_key_copy);
+  }
+  return retval;
+}
+
+int data_put(struct cgi_context *cgi, char **pathvec, int root) {
+  // Cannot update the key values for list item
+  char *content_raw = NULL;
+  char *module_name = NULL;
+  char *top_level_name = NULL;
+  char *parent = "";
+  char *root_key = NULL;
+  struct json_object *root_object = NULL;
+  struct json_object *content = NULL;
+  struct json_object *module = NULL;
+  json_object *top_level = NULL;
+  struct uci_path uci = INIT_UCI_PATH();
+  struct uci_path delete_uci = INIT_UCI_PATH();
+  enum json_tokener_error parse_error;
+  uci_write_pair **cmds = NULL;
+  char **package_list = NULL;
+  struct uci_path *delete = NULL;
+  error err;
+  int retval = 1;
+
+  if ((content_raw = get_content()) == NULL) {
+    retval = restconf_malformed();
+    goto done;
+  }
+  content = json_tokener_parse_verbose(content_raw, &parse_error);
+  if (parse_error != json_tokener_success) {
+    retval = restconf_malformed();
+    goto done;
+  }
+  if (json_object_object_length(content) != 1) {
+    // Only 1 child is allowed
+    retval = restconf_malformed();
+    goto done;
+  }
+
+  json_object_object_foreach(content, root_key_string, root_val) {
+    root_key = root_key_string;
+    root_object = root_val;
+  }
+
+  if (split_pair_by_char(pathvec[1], &module_name, &top_level_name, ':')) {
+    retval = restconf_badrequest();
+    goto done;
+  }
+
+  if (!(module = yang_module_exists(module_name))) {
+    retval = restconf_unknown_namespace();
+    goto done;
+  }
+  get_path_from_yang(module, &uci);
+
+  top_level = json_get_object_from_map(module, top_level_name);
+  if (!top_level) {
+    retval = restconf_badrequest();
+    goto done;
+  }
+  get_path_from_yang(top_level, &uci);
+
+  err = check_path(&top_level, pathvec, 2, vector_size(pathvec), &uci, 1,
+                   &parent);
+  if (!top_level || err != RE_OK) {
+    retval = print_error(err);
+    goto done;
+  }
+
+  // check whether top_level name == current node name
+  if (json_object_get_type(content) != json_type_object) {
+    retval = restconf_malformed();
+    goto done;
+  }
+
+  free(module_name);
+  free(top_level_name);
+  module_name = NULL;
+  top_level_name = NULL;
+  split_pair_by_char(root_key, &module_name, &top_level_name, ':');
+  if (!top_level_name) {
+    top_level_name = root_key;
+  }
+
+  if (strcmp(top_level_name, parent) != 0) {
+    retval = restconf_badrequest();
+    goto done;
+  }
+
+  delete_uci = uci;
+
+  cmds = verify_content_yang(root_object, top_level, &uci, &err, !root, 0);
+  if (err != RE_OK) {
+    retval = print_error(err);
+    goto done;
+  }
+
+  vector_grow(delete, 1);
+  if ((err = extract_paths(top_level, &delete_uci, delete)) != RE_OK) {
+    retval = print_error(err);
+    goto done;
+  }
+
+  for (size_t i = 0; i < vector_size(delete); i++) {
+    char path_string[512];
+    struct uci_path tmp = delete[i];
+
+    uci_combine_to_path(&tmp, path_string, sizeof(path_string));
+
+    if (!is_in_vector(package_list, tmp.package)) {
+      vector_push_back(package_list, tmp.package);
+    }
+
+    if (uci_delete_path(path_string, false)) {
+      retval = print_error(INTERNAL);
+      uci_revert_all(package_list);
+      goto done;
+    }
+  }
+
+  if (uci_commit_all(package_list)) {
+    retval = restconf_partial_operation();
+    goto done;
+  }
+
+  write_uci_write_list(cmds);
+done:
+  if (module_name) {
+    free(module_name);
+  }
+  if (top_level_name) {
+    free(top_level_name);
+  }
+  if (cmds) {
+    free_uci_write_list(cmds);
+  }
+  return retval;
+}
+
+error extract_paths(struct json_object *node, struct uci_path *uci,
+                    struct uci_path *path_list) {
+  struct json_object *map = NULL;
+
+  const char *type = NULL;
+  if (!(type = json_get_string(node, "type"))) {
+    return YANG_SCHEMA_ERROR;
+  }
+
+  if (strcmp(type, "leaf") == 0) {
+    // add path of leaf
+    vector_push_back(path_list, *uci);
+    uci->option = "";
+    return RE_OK;
+  } else if (strcmp(type, "leaf-list") == 0) {
+    // add path of
+    vector_push_back(path_list, *uci);
+    uci->option = "";
+    return RE_OK;
+  } else if (strcmp(type, "list") == 0) {
+    int list_length = uci_list_length(uci);
+    json_object_object_get_ex(node, "map", &map);
+    for (int index = 0; index < list_length; index++) {
+      uci->where = 1;
+      uci->index = 0;
+      vector_push_back(path_list, *uci);
+      json_object_object_foreach(map, key, val) {
+        error err;
+        const char *subnode_type = NULL;
+        if (!(subnode_type = json_get_string(val, "type"))) {
+          return YANG_SCHEMA_ERROR;
+        }
+        if (strcmp(subnode_type, "container") == 0 ||
+            strcmp(subnode_type, "list") == 0) {
+          get_path_from_yang(val, uci);
+          if ((err = extract_paths(val, uci, path_list)) != RE_OK) {
+            return err;
+          }
+        }
+      }
+    }
+    uci->option = "";
+    uci->section_type = "";
+    uci->index = 0;
+    uci->where = 0;
+    return RE_OK;
+  }
+
+  vector_push_back(path_list, *uci);
+  json_object_object_get_ex(node, "map", &map);
+  json_object_object_foreach(map, key, val) {
+    error err;
+    const char *subnode_type = NULL;
+    if (!(subnode_type = json_get_string(val, "type"))) {
+      return YANG_SCHEMA_ERROR;
+    }
+    if (strcmp(subnode_type, "container") == 0 ||
+        strcmp(subnode_type, "list") == 0) {
+      get_path_from_yang(val, uci);
+      if ((err = extract_paths(val, uci, path_list)) != RE_OK) {
+        return err;
+      }
+    }
+  }
+
+  return RE_OK;
+}
+
+int data_delete(struct cgi_context *cgi, char **pathvec, int root) {
+  json_object *module = NULL;
+  json_object *top_level = NULL;
+  char *module_name = NULL;
+  char *top_level_name = NULL;
+  int retval = 1;
+  struct uci_path uci = INIT_UCI_PATH();
+  struct uci_path *delete = NULL;
+  char **package_list = NULL;
+  error err;
+  char exists_path[512];
+
+  if (split_pair_by_char(pathvec[1], &module_name, &top_level_name, ':')) {
+    retval = restconf_badrequest();
+    goto done;
+  }
+
+  if (!(module = yang_module_exists(module_name))) {
+    retval = restconf_unknown_namespace();
+    goto done;
+  }
+  get_path_from_yang(module, &uci);
+
+  top_level = json_get_object_from_map(module, top_level_name);
+  if (!top_level) {
+    retval = restconf_badrequest();
+    goto done;
+  }
+  get_path_from_yang(top_level, &uci);
+
+  err = check_path(&top_level, pathvec, 2, vector_size(pathvec), &uci, 1, NULL);
+  if (!top_level || err != RE_OK) {
+    retval = print_error(err);
+    goto done;
+  }
+  uci_combine_to_path(&uci, exists_path, sizeof(exists_path));
+  if (!uci_path_exists(exists_path)) {
+    retval = restconf_invalid_value();
+    goto done;
+  }
+  if (yang_mandatory(top_level)) {
+    retval = restconf_badrequest();
+    goto done;
+  }
+  // check if keys
+  vector_grow(delete, 1);
+  if ((err = extract_paths(top_level, &uci, delete)) != RE_OK) {
+    retval = print_error(err);
+    goto done;
+  }
+  for (size_t i = 0; i < vector_size(delete); i++) {
+    char path_string[512];
+    struct uci_path tmp = delete[i];
+
+    uci_combine_to_path(&tmp, path_string, sizeof(path_string));
+
+    if (!is_in_vector(package_list, tmp.package)) {
+      vector_push_back(package_list, tmp.package);
+    }
+
+    if (uci_delete_path(path_string, false)) {
+      retval = print_error(INTERNAL);
+      uci_revert_all(package_list);
+      goto done;
+    }
+  }
+  if (uci_commit_all(package_list)) {
+    retval = restconf_partial_operation();
+    goto done;
+  }
+  retval = 0;
+done:
+  if (delete) {
+    vector_free(delete);
+  }
+  if (package_list) {
+    vector_free(package_list);
   }
   return retval;
 }

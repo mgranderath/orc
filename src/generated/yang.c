@@ -29,6 +29,9 @@ struct json_object *yang_module_exists(char *module) {
  * @return yang_type of the str
  */
 yang_type str_to_yang_type(const char *str) {
+  if (!str) {
+    return NONE;
+  }
   const map_str2yang_type *iter = str2yang_type;
   const map_str2yang_type *end =
       str2yang_type + sizeof(str2yang_type) / sizeof(str2yang_type[0]);
@@ -39,4 +42,17 @@ yang_type str_to_yang_type(const char *str) {
     iter++;
   }
   return NONE;
+}
+
+const char *yang_for_type(char *type) {
+  const map_str2str *iter = yang2regex;
+  const map_str2str *end =
+      yang2regex + sizeof(yang2regex) / sizeof(yang2regex[0]);
+  while (iter && iter < end) {
+    if (strcmp(type, iter->key) == 0) {
+      return iter->str;
+    }
+    iter++;
+  }
+  return NULL;
 }

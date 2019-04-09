@@ -12,7 +12,7 @@ struct uci_write_pair *initialize_uci_write_pair(struct uci_path *path,
   }
   output->path = *path;
   output->value = (char *)value;
-  output->type = list;
+  output->type = type;
   return output;
 }
 
@@ -68,8 +68,8 @@ int write_uci_write_list(uci_write_pair **write_list) {
         failed = uci_write_option(local_path_string, cmd->value);
         break;
       case container:
-        failed = uci_add_section_named(cmd->path.package, "container",
-                                       cmd->path.section);
+        failed = uci_add_section_named(
+            cmd->path.package, cmd->path.section_type, cmd->path.section);
         break;
     }
     if (failed) {

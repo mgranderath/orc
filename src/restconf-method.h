@@ -14,9 +14,13 @@ struct path_section_pair {
 
 int data_get(struct cgi_context* cgi, char** pathvec);
 int data_post(struct cgi_context* cgi, char** pathvec, int root);
+int data_delete(struct cgi_context* cgi, char** pathvec, int root);
+int data_put(struct cgi_context* cgi, char** pathvec, int root);
 
 struct json_object* build_recursive(struct json_object* jobj,
                                     struct uci_path* path, error* err,
                                     int root);
+error extract_paths(struct json_object* node, struct uci_path* uci,
+                    struct uci_path* path_list);
 
 #endif

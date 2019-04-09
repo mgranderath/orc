@@ -113,16 +113,9 @@ error json_yang_verify_list(struct json_object* list,
   int mandatory_exist = 1;
   struct json_object* keys = NULL;
   struct json_object* mandatory = NULL;
-  int singular_item = 0;
 
-  switch (json_object_get_type(list)) {
-    case json_type_object:
-      singular_item = 1;
-      break;
-    case json_type_array:
-      break;
-    default:
-      return INVALID_TYPE;
+  if (json_object_get_type(list) != json_type_array) {
+    return INVALID_TYPE;
   }
 
   if (!(keys = json_get_array(yang, "keys"))) {
@@ -172,4 +165,19 @@ error json_yang_verify_list(struct json_object* list,
   }
 
   return RE_OK;
+}
+
+int json_value_in_array(struct json_object* array, char* value) {
+  for (size_t i = 0; i < json_object_array_length(array); i++) {
+    const char* item_value = NULL;
+    struct json_object* item = NULL;
+    if ((item_value = json_object_get_string(
+             json_object_array_get_idx(array, i))) == NULL) {
+      return -1;
+    }
+    if (strcmp(item_value, value) == 0) {
+      return 1;
+    }
+  }
+  return 0;
 }

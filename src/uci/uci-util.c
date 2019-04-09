@@ -18,7 +18,7 @@
  * @return EXIT_SUCCESS or EXIT_FAILURE
  */
 int combine_to_path(struct uci_path *path, char *buffer, size_t size) {
-  int retval = -1;
+  int retval;
   if (!path->option || strlen(path->option) == 0) {
     retval = snprintf(buffer, size, "%s.%s", path->package, path->section);
   } else {
@@ -42,7 +42,7 @@ int combine_to_path(struct uci_path *path, char *buffer, size_t size) {
  */
 int combine_to_anonymous_path(struct uci_path *path, int index, char *buffer,
                               size_t size) {
-  int retval = -1;
+  int retval;
   if (!path->option || strlen(path->option) == 0) {
     retval = snprintf(buffer, size, "%s.@%s[%d]", path->package,
                       path->section_type, index);
@@ -72,6 +72,7 @@ int get_path_from_yang(struct json_object *jobj, struct uci_path *uci) {
   char *uci_package = NULL;
   char *uci_section = NULL;
   char *uci_option = NULL;
+  char *uci_section_type = NULL;
   json_object_object_get_ex(jobj, "uci-package", &uci_value);
   if (json_object_get_type(uci_value) == json_type_string) {
     uci_package = (char *)json_object_get_string(uci_value);
@@ -84,51 +85,108 @@ int get_path_from_yang(struct json_object *jobj, struct uci_path *uci) {
   if (json_object_get_type(uci_value) == json_type_string) {
     uci_option = (char *)json_object_get_string(uci_value);
   }
+  json_object_object_get_ex(jobj, "uci-section-type", &uci_value);
+  if (json_object_get_type(uci_value) == json_type_string) {
+    uci_section_type = (char *)json_object_get_string(uci_value);
+  }
 
   if (uci_package) {
-    if (uci_section) {
+    if (uci_section && uci_section_type) {
       if (uci_option) {
         uci->package = uci_package;
         uci->section = uci_section;
+        uci->section_type = uci_section_type;
         uci->option = uci_option;
         return 0;
       }
       uci->package = uci_package;
       uci->section = uci_section;
+      uci->section_type = uci_section_type;
+      uci->option = "";
+      return 0;
+    } else if (uci_section) {
+      if (uci_option) {
+        uci->package = uci_package;
+        uci->section = uci_section;
+        uci->section_type = "container";
+        uci->option = uci_option;
+        return 0;
+      }
+      uci->package = uci_package;
+      uci->section = uci_section;
+      uci->section_type = "container";
       uci->option = "";
       return 0;
     }
     uci->package = uci_package;
     uci->section = "";
+    uci->section_type = "";
     uci->option = "";
     return 0;
   }
 
-  if (uci_section) {
+  if (uci_section && uci_section_type) {
     if (uci_option) {
       uci->section = uci_section;
+      uci->section_type = uci_section_type;
       uci->option = uci_option;
       return 0;
     }
     uci->section = uci_section;
+    uci->section_type = uci_section_type;
     uci->option = "";
     return 0;
+  } else if (uci_section) {
+    if (uci_option) {
+      uci->section = uci_section;
+      uci->section_type = "container";
+      uci->option = uci_option;
+      return 0;
+    }
+    uci->section = uci_section;
+    uci->section_type = "container";
+    uci->option = "";
+    return 0;
+  } else if (uci_section_type) {
+    uci->section_type = uci_section_type;
+    uci->section = "";
+    uci->option = "";
+    uci->index = 0;
+    uci->where = 0;
   }
 
   if (uci_option) {
     uci->option = uci_option;
     return 0;
   }
+  return 0;
+}
 
-  json_object_object_get_ex(jobj, "uci-section-type", &uci_value);
-  if (uci_value) {
-    if (json_object_get_type(uci_value) == json_type_string) {
-      uci->section_type = (char *)json_object_get_string(uci_value);
-      uci->section = "";
-      uci->option = "";
-      uci->index = 0;
-      uci->where = 0;
+int uci_revert_all(char **package_list) {
+  for (size_t i = 0; i < vector_size(package_list); i++) {
+    char *item = package_list[i];
+    if (uci_revert_package(item)) {
+      return 1;
     }
+  }
+  return 0;
+}
+
+int uci_commit_all(char **package_list) {
+  for (size_t i = 0; i < vector_size(package_list); i++) {
+    char *item = package_list[i];
+    if (uci_commit_package(item)) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int yang_element_exists(struct uci_path *path) {
+  char path_string[512];
+  uci_combine_to_path(path, path_string, sizeof(path_string));
+  if (uci_path_exists(path_string)) {
+    return 1;
   }
   return 0;
 }

@@ -25,6 +25,6 @@ file(GLOB restconf_SRC
         )
 
 add_executable(restconf
-        ${restconf_SRC})
+        ${restconf_SRC} src/restconf-verify.c src/restconf-verify.h)
 
 target_link_libraries(restconf json-c uci ubox)
