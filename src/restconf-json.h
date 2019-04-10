@@ -18,5 +18,8 @@ yang_type str_to_yang_type(const char* str);
 struct json_object* json_yang_type_format(yang_type type, const char* val);
 error json_yang_verify_list(struct json_object* list, struct json_object* yang);
 int json_value_in_array(struct json_object* array, char* value);
+yang_type json_extract_yang_type(struct json_object* item);
+error extract_key_values(struct json_object* keys, struct json_object* item,
+                         struct json_object** ret);
 
 #endif  //_RESTCONF_JSON_H

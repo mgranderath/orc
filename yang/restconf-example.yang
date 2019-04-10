@@ -2,70 +2,92 @@ module restconf-example {
   namespace "http://example.org/example-last-modified";
   prefix "ex";
 
-  extension uci-package {
-    argument name;
+  import openwrt-uci-extension {
+    prefix uci;
   }
 
-  extension uci-section {
-    argument name;
+  typedef grade {
+    type uint8 {
+      range "0..100";
+    }
   }
 
-  extension uci-option {
-    argument name;
+  typedef email {
+    type string {
+      pattern "[A-Za-z0-9]*@university.de";
+    }
   }
 
-  extension uci-section-type {
-    argument name;
-  }
+  uci:uci-package "restconf-example";
+  container course {
+    uci:uci-section "course";
+    uci:uci-section-type "course";
 
-  ex:uci-package "restconf";
-  container state {
-    ex:uci-section "state";
-    ex:uci-section-type "state";
-
-    leaf-list op {
-      ex:uci-option "op";
-      type int64;
+    leaf name {
+      uci:uci-option "name";
+      type string;
+      description "name of the course";
     }
 
-    leaf num {
-      ex:uci-option "numa";
-      type int8;
+    leaf-list instructors {
+      uci:uci-option "instructors";
+      type string;
+      description "list of names of instructors";
     }
 
-    list people {
-      ex:uci-section-type "people_list";
-      key "name age";
+    leaf semester {
+      uci:uci-option "semester";
+      type uint8 {
+        range "1..6";
+      }
+    }
 
-      leaf name {
-        ex:uci-option "name";
+    list students {
+      uci:uci-section-type "student";
+
+      key "firstname lastname age";
+      leaf firstname {
+        uci:uci-option "firstname";
+        type string;
+      }
+
+      leaf lastname {
+        uci:uci-option "lastname";
         type string;
       }
 
       leaf age {
-        ex:uci-option "age";
-        type int8;
+        uci:uci-option "age";
+        type uint8 {
+          range "0..120";
+        }
       }
 
-      leaf age2 {
-        mandatory true;
-        ex:uci-option "age2";
-        type int8;
+      leaf major {
+        uci:uci-option "major";
+        type string {
+          pattern "(CS|IMS)";
+        }
       }
 
-      leaf-list age-list {
-        ex:uci-option "age_list";
-        type int64;
+      leaf grade {
+        uci:uci-option "grade";
+        type grade;
       }
     }
 
-    container nested-state {
-      ex:uci-section "nested_state";
-      ex:uci-section-type "nested_state";
+    container instructor {
+      uci:uci-section "instructor";
+      uci:uci-section-type "instructor";
 
-      leaf top {
-        ex:uci-option "top";
+      leaf name {
+        uci:uci-option "name";
         type string;
+      }
+
+      leaf email {
+        uci:uci-option "email";
+        type email;
       }
     }
   }

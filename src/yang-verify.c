@@ -16,12 +16,10 @@ error yang_verify_leaf(struct json_object* leaf, struct json_object* yang) {
     return YANG_SCHEMA_ERROR;
   }
 
-  value = json_object_get_string(leaf);
-  if (!value) {
+  if (!(value = json_object_get_string(leaf))) {
     return INVALID_TYPE;
   }
-  int wrong_format = yang_verify_value_type(type, value);
-  if (wrong_format) {
+  if (yang_verify_value_type(type, value)) {
     return INVALID_TYPE;
   }
   return RE_OK;
@@ -29,19 +27,23 @@ error yang_verify_leaf(struct json_object* leaf, struct json_object* yang) {
 
 error yang_verify_leaf_list(struct json_object* list,
                             struct json_object* yang) {
-  yang_type yang_leaf_list_type;
-  const char* yang_type_string = NULL;
+  struct json_object* type = NULL;
   json_type value_type = json_object_get_type(list);
   if (value_type != json_type_array) {
     return INVALID_TYPE;
   }
 
-  yang_type_string = json_get_string(yang, "leaf-type");
-  yang_leaf_list_type = str_to_yang_type(yang_type_string);
+  json_object_object_get_ex(yang, "leaf-type", &type);
+  if (!type) {
+    return YANG_SCHEMA_ERROR;
+  }
   for (int i = 0; i < json_object_array_length(list); i++) {
-    json_type element_type =
-        json_object_get_type(json_object_array_get_idx(list, i));
-    if (yang_verify_json_type(yang_leaf_list_type, element_type)) {
+    const char* value = NULL;
+    struct json_object* item = json_object_array_get_idx(list, i);
+    if (!(value = json_object_get_string(item))) {
+      return INVALID_TYPE;
+    }
+    if (yang_verify_value_type(type, value)) {
       return INVALID_TYPE;
     }
   }

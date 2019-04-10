@@ -119,7 +119,18 @@ uci_write_pair **verify_content_yang(struct json_object *content,
           return NULL;
         }
         // combine with uci values when root is list
-        json_object_array_add(existing_values, val);
+        if (value_type == json_type_array) {
+          json_array_forloop(val, index) {
+            struct json_object *item = json_object_array_get_idx(val, index);
+            if (!item) {
+              *err = INTERNAL;
+              return NULL;
+            }
+            json_object_array_add(existing_values, item);
+          }
+        } else {
+          json_object_array_add(existing_values, val);
+        }
         *err = json_yang_verify_list(existing_values, child);
         if (*err != RE_OK) {
           return NULL;
@@ -137,9 +148,10 @@ uci_write_pair **verify_content_yang(struct json_object *content,
       }
       if (value_type == json_type_array) {
         // TODO: check if only one array item can be added at a time
-        json_array_forloop(val, index) {
+        for (int index = 0, pos = list_length;
+             index < json_object_array_length(val); index++, pos++) {
           struct json_object *tmp = json_object_array_get_idx(val, index);
-          path->index = index;
+          path->index = pos;
           path->where = 1;
           uci_write_pair **tmp_list =
               verify_content_yang(tmp, child, path, err, 0, check_exists);
@@ -226,7 +238,7 @@ error get_list_item_where(struct json_object *yang, char *keylist,
     if (uci_option_name == NULL) {
       return LEAF_NO_OPTION;
     }
-    key_value[index].key = uci_option_name;
+    key_value[index].key = (char *)uci_option_name;
     key_value[index].str = keylist_vec[index];
   }
   struct uci_where where = {
@@ -288,6 +300,8 @@ error check_path(struct json_object **root_yang, char **path, size_t start,
     if (type && strcmp(type, "list") == 0) {
       int next_is_end = i + 1 == end;
       if (!keylist && !next_is_end) {
+        return LIST_NO_FILTER;
+      } else if (!keylist) {
         return LIST_NO_FILTER;
       }
 
@@ -465,6 +479,7 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
   error err;
   enum json_tokener_error parse_error;
   char path_string[512];
+  char key_out[1024];
   uci_write_pair **cmds = NULL;
   struct uci_path uci = INIT_UCI_PATH();
 
@@ -550,6 +565,22 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
     goto done;
   }
   root_key_copy = str_dup(root_key);
+  struct json_object *created = NULL;
+  if ((created = json_get_object_from_map(top_level, root_key_copy))) {
+    if (strcmp(json_get_string(created, "type"), "list") == 0) {
+      struct json_object *keys = NULL;
+      if ((keys = json_get_array(created, "keys"))) {
+        struct json_object *values = NULL;
+        if (extract_key_values(keys, root_object, &values) == RE_OK) {
+          json_object_object_foreach(values, key, value) {
+            strcat(key_out, json_object_get_string(value));
+            strcat(key_out, ",");
+          }
+          key_out[strlen(key_out) - 1] = '\0';
+        }
+      }
+    }
+  }
   cmds = verify_content_yang(content, top_level, &uci, &err, !root, 1);
   if (err != RE_OK) {
     retval = print_error(err);
@@ -560,6 +591,10 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
   printf("Status: 201 Created\r\n");
   char *protocol = NULL;
   char *slash = "";
+  char *equal = "";
+  if (strlen(key_out) > 0) {
+    equal = "=";
+  }
   if (cgi->https) {
     protocol = "https://";
   } else {
@@ -568,8 +603,8 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
   if (cgi->path_full[strlen(cgi->path_full) - 1] != '/') {
     slash = "/";
   }
-  printf("Location: %s%s%s%s%s\r\n", protocol, cgi->host, cgi->path_full, slash,
-         root_key_copy);
+  printf("Location: %s%s%s%s%s%s%s\r\n", protocol, cgi->host, cgi->path_full,
+         slash, root_key_copy, equal, key_out);
   headers_end();
 done:
   if (module_name) {

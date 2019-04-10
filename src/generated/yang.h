@@ -1,35 +1,16 @@
 #ifndef _YANG_H
 #define _YANG_H
-
 #include <json.h>
 #include <stddef.h>
 #include <string.h>
 
 struct map_str2str {
-  const char* key;
-  const char* str;
+  char* key;
+  char* str;
 };
 typedef struct map_str2str map_str2str;
 
 static const map_str2str modulemap[] = {
-    {"restconf-example",
-     "{\"type\": \"module\", \"map\": {\"state\": {\"type\": \"container\", "
-     "\"map\": {\"op\": {\"type\": \"leaf-list\", \"map\": {}, \"uci-option\": "
-     "\"op\", \"leaf-type\": \"int64\"}, \"num\": {\"type\": \"leaf\", "
-     "\"map\": {}, \"uci-option\": \"numa\", \"leaf-type\": \"int8\"}, "
-     "\"people\": {\"type\": \"list\", \"map\": {\"name\": {\"type\": "
-     "\"leaf\", \"map\": {}, \"uci-option\": \"name\", \"leaf-type\": "
-     "\"string\"}, \"age\": {\"type\": \"leaf\", \"map\": {}, \"uci-option\": "
-     "\"age\", \"leaf-type\": \"int8\"}, \"age2\": {\"type\": \"leaf\", "
-     "\"map\": {}, \"mandatory\": true, \"uci-option\": \"age2\", "
-     "\"leaf-type\": \"int8\"}, \"age-list\": {\"type\": \"leaf-list\", "
-     "\"map\": {}, \"uci-option\": \"age_list\", \"leaf-type\": \"int64\"}}, "
-     "\"uci-section-type\": \"people_list\", \"keys\": [\"name\", \"age\"], "
-     "\"mandatory\": [\"age2\"]}, \"nested-state\": {\"type\": \"container\", "
-     "\"map\": {\"top\": {\"type\": \"leaf\", \"map\": {}, \"uci-option\": "
-     "\"top\", \"leaf-type\": \"string\"}}, \"uci-section\": \"nested_state\", "
-     "\"uci-section-type\": \"nested_state\"}}, \"uci-section\": \"state\", "
-     "\"uci-section-type\": \"state\"}}, \"uci-package\": \"restconf\"}"},
     {"openwrt-system",
      "{\"type\": \"module\", \"map\": {\"system\": {\"type\": \"container\", "
      "\"map\": {\"hostname\": {\"type\": \"leaf\", \"map\": {}, "
@@ -67,7 +48,43 @@ static const map_str2str modulemap[] = {
      "\"timezone\", \"leaf-type\": \"string\"}, \"zonename\": {\"type\": "
      "\"leaf\", \"map\": {}, \"uci-option\": \"zonename\", \"leaf-type\": "
      "\"string\"}}, \"uci-package\": \"system\", \"uci-section\": \"OpenWrt\", "
-     "\"uci-section-type\": \"system\"}}}"}};
+     "\"uci-section-type\": \"system\"}}}"},
+    {"restconf-example",
+     "{\"type\": \"module\", \"map\": {\"course\": {\"type\": \"container\", "
+     "\"map\": {\"name\": {\"type\": \"leaf\", \"map\": {}, \"uci-option\": "
+     "\"name\", \"leaf-type\": \"string\"}, \"semester\": {\"type\": \"leaf\", "
+     "\"map\": {}, \"uci-option\": \"semester\", \"leaf-type\": "
+     "{\"leaf-type\": \"uint8\", \"from\": \"1\", \"to\": \"6\"}}, "
+     "\"instructors\": {\"type\": \"leaf-list\", \"map\": {}, \"uci-option\": "
+     "\"instructors\", \"leaf-type\": \"string\"}, \"students\": {\"type\": "
+     "\"list\", \"map\": {\"firstname\": {\"type\": \"leaf\", \"map\": {}, "
+     "\"uci-option\": \"firstname\", \"leaf-type\": \"string\"}, \"lastname\": "
+     "{\"type\": \"leaf\", \"map\": {}, \"uci-option\": \"lastname\", "
+     "\"leaf-type\": \"string\"}, \"age\": {\"type\": \"leaf\", \"map\": {}, "
+     "\"uci-option\": \"age\", \"leaf-type\": {\"leaf-type\": \"uint8\", "
+     "\"from\": \"0\", \"to\": \"120\"}}, \"major\": {\"type\": \"leaf\", "
+     "\"map\": {}, \"uci-option\": \"major\", \"leaf-type\": {\"leaf-type\": "
+     "\"string\", \"pattern\": \"^(CS|IMS)$\"}}, \"grade\": {\"type\": "
+     "\"leaf\", \"map\": {}, \"uci-option\": \"grade\", \"leaf-type\": "
+     "\"grade\"}}, \"uci-section-type\": \"student\", \"keys\": "
+     "[\"firstname\", \"lastname\", \"age\"]}, \"instructor\": {\"type\": "
+     "\"container\", \"map\": {\"name\": {\"type\": \"leaf\", \"map\": {}, "
+     "\"uci-option\": \"name\", \"leaf-type\": \"string\"}, \"email\": "
+     "{\"type\": \"leaf\", \"map\": {}, \"uci-option\": \"email\", "
+     "\"leaf-type\": \"email\"}}, \"uci-section\": \"instructor\", "
+     "\"uci-section-type\": \"instructor\"}}, \"uci-section\": \"course\", "
+     "\"uci-section-type\": \"course\"}}, \"uci-package\": "
+     "\"restconf-example\"}"}};
+
+static const map_str2str yang2regex[] = {
+    {"grade", "{\"leaf-type\": \"uint8\", \"from\": \"0\", \"to\": \"100\"}"},
+    {"email",
+     "{\"leaf-type\": \"string\", \"pattern\": "
+     "\"^[A-Za-z0-9]*@university.de$\"}"},
+    {"inet:ipv4-address",
+     "{\"leaf-type\": \"string\", \"pattern\": "
+     "\"^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\\\.){3}([0-9]|[1-"
+     "9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(%[\\\\p{N}\\\\p{L}]+)?$\"}"}};
 
 enum yang_type {
   NONE,
@@ -118,17 +135,10 @@ static const map_str2yang_type str2yang_type[] = {
     {"uint16", UINT_16},
     {"uint32", UINT_32},
     {"uint64", UINT_64},
-    {"union", UNION},
-};
-
-static const map_str2str yang2regex[] = {
-    {"inet:ipv4-address",
-     "{\"leaf-type\": \"string\", \"pattern\": "
-     "\"^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\\\.){3}([0-9]|[1-"
-     "9]["
-     "0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(%[\\\\p{N}\\\\p{L}]+)?$\"}"}};
+    {"union", UNION}};
 
 struct json_object* yang_module_exists(char* module);
 yang_type str_to_yang_type(const char* str);
 const char* yang_for_type(char* type);
+
 #endif

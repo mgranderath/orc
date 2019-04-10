@@ -64,20 +64,21 @@ struct json_object *uci_get_list(struct json_object *yang,
 struct json_object *uci_get_leaf(struct json_object *yang,
                                  struct uci_path *path, error *err) {
   char path_string[512], buf[512];
-  const char *leaf_type_string = NULL;
   yang_type leaf_type;
   struct json_object *output = NULL;
+  struct json_object *type = NULL;
 
   uci_combine_to_path(path, path_string, sizeof(path_string));
   if (uci_read_option(path_string, buf, sizeof(buf))) {
     *err = UCI_READ_FAILED;
     goto done;
   }
-  if (!(leaf_type_string = json_get_string(yang, "leaf-type"))) {
+  json_object_object_get_ex(yang, "leaf-type", &type);
+  if (!type) {
     *err = YANG_SCHEMA_ERROR;
     goto done;
   }
-  if (!(leaf_type = str_to_yang_type(leaf_type_string))) {
+  if ((leaf_type = json_extract_yang_type(type)) == NONE) {
     *err = YANG_SCHEMA_ERROR;
     goto done;
   }
@@ -95,20 +96,21 @@ struct json_object *uci_get_leaf_list(struct json_object *yang,
                                       struct uci_path *path, error *err) {
   char path_string[512];
   char **items = NULL;
-  const char *leaf_type_string;
   yang_type leaf_type;
   struct json_object *output = NULL;
+  struct json_object *type = NULL;
 
   uci_combine_to_path(path, path_string, sizeof(path_string));
   if (!(items = uci_read_list(path_string))) {
     *err = UCI_READ_FAILED;
     goto done;
   }
-  if (!(leaf_type_string = json_get_string(yang, "leaf-type"))) {
+  json_object_object_get_ex(yang, "leaf-type", &type);
+  if (!type) {
     *err = YANG_SCHEMA_ERROR;
     goto done;
   }
-  if (!(leaf_type = str_to_yang_type(leaf_type_string))) {
+  if ((leaf_type = json_extract_yang_type(type)) == NONE) {
     *err = YANG_SCHEMA_ERROR;
     goto done;
   }

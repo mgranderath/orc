@@ -67,8 +67,7 @@ struct json_object* json_yang_type_format(yang_type type, const char* val) {
   return NULL;
 }
 
-static error extract_key_values(struct json_object* keys,
-                                struct json_object* item,
+error extract_key_values(struct json_object* keys, struct json_object* item,
                                 struct json_object** ret) {
   struct json_object* values = json_object_new_object();
   for (size_t keys_i = 0; keys_i < json_object_array_length(keys); keys_i++) {
@@ -170,7 +169,6 @@ error json_yang_verify_list(struct json_object* list,
 int json_value_in_array(struct json_object* array, char* value) {
   for (size_t i = 0; i < json_object_array_length(array); i++) {
     const char* item_value = NULL;
-    struct json_object* item = NULL;
     if ((item_value = json_object_get_string(
              json_object_array_get_idx(array, i))) == NULL) {
       return -1;
@@ -180,4 +178,17 @@ int json_value_in_array(struct json_object* array, char* value) {
     }
   }
   return 0;
+}
+
+yang_type json_extract_yang_type(struct json_object* item) {
+  const char* leaf_type = NULL;
+  if (json_object_get_type(item) == json_type_object) {
+    leaf_type = json_get_string(item, "leaf-type");
+  } else {
+    leaf_type = json_object_get_string(item);
+  }
+  if (!leaf_type) {
+    return NONE;
+  }
+  return str_to_yang_type(leaf_type);
 }
