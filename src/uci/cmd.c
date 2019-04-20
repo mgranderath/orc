@@ -57,7 +57,8 @@ int write_uci_write_list(uci_write_pair **write_list) {
       combine_to_anonymous_path(&cmd->path, cmd->path.index, local_path_string,
                                 sizeof(local_path_string));
     } else {
-      uci_add_section_named(cmd->path.package, "container", cmd->path.section);
+      uci_add_section_named(cmd->path.package, cmd->path.section_type,
+                            cmd->path.section);
       combine_to_path(&cmd->path, local_path_string, sizeof(local_path_string));
     }
     switch (cmd->type) {

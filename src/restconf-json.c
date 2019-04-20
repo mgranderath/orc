@@ -140,7 +140,7 @@ error json_yang_verify_list(struct json_object* list,
     }
 
     for (size_t verify_i = list_i + 1;
-         verify_i < json_object_array_length(list); verify_i++) {
+         verify_i < json_object_array_length(list) && keys_exist; verify_i++) {
       int different = 0;
       json_object_object_foreach(values, key, value) {
         struct json_object* object_key_value = NULL;

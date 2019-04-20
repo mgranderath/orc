@@ -20,7 +20,7 @@ int data_put(struct cgi_context* cgi, char** pathvec, int root);
 struct json_object* build_recursive(struct json_object* jobj,
                                     struct uci_path* path, error* err,
                                     int root);
-error extract_paths(struct json_object* node, struct uci_path* uci,
-                    struct uci_path* path_list);
+struct uci_path* extract_paths(struct json_object* node, struct uci_path* uci,
+                               error* err);
 
 #endif

@@ -139,6 +139,6 @@ static const map_str2yang_type str2yang_type[] = {
 
 struct json_object* yang_module_exists(char* module);
 yang_type str_to_yang_type(const char* str);
-const char* yang_for_type(char* type);
+const char* yang_for_type(const char* type);
 
 #endif

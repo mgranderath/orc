@@ -1,0 +1,29 @@
+{
+  "restconf-example:course": {
+    "name": "Computer Networks",
+    "instructors": [
+      "Replaced"
+    ],
+    "semester": 5,
+    "instructor": {
+      "name": "Example Lecturer",
+      "email": "example@university.de"
+    },
+    "students": [
+    {
+      "firstname": "test",
+      "lastname": "student",
+      "age": 21,
+      "major": "CS",
+      "grade": 75
+    },
+    {
+      "firstname": "test2",
+      "lastname": "student",
+      "age": 21,
+      "major": "IMS",
+      "grade": 60
+    }
+    ]
+  }
+}

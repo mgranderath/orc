@@ -1,0 +1,9 @@
+{
+  "students": {
+    "firstname": "test2",
+    "lastname": "student",
+    "age": 21,
+    "major": "IMS",
+    "grade": 60
+  }
+}

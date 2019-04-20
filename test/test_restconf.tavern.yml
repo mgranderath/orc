@@ -1,0 +1,296 @@
+---
+
+test_name: setting up
+
+includes:
+  - !include common.yaml
+
+stages:
+  - name: delete current configuration
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: DELETE
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+    response:
+      status_code:
+        - 204
+        - 404
+
+  - &check_empty
+    name: check empty state
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: GET
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+    response:
+      status_code: 404
+      body:
+        ietf-restconf:errors:
+          error:
+            - error-tag: "invalid-value"
+              error-type: "protocol"
+
+---
+
+test_name: check POST root
+
+stages:
+  - name: check malformed
+    request:
+      url: "{url}/data/"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        restconf-example:course:
+          this does not exist: 5
+    response:
+      status_code: 404
+  - *check_empty
+  - name: post valid content
+    request:
+      url: "{url}/data/"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        !include POST/root-valid.yaml
+    response:
+      status_code: 201
+      headers:
+        location: "{url}/data/restconf-example:course"
+        connection: close
+        transfer-encoding: chunked
+  - name: check valid content exists
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: GET
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+    response:
+      status_code: 200
+      body:
+        !include GET/root-valid.yaml
+
+---
+
+test_name: check DELETE and POST
+
+stages:
+  - name: delete current instructors
+    request:
+      url: "{url}/data/restconf-example:course/instructors"
+      method: DELETE
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+    response:
+      status_code:
+        - 204
+
+  - name: create new list of instructors
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        !include POST/valid-instructor-item.yaml
+    response:
+      status_code: 201
+      headers:
+        location: "{url}/data/restconf-example:course/instructors"
+
+  - name: delete current semester
+    request:
+      url: "{url}/data/restconf-example:course/semester"
+      method: DELETE
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+    response:
+      status_code:
+        - 204
+
+  - name: invalid range on semester
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        !include POST/invalid-semester.yaml
+    response:
+      status_code: 400
+      body:
+        ietf-restconf:errors:
+          error:
+            - error-tag: "malformed-message"
+              error-type: "protocol"
+
+  - name: correct range on semester
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        !include POST/valid-semester.yaml
+    response:
+      status_code: 201
+      headers:
+        location: "{url}/data/restconf-example:course/semester"
+
+---
+
+test_name: check list
+
+stages:
+  - name: check duplicate keys
+    request:
+      url: "{url}/data/restconf-example:course/students"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        !include POST/duplicate-keys.yaml
+    response:
+      status_code: 400
+  - name: add student
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        !include POST/new-item.yaml
+    response:
+      status_code: 201
+      headers:
+        location: "{url}/data/restconf-example:course/students=test2,student,21"
+        connection: close
+        transfer-encoding: chunked
+  - name: check item was createed
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: GET
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+    response:
+      status_code: 200
+      body:
+        !include GET/root-valid-extended.yaml
+  - name: delete item
+    request:
+      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      method: DELETE
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+    response:
+      status_code:
+        - 204
+  - name: put item
+    request:
+      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      method: PUT
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        !include POST/new-item.yaml
+    response:
+      status_code: 201
+  - name: update key
+    request:
+      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      method: PUT
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        {
+          "students": {
+            "firstname": "test3",
+            "lastname": "student",
+            "age": 21,
+            "major": "IMS",
+            "grade": 60
+          }
+        }
+    response:
+      status_code: 400
+  - name: update content
+    request:
+      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      method: PUT
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        {
+          "students": {
+            "firstname": "test2",
+            "lastname": "student",
+            "age": 21,
+            "major": "IMS",
+            "grade": 20
+          }
+        }
+    response:
+      status_code: 204
+  - name: check updated content
+    request:
+      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      method: GET
+    response:
+      status_code: 200
+      body:
+        {
+          "restconf-example:students": [{
+                                          "age": 21,
+                                          "firstname": "test2",
+                                          "grade": 20,
+                                          "lastname": "student",
+                                          "major": "IMS"
+                                        }]
+        }
+
+---
+
+test_name: check PUT
+
+stages:
+  - name: replace datastore
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: PUT
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        !include GET/root-valid-extended.yaml
+    response:
+      status_code: 204
+  - name: check if correct
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: GET
+    response:
+      status_code: 200
+      body:
+        !include GET/root-valid-extended.yaml
+

@@ -122,7 +122,7 @@ int print_error(error err) {
       restconf_operation_failed_internal();
       break;
     case NO_SUCH_ELEMENT:
-      restconf_unknown_element();
+      restconf_invalid_value();
       break;
     case LIST_UNDEFINED_KEY:
       restconf_operation_failed();

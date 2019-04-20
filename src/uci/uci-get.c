@@ -79,8 +79,10 @@ struct json_object *uci_get_leaf(struct json_object *yang,
     goto done;
   }
   if ((leaf_type = json_extract_yang_type(type)) == NONE) {
-    *err = YANG_SCHEMA_ERROR;
-    goto done;
+    // TODO: Solve this problem
+    //    *err = YANG_SCHEMA_ERROR;
+    //    goto done;
+    leaf_type = STRING;
   }
   if (!(output = json_yang_type_format(leaf_type, buf))) {
     *err = YANG_SCHEMA_ERROR;

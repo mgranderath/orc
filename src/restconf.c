@@ -40,6 +40,8 @@ static int data_root(struct cgi_context *cgi, char **pathvec) {
     } else if (strcmp(cgi->method, "HEAD") == 0) {
     } else if (strcmp(cgi->method, "POST") == 0) {
       retval = data_post(cgi, pathvec, 1);
+    } else if (strcmp(cgi->method, "PUT") == 0) {
+      retval = data_put(cgi, pathvec, 1);
     }
     goto done;
   }

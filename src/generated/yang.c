@@ -32,6 +32,8 @@ yang_type str_to_yang_type(const char *str) {
   if (!str) {
     return NONE;
   }
+  struct json_object *tmp = NULL;
+  const char *leaf_type = NULL;
   const map_str2yang_type *iter = str2yang_type;
   const map_str2yang_type *end =
       str2yang_type + sizeof(str2yang_type) / sizeof(str2yang_type[0]);
@@ -41,10 +43,19 @@ yang_type str_to_yang_type(const char *str) {
     }
     iter++;
   }
-  return NONE;
+
+  if (!(leaf_type = yang_for_type(str))) return NONE;
+  struct json_object *yang = json_tokener_parse(leaf_type);
+  json_object_object_get_ex(yang, "leaf-type", &tmp);
+  if (!tmp || json_object_get_type(tmp) != json_type_string) {
+    return NONE;
+  }
+  yang_type final_value = str_to_yang_type(json_object_get_string(tmp));
+  json_object_put(yang);
+  return final_value;
 }
 
-const char *yang_for_type(char *type) {
+const char *yang_for_type(const char *type) {
   const map_str2str *iter = yang2regex;
   const map_str2str *end =
       yang2regex + sizeof(yang2regex) / sizeof(yang2regex[0]);
