@@ -3,4 +3,4 @@ description: |
   variables for tavern tests
 
 variables:
-  url: "http://192.168.56.2/cgi-bin/restconf"
+  url: "http://192.168.56.3/cgi-bin/restconf"

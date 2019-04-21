@@ -291,6 +291,7 @@ int uci_revert_package(char *package) {
 
 int uci_delete_path(char *path, int commit) {
   struct uci_ptr ptr;
+  char *dup_path = NULL;
   struct uci_context *ctx = uci_alloc_context();
   if (!ctx) {
     return 1;
@@ -298,18 +299,24 @@ int uci_delete_path(char *path, int commit) {
 
   unsigned int UCI_LOOKUP_COMPLETE = (1u << 1u);
 
-  if ((uci_lookup_ptr(ctx, &ptr, path, true) != UCI_OK) ||
+  if (!(dup_path = str_dup(path))) {
+    return 1;
+  }
+  if ((uci_lookup_ptr(ctx, &ptr, dup_path, true) != UCI_OK) ||
       (ptr.o == NULL && ptr.s == NULL)) {
+    free(dup_path);
     uci_free_context(ctx);
     return -1;
   }
 
   if (!(ptr.flags & UCI_LOOKUP_COMPLETE)) {
+    free(dup_path);
     uci_free_context(ctx);
     return -1;
   }
 
   if (uci_delete(ctx, &ptr)) {
+    free(dup_path);
     uci_free_context(ctx);
     return 1;
   }
@@ -319,7 +326,7 @@ int uci_delete_path(char *path, int commit) {
   } else {
     uci_save(ctx, ptr.p);
   }
-
+  free(dup_path);
   uci_free_context(ctx);
   return 0;
 }

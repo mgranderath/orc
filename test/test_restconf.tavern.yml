@@ -294,3 +294,34 @@ stages:
       body:
         !include GET/root-valid-extended.yaml
 
+---
+
+test_name: leaf-list test
+
+stages:
+  - name: same key
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        {
+          "restconf-example:instructors": "Replaced"
+        }
+    response:
+      status_code: 409
+  - name: add item
+    request:
+      url: "{url}/data/restconf-example:course"
+      method: POST
+      headers:
+        content-type: application/yang-data+json
+        accept: application/yang-data+json
+      json:
+        {
+          "restconf-example:instructors": "Added item"
+        }
+    response:
+      status_code: 201

@@ -1,4 +1,5 @@
 #include "cmd.h"
+#include <util.h>
 #include "restconf-method.h"
 #include "uci-util.h"
 #include "vector.h"
@@ -36,8 +37,21 @@ static int section_already_created(struct path_section_pair *sections,
   return 0;
 }
 
+static int leaf_list_deleted(struct uci_path *path, struct uci_path *comp) {
+  for (size_t i = 0; i < vector_size(path); i++) {
+    struct uci_path curr = path[i];
+    if (strcmp(curr.section_type, comp->section_type) == 0 &&
+        strcmp(curr.section, comp->section) == 0 &&
+        strcmp(curr.option, comp->option) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 int write_uci_write_list(uci_write_pair **write_list) {
   struct path_section_pair *section_list = NULL;
+  struct uci_path *path = NULL;
   for (size_t i = 0; i < vector_size(write_list); i++) {
     int failed = 1;
     char local_path_string[512];
@@ -60,6 +74,15 @@ int write_uci_write_list(uci_write_pair **write_list) {
       uci_add_section_named(cmd->path.package, cmd->path.section_type,
                             cmd->path.section);
       combine_to_path(&cmd->path, local_path_string, sizeof(local_path_string));
+    }
+    if (cmd->type == list && !leaf_list_deleted(path, &cmd->path)) {
+      char *duplicated_local_path_string = str_dup(local_path_string);
+      if (!duplicated_local_path_string) {
+        return 1;
+      }
+      uci_delete_path(duplicated_local_path_string, 1);
+      free(duplicated_local_path_string);
+      vector_push_back(path, cmd->path);
     }
     switch (cmd->type) {
       case list:

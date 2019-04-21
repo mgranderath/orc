@@ -46,6 +46,18 @@ error yang_verify_leaf_list(struct json_object* list,
     if (yang_verify_value_type(type, value)) {
       return INVALID_TYPE;
     }
+    for (int compare = i + 1; compare < json_object_array_length(list);
+         compare++) {
+      const char* compare_value = NULL;
+      struct json_object* compare_item =
+          json_object_array_get_idx(list, compare);
+      if (!(compare_value = json_object_get_string(compare_item))) {
+        return INVALID_TYPE;
+      }
+      if (strcmp(value, compare_value) == 0) {
+        return IDENTICAL_KEYS;
+      }
+    }
   }
   return RE_OK;
 }

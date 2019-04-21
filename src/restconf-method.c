@@ -22,12 +22,36 @@ uci_write_pair **verify_content_yang(struct json_object *content,
     return NULL;
   }
   if (strcmp(child_type, "leaf-list") == 0) {
-    if ((*err = restconf_verify_leaf_list(content, path, yang_node,
-                                          check_exists)) != RE_OK) {
+    json_type value_type = json_object_get_type(content);
+    if (value_type == json_type_object) {
+      *err = INVALID_TYPE;
       return NULL;
     }
-    json_array_forloop(content, index) {
-      json_object *item = json_object_array_get_idx(content, index);
+    struct json_object *existing_items = NULL;
+    if (check_exists) {
+      if (!(existing_items = uci_get_leaf_list(yang_node, path, err))) {
+        existing_items = json_object_new_array();
+      }
+    } else {
+      existing_items = json_object_new_array();
+    }
+    if (*err != RE_OK && *err != UCI_READ_FAILED) {
+      return NULL;
+    }
+    if (value_type == json_type_array) {
+      json_array_forloop(content, index) {
+        struct json_object *tmp = json_object_array_get_idx(content, index);
+        json_object_array_add(existing_items, tmp);
+      }
+    } else {
+      json_object_array_add(existing_items, content);
+    }
+    if ((*err = restconf_verify_leaf_list(existing_items, path, yang_node,
+                                          0)) != RE_OK) {
+      return NULL;
+    }
+    json_array_forloop(existing_items, index) {
+      json_object *item = json_object_array_get_idx(existing_items, index);
       const char *value = json_object_get_string(item);
       uci_write_pair *output =
           initialize_uci_write_pair(path, (char *)value, list);
@@ -151,7 +175,6 @@ uci_write_pair **verify_content_yang(struct json_object *content,
     if (module) {
       free(module);
     }
-    json_type value_type = json_object_get_type(val);
     child = json_get_object_from_map(yang_node, split_key);
     free(split_key);
     if (!child) {
@@ -159,141 +182,17 @@ uci_write_pair **verify_content_yang(struct json_object *content,
       return NULL;
     }
     get_path_from_yang(child, path);
-    if (!(child_type = json_get_string(child, "type"))) {
-      *err = YANG_SCHEMA_ERROR;
+    uci_write_pair **tmp_list =
+        verify_content_yang(val, child, path, err, root, check_exists);
+    if (*err != RE_OK) {
+      free_uci_write_list(tmp_list);
       return NULL;
     }
-    if (strcmp(child_type, "leaf") == 0) {
-      if ((*err = restconf_verify_leaf(val, path, child, check_exists)) !=
-          RE_OK) {
-        return NULL;
-      }
-      uci_write_pair *output = initialize_uci_write_pair(
-          path, (char *)json_object_get_string(val), option);
-      if (!output) {
-        *err = INTERNAL;
-        return NULL;
-      }
-      vector_push_back(command_list, output);
-    } else if (strcmp(child_type, "leaf-list") == 0) {
-      if ((*err = restconf_verify_leaf_list(val, path, child, check_exists)) !=
-          RE_OK) {
-        return NULL;
-      }
-      json_array_forloop(val, index) {
-        json_object *item = json_object_array_get_idx(val, index);
-        const char *value = json_object_get_string(item);
-        uci_write_pair *output =
-            initialize_uci_write_pair(path, (char *)value, list);
-        if (!output) {
-          *err = INTERNAL;
-          return NULL;
-        }
-        vector_push_back(command_list, output);
-      }
-    } else if (strcmp(child_type, "list") == 0) {
-      if (value_type != json_type_array && value_type != json_type_object) {
-        *err = INVALID_TYPE;
-        return NULL;
-      }
-      // TODO: Actual type checking implementation
-      int list_length = uci_list_length(path);
-      if (root) {
-        if (value_type != json_type_object) {
-          *err = MULTIPLE_OBJECTS;
-          return NULL;
-        }
-        struct json_object *existing_values = NULL;
-        if (check_exists) {
-          existing_values = uci_get_list(child, path, err);
-          if (*err != RE_OK) {
-            return NULL;
-          }
-        }
-        if (!existing_values) {
-          existing_values = json_object_new_array();
-        }
-        // combine with uci values when root is list
-        if (value_type == json_type_array) {
-          json_array_forloop(val, index) {
-            struct json_object *item = json_object_array_get_idx(val, index);
-            if (!item) {
-              *err = INTERNAL;
-              return NULL;
-            }
-            json_object_array_add(existing_values, item);
-          }
-        } else {
-          json_object_array_add(existing_values, val);
-        }
-        *err = json_yang_verify_list(existing_values, child);
-        if (*err != RE_OK) {
-          return NULL;
-        }
-      } else {
-        if (list_length != 0 && check_exists) {
-          *err = ELEMENT_ALREADY_EXISTS;
-          return NULL;
-        }
-
-        *err = json_yang_verify_list(val, child);
-        if (*err != RE_OK) {
-          return NULL;
-        }
-      }
-      if (value_type == json_type_array) {
-        // TODO: check if only one array item can be added at a time
-        int start = (path->where || !root) ? path->index : list_length;
-        for (int index = 0, pos = start; index < json_object_array_length(val); index++, pos++) {
-          struct json_object *tmp = json_object_array_get_idx(val, index);
-          path->index = pos;
-          path->where = 1;
-          uci_write_pair **tmp_list =
-              verify_content_yang(tmp, child, path, err, 0, check_exists);
-          if (*err != RE_OK) {
-            free_uci_write_list(tmp_list);
-            return NULL;
-          }
-          for (size_t i = 0; i < vector_size(tmp_list); i++) {
-            vector_push_back(command_list, tmp_list[i]);
-          }
-          // TODO: Solve memory leak problem with tmp list
-          vector_free(tmp_list);
-        }
-      } else {
-        path->index = (path->where || !root) ? path->index : list_length;
-        path->where = 1;
-        uci_write_pair **tmp_list =
-            verify_content_yang(val, child, path, err, 0, check_exists);
-        if (*err != RE_OK) {
-          free_uci_write_list(tmp_list);
-          return NULL;
-        }
-        for (size_t i = 0; i < vector_size(tmp_list); i++) {
-          vector_push_back(command_list, tmp_list[i]);
-        }
-        // TODO: Solve memory leak problem with tmp list
-        vector_free(tmp_list);
-      }
-      path->index = 0;
-      path->where = 0;
-    } else if (strcmp(child_type, "container") == 0) {
-      if (value_type != json_type_object) {
-        return NULL;
-      }
-      // TODO: Actual type checking implementation
-      uci_write_pair **tmp_list =
-          verify_content_yang(val, child, path, err, 0, check_exists);
-      if (*err != RE_OK) {
-        free_uci_write_list(tmp_list);
-        return NULL;
-      }
-      for (size_t i = 0; i < vector_size(tmp_list); i++) {
-        vector_push_back(command_list, tmp_list[i]);
-      }
-      // TODO: Solve memory leak problem with tmp list
-      vector_free(tmp_list);
+    for (size_t i = 0; i < vector_size(tmp_list); i++) {
+      vector_push_back(command_list, tmp_list[i]);
     }
+    // TODO: Solve memory leak problem with tmp list
+    vector_free(tmp_list);
   }
   *err = RE_OK;
   return command_list;
@@ -438,7 +337,9 @@ struct json_object *build_recursive(struct json_object *jobj,
   if (strcmp(type, "leaf") == 0) {
     return uci_get_leaf(jobj, path, err);
   } else if (strcmp(type, "leaf-list") == 0) {
-    return uci_get_leaf_list(jobj, path, err);
+    struct json_object *retval = uci_get_leaf_list(jobj, path, err);
+    path->option = "";
+    return retval;
   } else if (strcmp(type, "list") == 0) {
     return uci_get_list(jobj, path, err);
   }

@@ -129,6 +129,5 @@ struct json_object *uci_get_leaf_list(struct json_object *yang,
   vector_free(items);
   *err = RE_OK;
 done:
-  path->option = "";
   return output;
 }
