@@ -68,7 +68,7 @@ struct json_object* json_yang_type_format(yang_type type, const char* val) {
 }
 
 error extract_key_values(struct json_object* keys, struct json_object* item,
-                                struct json_object** ret) {
+                         struct json_object** ret) {
   struct json_object* values = json_object_new_object();
   for (size_t keys_i = 0; keys_i < json_object_array_length(keys); keys_i++) {
     const char* key = NULL;
@@ -110,8 +110,10 @@ error json_yang_verify_list(struct json_object* list,
                             struct json_object* yang) {
   int keys_exist = 1;
   int mandatory_exist = 1;
+  int unique_exist = 1;
   struct json_object* keys = NULL;
   struct json_object* mandatory = NULL;
+  struct json_object* unique = NULL;
 
   if (json_object_get_type(list) != json_type_array) {
     return INVALID_TYPE;
@@ -121,14 +123,24 @@ error json_yang_verify_list(struct json_object* list,
     // No keys defined in YANG
     keys_exist = 0;
   }
+  if (!(unique = json_get_array(yang, "unique"))) {
+    unique_exist = 0;
+  }
   if (!(mandatory = json_get_array(yang, "mandatory"))) {
     mandatory_exist = 0;
   }
   for (size_t list_i = 0; list_i < json_object_array_length(list); list_i++) {
-    struct json_object* values = NULL;
+    struct json_object* key_values = NULL;
+    struct json_object* unique_values = NULL;
     struct json_object* list_item = json_object_array_get_idx(list, list_i);
     if (keys_exist) {
-      if (extract_key_values(keys, list_item, &values) != RE_OK) {
+      if (extract_key_values(keys, list_item, &key_values) != RE_OK) {
+        return KEY_NOT_PRESENT;
+      }
+    }
+
+    if (unique_exist) {
+      if (extract_key_values(unique, list_item, &unique_values) != RE_OK) {
         return KEY_NOT_PRESENT;
       }
     }
@@ -142,7 +154,7 @@ error json_yang_verify_list(struct json_object* list,
     for (size_t verify_i = list_i + 1;
          verify_i < json_object_array_length(list) && keys_exist; verify_i++) {
       int different = 0;
-      json_object_object_foreach(values, key, value) {
+      json_object_object_foreach(key_values, key, value) {
         struct json_object* object_key_value = NULL;
         const char* key_value = json_object_get_string(value);
         struct json_object* list_item_verify =
@@ -153,6 +165,29 @@ error json_yang_verify_list(struct json_object* list,
         }
         const char* object_key_value_string =
             json_object_get_string(object_key_value);
+        if (strcmp(key_value, object_key_value_string) != 0) {
+          different = 1;
+        }
+      }
+      if (!different) {
+        return IDENTICAL_KEYS;
+      }
+      different = 0;
+      if (!unique_exist) {
+        continue;
+      }
+      json_object_object_foreach(unique_values, uniqueKey, uniqueValue) {
+        struct json_object* object_unique_value = NULL;
+        const char* key_value = json_object_get_string(uniqueValue);
+        struct json_object* list_item_verify =
+            json_object_array_get_idx(list, verify_i);
+        json_object_object_get_ex(list_item_verify, uniqueKey,
+                                  &object_unique_value);
+        if (key_value == NULL) {
+          return KEY_NOT_PRESENT;
+        }
+        const char* object_key_value_string =
+            json_object_get_string(object_unique_value);
         if (strcmp(key_value, object_key_value_string) != 0) {
           different = 1;
         }

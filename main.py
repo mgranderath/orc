@@ -235,6 +235,9 @@ def convert(level, object_type=None):
             generated["keys"] = to_be_split.split()
         if key == "mandatory":
             generated["mandatory"] = value["@value"] == "true"
+        if key == "unique":
+            to_be_split = value["@value"]
+            generated["unique"] = to_be_split.split()
         if key in ["container", "leaf", "leaf-list", "list"]:
             processNode(generated, key, value)
     return generated

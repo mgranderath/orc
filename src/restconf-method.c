@@ -81,7 +81,6 @@ uci_write_pair **verify_content_yang(struct json_object *content,
       *err = INVALID_TYPE;
       return NULL;
     }
-    // TODO: Actual type checking implementation
     int list_length = uci_list_length(path);
     if (root) {
       if (value_type != json_type_object) {
@@ -127,7 +126,6 @@ uci_write_pair **verify_content_yang(struct json_object *content,
       }
     }
     if (value_type == json_type_array) {
-      // TODO: check if only one array item can be added at a time
       int start = (path->where || !root) ? path->index : list_length;
       for (int index = 0, pos = start;
            index < json_object_array_length(content); index++, pos++) {
@@ -143,7 +141,6 @@ uci_write_pair **verify_content_yang(struct json_object *content,
         for (size_t i = 0; i < vector_size(tmp_list); i++) {
           vector_push_back(command_list, tmp_list[i]);
         }
-        // TODO: Solve memory leak problem with tmp list
         vector_free(tmp_list);
       }
     } else {
@@ -158,7 +155,6 @@ uci_write_pair **verify_content_yang(struct json_object *content,
       for (size_t i = 0; i < vector_size(tmp_list); i++) {
         vector_push_back(command_list, tmp_list[i]);
       }
-      // TODO: Solve memory leak problem with tmp list
       vector_free(tmp_list);
     }
     path->index = 0;
@@ -191,7 +187,6 @@ uci_write_pair **verify_content_yang(struct json_object *content,
     for (size_t i = 0; i < vector_size(tmp_list); i++) {
       vector_push_back(command_list, tmp_list[i]);
     }
-    // TODO: Solve memory leak problem with tmp list
     vector_free(tmp_list);
   }
   *err = RE_OK;
@@ -305,6 +300,11 @@ error check_path(struct json_object **root_yang, char **path, size_t start,
 
       if (check_keys && !(keys = json_get_array(child, "keys"))) {
         return YANG_SCHEMA_ERROR;
+      }
+    } else if (type && strcmp(type, "leaf-list") == 0) {
+      int next_is_end = i + 1 == end;
+      if (!next_is_end) {
+        return LIST_NO_FILTER;
       }
     }
 
@@ -550,7 +550,6 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
     retval = restconf_data_exists();
     goto done;
   }
-  // TODO: What to return for list?
   if (json_object_get_type(content) != json_type_object) {
     retval = restconf_malformed();
     goto done;

@@ -55,6 +55,11 @@ yang_type str_to_yang_type(const char *str) {
   return final_value;
 }
 
+/**
+ * Getting yingson from typedef and imported types
+ * @param type the input type
+ * @return the json string
+ */
 const char *yang_for_type(const char *type) {
   const map_str2str *iter = yang2regex;
   const map_str2str *end =
