@@ -11,6 +11,6 @@ int uci_combine_to_path(struct uci_path *path, char *buffer,
 int get_path_from_yang(struct json_object *jobj, struct uci_path *uci);
 int uci_revert_all(char **package_list);
 int uci_commit_all(char **package_list);
-int yang_element_exists(struct uci_path *path);
+int uci_element_exists(struct uci_path *path);
 
 #endif  // RESTCONF_UCI_UTIL_

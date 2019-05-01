@@ -93,7 +93,7 @@ static const map_str2yang_type str2yang_type[] = {
 
 struct json_object* yang_module_exists(char* module);
 yang_type str_to_yang_type(const char* str);
-const char* yang_for_type(char* type);
+const char* yang_for_type(const char* type);
 
 #endif
 """)
@@ -262,7 +262,12 @@ def processImportedTypes(args):
                                 "leaf-type": item["type"]["@name"]
                             }
                             if converted["leaf-type"] == "string" and "pattern" in item["type"]:
-                                converted["pattern"] = "^" + item["type"]["pattern"]["@value"] + "$"
+                                converted["pattern"] = []
+                                if isinstance(item["type"]["pattern"], list):
+                                    for pattern in item["type"]["pattern"]:
+                                        converted["pattern"].append("^" + pattern["@value"] + "$")
+                                else:
+                                    converted["pattern"].append("^" + item["type"]["pattern"]["@value"] + "$")
                             if range_allowed(converted["leaf-type"]) and "range" in item["type"]:
                                 range_split = item["type"]["range"]["@value"].split("..", 1)
                                 converted["from"] = range_split[0]

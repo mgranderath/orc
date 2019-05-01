@@ -46,25 +46,24 @@ struct cgi_context *cgi_context_init() {
  */
 void cgi_context_free(struct cgi_context *ctx) { free(ctx); }
 
+/**
+ * Get the content passed in stdin
+ * @return the allocated content
+ */
 char *get_content() {
   char *post_data;
   char *length_str;
   char *trailing;
   unsigned long length;
-  /* no current support for file uploads, so limit upload data size
-   * 1 MB should be overkill for text data
-   */
-  const unsigned long content_max = 1024UL * 1024UL;
 
   length_str = getenv("CONTENT_LENGTH");
   if (!length_str || !*length_str) return NULL;
 
-  /* validate length. not checking for negative as is cast unsigned. */
   length = strtoul(length_str, &trailing, 10);
-  if (*trailing != '\0' || !length || length > content_max) return NULL;
+  if (*trailing != '\0' || !length || length > 1024UL * 1024UL) return NULL;
 
   post_data = (char *)malloc(length + 1);
-  if (!post_data) exit(1);
+  if (!post_data) return NULL;
 
   if (fread(post_data, sizeof(char), length, stdin) == length) {
     post_data[length] = '\0';

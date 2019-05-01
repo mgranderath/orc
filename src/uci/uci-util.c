@@ -57,6 +57,13 @@ int combine_to_anonymous_path(struct uci_path *path, int index, char *buffer,
   }
 }
 
+/**
+ * Combines uci_path to string UCI path
+ * @param path the path object
+ * @param buffer the output value
+ * @param buffer_size the size of the output buffer
+ * @return 0
+ */
 int uci_combine_to_path(struct uci_path *path, char *buffer,
                         size_t buffer_size) {
   if (path->where) {
@@ -182,7 +189,7 @@ int uci_commit_all(char **package_list) {
   return 0;
 }
 
-int yang_element_exists(struct uci_path *path) {
+int uci_element_exists(struct uci_path *path) {
   char path_string[512];
   uci_combine_to_path(path, path_string, sizeof(path_string));
   if (uci_path_exists(path_string)) {

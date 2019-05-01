@@ -1,6 +1,11 @@
 module openwrt-uci-extension {
-    namespace "https://to-be-added.com/uci";
+    namespace "urn:jacobs:yang:openwrt-uci";
     prefix "ouci";
+
+    contact "Malte Granderath <m.granderath@jacobs-university.de>";
+    revision 2019-04-24 {
+      description "initial revision";
+    }
 
     extension uci-package {
         argument name;

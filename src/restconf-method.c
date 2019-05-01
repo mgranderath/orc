@@ -568,7 +568,7 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
       struct json_object *keys = NULL;
       if ((keys = json_get_array(created, "keys"))) {
         struct json_object *values = NULL;
-        if (extract_key_values(keys, root_object, &values) == RE_OK) {
+        if (json_extract_key_values(keys, root_object, &values) == RE_OK) {
           json_object_object_foreach(values, key, value) {
             strcat(key_out, json_object_get_string(value));
             strcat(key_out, ",");
@@ -737,7 +737,7 @@ int data_put(struct cgi_context *cgi, char **pathvec, int root) {
     struct json_object *keys = NULL;
     if ((keys = json_get_array(top_level, "keys"))) {
       struct json_object *values = NULL;
-      if (extract_key_values(keys, root_object, &values) == RE_OK) {
+      if (json_extract_key_values(keys, root_object, &values) == RE_OK) {
         json_object_object_foreach(values, key, value) {
           strcat(key_out, json_object_get_string(value));
           strcat(key_out, ",");

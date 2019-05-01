@@ -11,8 +11,8 @@
     <import module="openwrt-uci-extension">
         <prefix value="ex"/>
     </import>
+    <ex:uci-package name="system"/>
     <container name="system">
-        <ex:uci-package name="system"/>
         <ex:uci-section name="OpenWrt"/>
         <ex:uci-section-type name="system"/>
         <leaf name="hostname">
@@ -177,5 +177,34 @@
                 <text>Only useful when using glibc and zoneinfo!</text>
             </description>
         </leaf>
+    </container>
+    <container name="ntp">
+        <ex:uci-section-type name="timeserver"/>
+        <ex:uci-section name="ntp"/>
+        <leaf name="enabled">
+            <ex:uci-option name="enabled"/>
+            <type name="string">
+                <pattern value="(0|1)"/>
+            </type>
+            <description>
+                <text>enable the ntp client</text>
+            </description>
+        </leaf>
+        <leaf name="enable_server">
+            <ex:uci-option name="enable_server"/>
+            <type name="string">
+                <pattern value="(0|1)"/>
+            </type>
+            <description>
+                <text>enable the timeserver</text>
+            </description>
+        </leaf>
+        <leaf-list name="server">
+            <ex:uci-option name="server"/>
+            <type name="string"/>
+            <description>
+                <text>list of ntp servers</text>
+            </description>
+        </leaf-list>
     </container>
 </module>

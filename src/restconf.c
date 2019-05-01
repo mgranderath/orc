@@ -10,6 +10,10 @@
 #include "util.h"
 #include "vector.h"
 
+/**
+ * @brief the api root method
+ * @param cgi the cgi context
+ */
 static int api_root(struct cgi_context *cgi) {
   char api[] =
       "{\n"
@@ -27,6 +31,11 @@ static int api_root(struct cgi_context *cgi) {
   return 0;
 }
 
+/**
+ * @brief the data root method
+ * @param cgi the cgi context
+ * @param pathvec the path vector
+ */
 static int data_root(struct cgi_context *cgi, char **pathvec) {
   int retval = 1;
 
@@ -42,29 +51,32 @@ static int data_root(struct cgi_context *cgi, char **pathvec) {
       retval = data_post(cgi, pathvec, 1);
     } else if (strcmp(cgi->method, "PUT") == 0) {
       retval = data_put(cgi, pathvec, 1);
+    } else {
+      retval = notfound(cgi);
     }
     goto done;
   }
 
   if (strcmp(cgi->method, "GET") == 0) {
     retval = data_get(cgi, pathvec);
-    goto done;
   } else if (strcmp(cgi->method, "POST") == 0) {
     retval = data_post(cgi, pathvec, 0);
-    goto done;
   } else if (strcmp(cgi->method, "DELETE") == 0) {
     retval = data_delete(cgi, pathvec, 0);
-    goto done;
   } else if (strcmp(cgi->method, "PUT") == 0) {
     retval = data_put(cgi, pathvec, 0);
-    goto done;
+  } else {
+    retval = notfound(cgi);
   }
 
-  retval = 0;
 done:
   return retval;
 }
 
+/**
+ * @brief the operations root
+ * @param cgi the cgi context
+ */
 static int operations_root(struct cgi_context *cgi) {
   content_type_json();
   headers_end();
@@ -73,6 +85,10 @@ static int operations_root(struct cgi_context *cgi) {
   return 0;
 }
 
+/**
+ * @brief the yang library version method
+ * @param cgi the cgi context
+ */
 static int yang_library_version(struct cgi_context *cgi) {
   char yang_version[] =
       "{ \"yang-library-version\": \"" IETF_YANG_VERSION "\" }";
@@ -116,25 +132,20 @@ int main(void) {
   }
 
   path_modify = str_dup(ctx->path);
-  vec = path2vec(path_modify, "/");
 
-  if (!vec) {
+  if (!(vec = path2vec(path_modify, "/"))) {
     retval = notfound(ctx);
     goto done;
   }
 
   if (strcmp(vec[0], "data") == 0) {
     retval = data_root(ctx, vec);
-    goto done;
   } else if (strcmp(vec[0], "operations") == 0) {
     retval = operations_root(ctx);
-    goto done;
   } else if (strcmp(vec[0], "yang-library-version") == 0) {
     retval = yang_library_version(ctx);
-    goto done;
   } else {
     retval = notfound(ctx);
-    goto done;
   }
 
 done:

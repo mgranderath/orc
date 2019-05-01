@@ -2,6 +2,14 @@
 #include <regex.h>
 #include "restconf-json.h"
 
+static int yang_verify_value_type(struct json_object* type, const char* value);
+
+/**
+ * @brief verify JSON leaf
+ * @param leaf the JSON leaf to be verified
+ * @param yang the YANG leaf node
+ * @return error if not verified
+ */
 error yang_verify_leaf(struct json_object* leaf, struct json_object* yang) {
   const char* value = NULL;
   struct json_object* type = NULL;
@@ -25,6 +33,12 @@ error yang_verify_leaf(struct json_object* leaf, struct json_object* yang) {
   return RE_OK;
 }
 
+/**
+ * @brief verify JSON leaf-list
+ * @param list the JSON leaf-list to be verified
+ * @param yang the YANG leaf-list node
+ * @return error if not verified
+ */
 error yang_verify_leaf_list(struct json_object* list,
                             struct json_object* yang) {
   struct json_object* type = NULL;
@@ -62,6 +76,12 @@ error yang_verify_leaf_list(struct json_object* list,
   return RE_OK;
 }
 
+/**
+ * @brief verify JSON type again YANG type
+ * @param type the yang_type
+ * @param val_type the json_type
+ * @return 1 if incorrect else 0
+ */
 int yang_verify_json_type(yang_type type, json_type val_type) {
   switch (type) {
     case BOOLEAN:
@@ -102,6 +122,11 @@ int yang_verify_json_type(yang_type type, json_type val_type) {
   return 0;
 }
 
+/**
+ * @brief check if YANG node is mandatory
+ * @param yang the YANG node
+ * @return 1 if mandatory else 0
+ */
 int yang_mandatory(struct json_object* yang) {
   const char* type_string = NULL;
   type_string = json_get_string(yang, "type");
@@ -115,7 +140,13 @@ int yang_mandatory(struct json_object* yang) {
   return 0;
 }
 
-int regex_verify_value(const char* regex, const char* value) {
+/**
+ * @brief verify string with regex
+ * @param regex the regex
+ * @param value the string to be checked
+ * @return 1 if error else 0
+ */
+static int regex_verify_value(const char* regex, const char* value) {
   regex_t regex_o;
   if (regcomp(&regex_o, regex, REG_EXTENDED)) {
     return 1;
@@ -128,7 +159,13 @@ int regex_verify_value(const char* regex, const char* value) {
   return 0;
 }
 
-int verify_value_from_imported(const char* type, const char* value) {
+/**
+ * @brief verify a value against a imported type
+ * @param type the name of the type
+ * @param value the string value
+ * @return 0 if verified else 1
+ */
+static int verify_value_from_imported(const char* type, const char* value) {
   enum json_tokener_error err;
   const char* typedefinition = yang_for_type((char*)type);
   if (!typedefinition) {
@@ -148,7 +185,13 @@ int verify_value_from_imported(const char* type, const char* value) {
   return 0;
 }
 
-int yang_verify_value_type(struct json_object* type, const char* value) {
+/**
+ * @brief verify string value by type object
+ * @param type the type object
+ * @param value the string value
+ * @return 0 if verified else 0
+ */
+static int yang_verify_value_type(struct json_object* type, const char* value) {
   const char* leaf_type = NULL;
   int is_object = 0;
   enum other_check { NONE, RANGE, PATTERN } verify_type = NONE;
@@ -246,14 +289,29 @@ int yang_verify_value_type(struct json_object* type, const char* value) {
         break;
       }
       case PATTERN: {
-        const char* pattern = json_get_string(type, "pattern");
-        if (!pattern) {
-          break;
-        }
-        if (regex_verify_value(pattern, value)) {
+        struct json_object* patterns = NULL;
+        json_object_object_get_ex(type, "pattern", &patterns);
+        if (json_object_get_type(patterns) == json_type_string) {
+          const char* pattern = json_object_get_string(patterns);
+          if (regex_verify_value(pattern, value)) {
+            return 1;
+          } else {
+            break;
+          }
+        } else if (json_object_get_type(patterns) != json_type_array) {
           return 1;
         }
-        break;
+        if (json_object_array_length(patterns) == 0) {
+          break;
+        }
+        json_array_forloop(patterns, index) {
+          const char* pattern = json_object_get_string(
+              json_object_array_get_idx(patterns, index));
+          if (!regex_verify_value(pattern, value)) {
+            break;
+          }
+        }
+        return 1;
       }
       default:
         break;

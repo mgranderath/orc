@@ -1,5 +1,5 @@
 module openwrt-system {
-  namespace "https://to-be-added.com";
+  namespace "urn:jacobs:yang:openwrt-system";
   prefix "os";
 
   import ietf-inet-types {
@@ -10,8 +10,13 @@ module openwrt-system {
     prefix ex;
   }
 
+  contact "Malte Granderath <m.granderath@jacobs-university.de>";
+  revision 2019-04-24 {
+    description "initial revision";
+  }
+
+  ex:uci-package "system";
   container system {
-    ex:uci-package "system";
     ex:uci-section "OpenWrt";
     ex:uci-section-type "system";
 
@@ -158,6 +163,33 @@ module openwrt-system {
       ex:uci-option "zonename";
       type string;
       description "Only useful when using glibc and zoneinfo!";
+    }
+  }
+
+  container ntp {
+    ex:uci-section-type "timeserver";
+    ex:uci-section "ntp";
+
+    leaf enabled {
+      ex:uci-option "enabled";
+      type string {
+        pattern "(0|1)";
+      }
+      description "enable the ntp client";
+    }
+
+    leaf enable_server {
+      ex:uci-option "enable_server";
+      type string {
+        pattern "(0|1)";
+      }
+      description "enable the timeserver";
+    }
+
+    leaf-list server {
+      ex:uci-option "server";
+      type string;
+      description "list of ntp servers";
     }
   }
 }

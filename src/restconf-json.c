@@ -67,8 +67,16 @@ struct json_object* json_yang_type_format(yang_type type, const char* val) {
   return NULL;
 }
 
-error extract_key_values(struct json_object* keys, struct json_object* item,
-                         struct json_object** ret) {
+/**
+ * @brief extract key values from JSON item
+ * @param keys the list of keys
+ * @param item the JSON item
+ * @param ret the object the key-value pairs should be copied to
+ * @return error in case of error
+ */
+error json_extract_key_values(struct json_object* keys,
+                              struct json_object* item,
+                              struct json_object** ret) {
   struct json_object* values = json_object_new_object();
   for (size_t keys_i = 0; keys_i < json_object_array_length(keys); keys_i++) {
     const char* key = NULL;
@@ -81,13 +89,18 @@ error extract_key_values(struct json_object* keys, struct json_object* item,
     if (key_value == NULL) {
       return KEY_NOT_PRESENT;
     }
-    // Verify that key is leaf
     json_object_object_add(values, key, key_value);
   }
   *ret = values;
   return RE_OK;
 }
 
+/**
+ * @brief check mandatory items of an JSON item
+ * @param mandatory the list of names of mandatory values
+ * @param item the JSON item to be checked
+ * @return error in case of error otherwise RE_OK
+ */
 static error check_mandatory_values(struct json_object* mandatory,
                                     struct json_object* item) {
   for (size_t mandatory_i = 0;
@@ -106,6 +119,12 @@ static error check_mandatory_values(struct json_object* mandatory,
   return RE_OK;
 }
 
+/**
+ * @brief verify a JSON list against a YANG list node
+ * @param list the JSON list
+ * @param yang the YANG list node
+ * @return error in case of error else RE_OK
+ */
 error json_yang_verify_list(struct json_object* list,
                             struct json_object* yang) {
   int keys_exist = 1;
@@ -134,13 +153,13 @@ error json_yang_verify_list(struct json_object* list,
     struct json_object* unique_values = NULL;
     struct json_object* list_item = json_object_array_get_idx(list, list_i);
     if (keys_exist) {
-      if (extract_key_values(keys, list_item, &key_values) != RE_OK) {
+      if (json_extract_key_values(keys, list_item, &key_values) != RE_OK) {
         return KEY_NOT_PRESENT;
       }
     }
 
     if (unique_exist) {
-      if (extract_key_values(unique, list_item, &unique_values) != RE_OK) {
+      if (json_extract_key_values(unique, list_item, &unique_values) != RE_OK) {
         return KEY_NOT_PRESENT;
       }
     }
@@ -201,6 +220,12 @@ error json_yang_verify_list(struct json_object* list,
   return RE_OK;
 }
 
+/**
+ * @brief check if value in JSON array
+ * @param array the JSON array
+ * @param value the value to be compared
+ * @return 1 if in array else 0
+ */
 int json_value_in_array(struct json_object* array, char* value) {
   for (size_t i = 0; i < json_object_array_length(array); i++) {
     const char* item_value = NULL;
@@ -215,6 +240,11 @@ int json_value_in_array(struct json_object* array, char* value) {
   return 0;
 }
 
+/**
+ * @brief extract YANG type from JSON node
+ * @param item the YANG JSON node
+ * @return the yang_type
+ */
 yang_type json_extract_yang_type(struct json_object* item) {
   const char* leaf_type = NULL;
   if (json_object_get_type(item) == json_type_object) {

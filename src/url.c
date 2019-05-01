@@ -3,6 +3,11 @@
 #include <string.h>
 #include "vector.h"
 
+/**
+ * @brief convert comma separated list into vector
+ * @param list the comma separated list
+ * @return the vector of seperated items
+ */
 char **clist_to_vec(char *list) {
   char **vec = NULL;
   char *next;
@@ -16,7 +21,12 @@ char **clist_to_vec(char *list) {
   return vec;
 }
 
-// Copyright!!!
+/**
+ * @brief Decodes a URL
+ * Taken from https://stackoverflow.com/a/14530993
+ * @param dst the output string
+ * @param src the string to be decoded
+ */
 void urldecode(char *dst, const char *src) {
   char a, b;
   while (*src) {

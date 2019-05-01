@@ -20,8 +20,6 @@ enum error {
 };
 typedef enum error error;
 
-int restconf_error(char *error_tag);
-
 int restconf_badrequest();
 int restconf_malformed();
 int restconf_data_exists();

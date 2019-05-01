@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 project(restconf)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_C_FLAGS "--coverage")
 set(CMAKE_BUILD_TYPE Debug)
+set(GCOV_PREFIX "/www/cgi-bin/gcov")
 set(STAGING_DIR $ENV{HOME}/github/openwrt/staging_dir)
 set(CMAKE_C_COMPILER $ENV{HOME}/github/openwrt/staging_dir/toolchain-x86_64_gcc-7.4.0_musl/bin/x86_64-openwrt-linux-gcc)
 
