@@ -1,5 +1,5 @@
 #include "error.h"
-#include <json.h>
+#include <json-c/json.h>
 #include <stdio.h>
 #include "http.h"
 #include "restconf-json.h"

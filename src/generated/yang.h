@@ -2,7 +2,7 @@
 
 #ifndef _YANG_H
 #define _YANG_H
-#include <json.h>
+#include <json-c/json.h>
 #include <stddef.h>
 #include <string.h>
 

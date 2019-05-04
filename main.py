@@ -10,7 +10,7 @@ c = Template("""
 #ifndef _YANG_H
 #define _YANG_H
 #include <stddef.h>
-#include <json.h>
+#include <json-c/json.h>
 #include <string.h>
 
 struct map_str2str{

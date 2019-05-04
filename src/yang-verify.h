@@ -2,7 +2,7 @@
 #define RESTCONF_YANG_VERIFY_H
 
 #include <generated/yang.h>
-#include <json.h>
+#include <json-c/json.h>
 #include "error.h"
 
 error yang_verify_leaf(struct json_object* leaf, struct json_object* yang);

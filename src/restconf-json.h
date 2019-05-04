@@ -1,7 +1,7 @@
 #ifndef _RESTCONF_JSON_H
 #define _RESTCONF_JSON_H
 
-#include <json.h>
+#include <json-c/json.h>
 #include "error.h"
 #include "generated/yang.h"
 

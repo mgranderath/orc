@@ -3,3 +3,4 @@ build
 .idea
 cmake-build-debug
 .pytest_cache
+.env

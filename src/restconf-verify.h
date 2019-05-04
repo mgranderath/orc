@@ -1,6 +1,6 @@
 #ifndef RESTCONF_VERIFY_H
 #define RESTCONF_VERIFY_H
-#include <json.h>
+#include <json-c/json.h>
 #include "error.h"
 #include "uci/methods.h"
 
