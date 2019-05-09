@@ -8,7 +8,7 @@ if (NOT DEFINED ENV{STAGING_DIR})
 endif ()
 
 if (NOT DEFINED ENV{OPENWRT_COMPILER})
-    message(FATA_ERROR "OPENWRT_COMPILER environment variable not set")
+    message(FATAL_ERROR "OPENWRT_COMPILER environment variable not set")
 endif ()
 
 set(CMAKE_C_COMPILER $ENV{OPENWRT_COMPILER})

@@ -4,3 +4,4 @@ build
 cmake-build-debug
 .pytest_cache
 .env
+scratch
