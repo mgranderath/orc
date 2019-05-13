@@ -63,3 +63,19 @@ be followed:
 3. Make sure the `http_keepalive` option in `/etc/config/uhttpd` is set to `0`
 4. Copy the script into the `/www/cgi-bin/` folder
 5. Now you should be able to make requests at the `<IP>/cgi-bin/restconf` URL
+
+## Testing
+
+The tests are inside the `/test` directory and are based on the Python
+[Tavern Testing Framework](https://github.com/taverntesting/tavern). After
+installing the framework the tests can be run using either of the
+following commands:
+
+```console
+tavern-ci ./test/test_restconf.tavern.yml
+# or
+py.test ./test/test_restconf.tavern.yml
+```
+
+This will run integration tests that check the actual implementation. The
+url where the server is located can be changed in `/test/common.yaml`.
