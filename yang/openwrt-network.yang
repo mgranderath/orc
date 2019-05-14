@@ -38,9 +38,6 @@ module openwrt-network {
   }
 
   container interfaces {
-    uci:uci-section-type "interfaces";
-    uci:uci-section "interfaces";
-
     list interface {
       uci:uci-section-type "interface";
       key "ifname";
@@ -191,9 +188,6 @@ module openwrt-network {
   }
 
   container rules {
-    uci:uci-section-type "rules";
-    uci:uci-section "rules";
-
     list ip4rules {
       uci:uci-section-type "rule";
       key "mark";
@@ -336,9 +330,6 @@ module openwrt-network {
   }
 
   container routes {
-    uci:uci-section-type "routes";
-    uci:uci-section "routes";
-
     list ip4routes {
       uci:uci-section-type "route";
       key "name";
@@ -477,9 +468,6 @@ module openwrt-network {
   }
 
   container switches {
-    uci:uci-section-type "switches";
-    uci:uci-section "switches";
-
     list switch {
       uci:uci-section-type "switch";
       key "name";

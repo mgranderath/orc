@@ -13,7 +13,7 @@ datastore.
 ## Adding YANG modules
 
 To add YANG modules for OpenWrt they have to go through some pre-processing. This is
-what the `main.py` script does.
+what the `./yin2json/yin2json.py` script does.
 
 ### Annotations
 

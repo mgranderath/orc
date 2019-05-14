@@ -166,7 +166,7 @@ int get_path_from_yang(struct json_object *jobj, struct uci_path *uci) {
     uci->option = uci_option;
     return 0;
   }
-  return 0;
+  return 1;
 }
 
 int uci_revert_all(char **package_list) {
