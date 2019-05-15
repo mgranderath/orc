@@ -345,7 +345,8 @@ struct json_object *build_recursive(struct json_object *jobj,
   }
 
   uci_combine_to_path(path, path_string, sizeof(path_string));
-  if (!uci_path_exists(path_string)) {
+  if ((strlen(path->section) != 0 || strlen(path->option) != 0) &&
+      !uci_path_exists(path_string)) {
     *err = NO_SUCH_ELEMENT;
     return NULL;
   }
