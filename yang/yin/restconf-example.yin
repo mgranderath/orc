@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module xmlns:uci="https://to-be-added.com/uci"
-        name="restconf-example"
-        xmlns="urn:ietf:params:xml:ns:yang:yin:1">
+<module name="restconf-example"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:ex="http://example.org/example-last-modified"
+        xmlns:uci="urn:jacobs:yang:openwrt-uci">
   <namespace uri="http://example.org/example-last-modified"/>
   <prefix value="ex"/>
   <import module="openwrt-uci-extension">
@@ -17,67 +18,68 @@
       <pattern value="[A-Za-z0-9]*@university.de"/>
     </type>
   </typedef>
-  <uci:uci-package name="restconf-example"/>
+  <uci:package name="restconf-example"/>
   <container name="course">
-    <uci:uci-section name="course"/>
-    <uci:uci-section-type name="course"/>
+    <uci:section-name name="course"/>
+    <uci:section name="course"/>
     <leaf name="name">
-      <uci:uci-option name="name"/>
+      <uci:option name="name"/>
       <type name="string"/>
       <description>
         <text>name of the course</text>
       </description>
     </leaf>
     <leaf-list name="instructors">
-      <uci:uci-option name="instructors"/>
+      <uci:option name="instructors"/>
       <type name="string"/>
       <description>
         <text>list of names of instructors</text>
       </description>
     </leaf-list>
     <leaf name="semester">
-      <uci:uci-option name="semester"/>
+      <uci:option name="semester"/>
       <type name="uint8">
         <range value="1..6"/>
       </type>
     </leaf>
     <list name="students">
-      <uci:uci-section-type name="student"/>
+      <uci:section name="student"/>
+      <uci:leaf-as-name name="lastname"/>
       <key value="firstname lastname age"/>
       <leaf name="firstname">
-        <uci:uci-option name="firstname"/>
+        <uci:option name="firstname"/>
         <type name="string"/>
       </leaf>
       <leaf name="lastname">
-        <uci:uci-option name="lastname"/>
+        <uci:option name="lastname"/>
         <type name="string"/>
       </leaf>
       <leaf name="age">
-        <uci:uci-option name="age"/>
+        <uci:option name="age"/>
         <type name="uint8">
           <range value="0..120"/>
         </type>
       </leaf>
       <leaf name="major">
-        <uci:uci-option name="major"/>
+        <uci:option name="major"/>
         <type name="string">
           <pattern value="(CS|IMS)"/>
         </type>
       </leaf>
       <leaf name="grade">
-        <uci:uci-option name="grade"/>
+        <uci:option name="grade"/>
         <type name="grade"/>
       </leaf>
     </list>
     <container name="instructor">
-      <uci:uci-section name="instructor"/>
-      <uci:uci-section-type name="instructor"/>
+      <uci:section-name name="instructor"/>
+      <uci:section name="instructor"/>
       <leaf name="name">
-        <uci:uci-option name="name"/>
+        <uci:option name="name"/>
         <type name="string"/>
       </leaf>
       <leaf name="email">
-        <uci:uci-option name="email"/>
+        <uci:option name="email"/>
         <type name="email"/>
       </leaf>
     </container>

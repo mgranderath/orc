@@ -1,7 +1,8 @@
 build
 .vscode
-.idea
 cmake-build-debug
 .pytest_cache
 .env
 scratch
+.idea
+cgi-bin

@@ -1,4 +1,4 @@
-# OpenWrt RESTCONF
+# ORC (**O**penWrt **R**EST**C**ONF)
 
 This is a prototype implementation of RESTCONF for the OpenWrt system that utilizes the UCI configuration files as a
 datastore.

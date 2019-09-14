@@ -2,6 +2,7 @@
 #define _RESTCONF_JSON_H
 
 #include <json-c/json.h>
+#include <stdbool.h>
 #include "error.h"
 #include "generated/yang.h"
 
@@ -21,5 +22,7 @@ yang_type json_extract_yang_type(struct json_object* item);
 error json_extract_key_values(struct json_object* keys,
                               struct json_object* item,
                               struct json_object** ret);
+int json_is_object(json_type type);
+int json_is_array(json_type type);
 
 #endif  //_RESTCONF_JSON_H

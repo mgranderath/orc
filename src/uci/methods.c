@@ -92,16 +92,16 @@ int uci_path_exists(char *path) {
   return ptr.flags & UCI_LOOKUP_COMPLETE;
 }
 
-int uci_index_where(struct uci_where *where) {
+int uci_index_where(struct UciWhere *where) {
   int index = 0;
   char *package = str_dup(where->path->package);
   char *section_type = str_dup(where->path->section_type);
-  struct uci_path path = {.package = package,
-                          .section_type = section_type,
-                          .section = "",
-                          .option = "",
-                          .index = 0,
-                          .where = 0};
+  struct UciPath path = {.package = package,
+                         .section_type = section_type,
+                         .section = "",
+                         .option = "",
+                         .index = 0,
+                         .where = 0};
   while (1) {
     int notfound = 0;
     for (int i = 0; i < where->key_value_length; i++) {
@@ -176,7 +176,7 @@ int uci_write_list(char *path, const char *value) {
   return 0;
 }
 
-int uci_list_length(struct uci_path *path) {
+int uci_list_length(struct UciPath *path) {
   int index = 0;
   if (!path->package || !path->section_type) {
     return -1;
@@ -186,12 +186,12 @@ int uci_list_length(struct uci_path *path) {
   if (!package || !section_type) {
     return -1;
   }
-  struct uci_path cloned_path = {.section = "",
-                                 .package = package,
-                                 .section_type = section_type,
-                                 .index = 0,
-                                 .where = 0,
-                                 .option = ""};
+  struct UciPath cloned_path = {.section = "",
+                                .package = package,
+                                .section_type = section_type,
+                                .index = 0,
+                                .where = 0,
+                                .option = ""};
 
   while (1) {
     char path_string[512];

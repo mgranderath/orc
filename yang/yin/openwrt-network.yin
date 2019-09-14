@@ -1,662 +1,662 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module xmlns:inet="urn:ietf:params:xml:ns:yang:ietf-inet-types"
-        xmlns:uci="https://to-be-added.com/uci"
-        name="openwrt-network"
+<module name="openwrt-network"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:on="urn:jacobs:yang:openwrt-network"
+        xmlns:inet="urn:ietf:params:xml:ns:yang:ietf-inet-types"
         xmlns:yang="urn:ietf:params:xml:ns:yang:ietf-yang-types"
-        xmlns="urn:ietf:params:xml:ns:yang:yin:1">
-    <namespace uri="urn:jacobs:yang:openwrt-network"/>
-    <prefix value="on"/>
-    <import module="ietf-inet-types">
-        <prefix value="inet"/>
-    </import>
-    <import module="ietf-yang-types">
-        <prefix value="yang"/>
-    </import>
-    <import module="openwrt-uci-extension">
-        <prefix value="uci"/>
-    </import>
-    <contact>
-        <text>Malte Granderath &lt;m.granderath@jacobs-university.de&gt;</text>
-    </contact>
-    <revision date="2019-04-24">
+        xmlns:uci="urn:jacobs:yang:openwrt-uci">
+  <namespace uri="urn:jacobs:yang:openwrt-network"/>
+  <prefix value="on"/>
+  <import module="ietf-inet-types">
+    <prefix value="inet"/>
+  </import>
+  <import module="ietf-yang-types">
+    <prefix value="yang"/>
+  </import>
+  <import module="openwrt-uci-extension">
+    <prefix value="uci"/>
+  </import>
+  <contact>
+    <text>Malte Granderath &lt;m.granderath@jacobs-university.de&gt;</text>
+  </contact>
+  <revision date="2019-04-24">
+    <description>
+      <text>initial revision</text>
+    </description>
+  </revision>
+  <typedef name="openwrt-bool">
+    <type name="string">
+      <pattern value="(0|1)"/>
+    </type>
+  </typedef>
+  <uci:package name="network"/>
+  <container name="globals">
+    <uci:section name="globals"/>
+    <uci:section-name name="globals"/>
+    <leaf name="ula_prefix">
+      <uci:option name="ula_prefix"/>
+      <type name="inet:ipv6-prefix"/>
+      <description>
+        <text>IPv6 prefix for device</text>
+      </description>
+    </leaf>
+  </container>
+  <container name="interfaces">
+    <list name="interface">
+      <uci:section name="interface"/>
+      <key value="ifname"/>
+      <leaf name="ifname">
+        <uci:option name="ifname"/>
+        <type name="string"/>
+        <mandatory value="true"/>
         <description>
-            <text>initial revision</text>
+          <text>Physical interface name</text>
         </description>
-    </revision>
-    <typedef name="openwrt-bool">
-        <type name="string">
-            <pattern value="(0|1)"/>
+      </leaf>
+      <leaf name="iftype">
+        <uci:option name="type"/>
+        <type name="string"/>
+        <description>
+          <text>Type of interface</text>
+        </description>
+      </leaf>
+      <leaf name="stp">
+        <uci:option name="stp"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable spanning tree protocol</text>
+        </description>
+      </leaf>
+      <leaf name="bridge_empty">
+        <uci:option name="bridge_empty"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable creating empty bridge</text>
+        </description>
+      </leaf>
+      <leaf name="igmp_snooping">
+        <uci:option name="imgp_snooping"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable multicast_snooping</text>
+        </description>
+      </leaf>
+      <leaf name="multicast_querier">
+        <uci:option name="multicast_querier"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable mutlicast_queries</text>
+        </description>
+      </leaf>
+      <leaf name="macaddr">
+        <uci:option name="macaddr"/>
+        <type name="yang:phys-address"/>
+        <description>
+          <text>Override the MAC address of the interface</text>
+        </description>
+      </leaf>
+      <leaf name="mtu">
+        <uci:option name="mtu"/>
+        <type name="int64"/>
+        <description>
+          <text>Override the default MTU of the interface</text>
+        </description>
+      </leaf>
+      <leaf name="auto">
+        <uci:option name="auto"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Bring up interface at boot</text>
+        </description>
+      </leaf>
+      <leaf name="ipv6">
+        <uci:option name="ipv6"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable or disable IPv6</text>
+        </description>
+      </leaf>
+      <leaf name="force_link">
+        <uci:option name="force_link"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Specifies whether ip address, route, and optionally gateway are assigned to the interface
+regardless of the link being active ('1') or only after the link has become active ('0');</text>
+        </description>
+      </leaf>
+      <leaf name="disabled">
+        <uci:option name="disabled"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable or disable the interface</text>
+        </description>
+      </leaf>
+      <leaf name="ip4table">
+        <uci:option name="ip4table"/>
+        <type name="string"/>
+        <description>
+          <text>IPv4 routing table for this interface</text>
+        </description>
+      </leaf>
+      <leaf name="ip6table">
+        <uci:option name="ip6table"/>
+        <type name="string"/>
+        <description>
+          <text>IPv6 routing table for this interface</text>
+        </description>
+      </leaf>
+      <leaf name="proto">
+        <uci:option name="proto"/>
+        <type name="string"/>
+        <description>
+          <text>The protocol of the interface</text>
+        </description>
+      </leaf>
+      <leaf name="ipaddr">
+        <uci:option name="ipaddr"/>
+        <type name="inet:ipv4-address"/>
+        <description>
+          <text>Alias IP address</text>
+        </description>
+      </leaf>
+      <leaf name="netmask">
+        <uci:option name="netmask"/>
+        <type name="inet:ipv4-prefix"/>
+        <description>
+          <text>Alias Netmask</text>
+        </description>
+      </leaf>
+      <leaf name="gateway">
+        <uci:option name="gateway"/>
+        <type name="inet:ipv4-address"/>
+        <description>
+          <text>Default gateway</text>
+        </description>
+      </leaf>
+      <leaf name="broadcast">
+        <uci:option name="broadcast"/>
+        <type name="inet:ipv4-address"/>
+        <description>
+          <text>Broadcast address (autogenerated if not setup)</text>
+        </description>
+      </leaf>
+      <leaf name="ip6addr">
+        <uci:option name="ip6addr"/>
+        <type name="inet:ipv6-address"/>
+        <description>
+          <text>IPv6 address</text>
+        </description>
+      </leaf>
+      <leaf name="ip6gw">
+        <uci:option name="ip6gw"/>
+        <type name="inet:ipv6-address"/>
+        <description>
+          <text>IPv6 default gateway</text>
+        </description>
+      </leaf>
+      <leaf-list name="dns">
+        <uci:option name="dns"/>
+        <type name="inet:ipv4-address"/>
+        <description>
+          <text>list of dns servers</text>
+        </description>
+      </leaf-list>
+      <leaf name="layer">
+        <uci:option name="layer"/>
+        <type name="uint8">
+          <range value="1..3"/>
         </type>
-    </typedef>
-    <uci:uci-package name="network"/>
-    <container name="globals">
-        <uci:uci-section-type name="globals"/>
-        <uci:uci-section name="globals"/>
-        <leaf name="ula_prefix">
-            <uci:uci-option name="ula_prefix"/>
-            <type name="inet:ipv6-prefix"/>
-            <description>
-                <text>IPv6 prefix for device</text>
-            </description>
-        </leaf>
-    </container>
-    <container name="interfaces">
-        <list name="interface">
-            <uci:uci-section-type name="interface"/>
-            <key value="ifname"/>
-            <leaf name="ifname">
-                <uci:uci-option name="ifname"/>
-                <type name="string"/>
-                <mandatory value="true"/>
-                <description>
-                    <text>Physical interface name</text>
-                </description>
-            </leaf>
-            <leaf name="iftype">
-                <uci:uci-option name="type"/>
-                <type name="string"/>
-                <description>
-                    <text>Type of interface</text>
-                </description>
-            </leaf>
-            <leaf name="stp">
-                <uci:uci-option name="stp"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable spanning tree protocol</text>
-                </description>
-            </leaf>
-            <leaf name="bridge_empty">
-                <uci:uci-option name="bridge_empty"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable creating empty bridge</text>
-                </description>
-            </leaf>
-            <leaf name="igmp_snooping">
-                <uci:uci-option name="imgp_snooping"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable multicast_snooping</text>
-                </description>
-            </leaf>
-            <leaf name="multicast_querier">
-                <uci:uci-option name="multicast_querier"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable mutlicast_queries</text>
-                </description>
-            </leaf>
-            <leaf name="macaddr">
-                <uci:uci-option name="macaddr"/>
-                <type name="yang:phys-address"/>
-                <description>
-                    <text>Override the MAC address of the interface</text>
-                </description>
-            </leaf>
-            <leaf name="mtu">
-                <uci:uci-option name="mtu"/>
-                <type name="int64"/>
-                <description>
-                    <text>Override the default MTU of the interface</text>
-                </description>
-            </leaf>
-            <leaf name="auto">
-                <uci:uci-option name="auto"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Bring up interface at boot</text>
-                </description>
-            </leaf>
-            <leaf name="ipv6">
-                <uci:uci-option name="ipv6"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable or disable IPv6</text>
-                </description>
-            </leaf>
-            <leaf name="force_link">
-                <uci:uci-option name="force_link"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Specifies whether ip address, route, and optionally gateway are assigned to the interface
-                        regardless of the link being active ('1') or only after the link has become active ('0');
-                    </text>
-                </description>
-            </leaf>
-            <leaf name="disabled">
-                <uci:uci-option name="disabled"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable or disable the interface</text>
-                </description>
-            </leaf>
-            <leaf name="ip4table">
-                <uci:uci-option name="ip4table"/>
-                <type name="string"/>
-                <description>
-                    <text>IPv4 routing table for this interface</text>
-                </description>
-            </leaf>
-            <leaf name="ip6table">
-                <uci:uci-option name="ip6table"/>
-                <type name="string"/>
-                <description>
-                    <text>IPv6 routing table for this interface</text>
-                </description>
-            </leaf>
-            <leaf name="proto">
-                <uci:uci-option name="proto"/>
-                <type name="string"/>
-                <description>
-                    <text>The protocol of the interface</text>
-                </description>
-            </leaf>
-            <leaf name="ipaddr">
-                <uci:uci-option name="ipaddr"/>
-                <type name="inet:ipv4-address"/>
-                <description>
-                    <text>Alias IP address</text>
-                </description>
-            </leaf>
-            <leaf name="netmask">
-                <uci:uci-option name="netmask"/>
-                <type name="inet:ipv4-prefix"/>
-                <description>
-                    <text>Alias Netmask</text>
-                </description>
-            </leaf>
-            <leaf name="gateway">
-                <uci:uci-option name="gateway"/>
-                <type name="inet:ipv4-address"/>
-                <description>
-                    <text>Default gateway</text>
-                </description>
-            </leaf>
-            <leaf name="broadcast">
-                <uci:uci-option name="broadcast"/>
-                <type name="inet:ipv4-address"/>
-                <description>
-                    <text>Broadcast address (autogenerated if not setup)</text>
-                </description>
-            </leaf>
-            <leaf name="ip6addr">
-                <uci:uci-option name="ip6addr"/>
-                <type name="inet:ipv6-address"/>
-                <description>
-                    <text>IPv6 address</text>
-                </description>
-            </leaf>
-            <leaf name="ip6gw">
-                <uci:uci-option name="ip6gw"/>
-                <type name="inet:ipv6-address"/>
-                <description>
-                    <text>IPv6 default gateway</text>
-                </description>
-            </leaf>
-            <leaf-list name="dns">
-                <uci:uci-option name="dns"/>
-                <type name="inet:ipv4-address"/>
-                <description>
-                    <text>list of dns servers</text>
-                </description>
-            </leaf-list>
-            <leaf name="layer">
-                <uci:uci-option name="layer"/>
-                <type name="uint8">
-                    <range value="1..3"/>
-                </type>
-                <description>
-                    <text>Selects the interface to attach to for stacked protocols</text>
-                </description>
-            </leaf>
-        </list>
-    </container>
-    <container name="rules">
-        <list name="ip4rules">
-            <uci:uci-section-type name="rule"/>
-            <key value="mark"/>
-            <leaf name="mark">
-                <uci:uci-option name="mark"/>
-                <type name="string"/>
-                <description>
-                    <text>Specifies the fwmark</text>
-                </description>
-            </leaf>
-            <leaf name="in">
-                <uci:uci-option name="in"/>
-                <type name="string"/>
-                <description>
-                    <text>Specifies the incoming logical interface name</text>
-                </description>
-            </leaf>
-            <leaf name="out">
-                <uci:uci-option name="out"/>
-                <type name="string"/>
-                <description>
-                    <text>Specifies the outgoing logical interface name</text>
-                </description>
-            </leaf>
-            <leaf name="src">
-                <uci:uci-option name="src"/>
-                <type name="inet:ipv4-prefix"/>
-                <description>
-                    <text>Specifies the source subnet to match</text>
-                </description>
-            </leaf>
-            <leaf name="dest">
-                <uci:uci-option name="dest"/>
-                <type name="inet:ipv4-prefix"/>
-                <description>
-                    <text>Specifies the destination subnet to match</text>
-                </description>
-            </leaf>
-            <leaf name="tos">
-                <uci:uci-option name="tos"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Specifies the TOS value to match in the IP headers</text>
-                </description>
-            </leaf>
-            <leaf name="invert">
-                <uci:uci-option name="invert"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Inverts the meaning of match options</text>
-                </description>
-            </leaf>
-            <leaf name="priority">
-                <uci:uci-option name="priority"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Declares the priority of the rule</text>
-                </description>
-            </leaf>
-            <leaf name="lookup">
-                <uci:uci-option name="lookup"/>
-                <type name="string"/>
-                <description>
-                    <text>The rule lookup target</text>
-                </description>
-            </leaf>
-            <leaf name="goto">
-                <uci:uci-option name="goto"/>
-                <type name="uint64"/>
-                <description>
-                    <text>The rule target is another rule with priority</text>
-                </description>
-            </leaf>
-            <leaf name="action">
-                <uci:uci-option name="action"/>
-                <type name="string"/>
-            </leaf>
-        </list>
-        <list name="ip6rules">
-            <uci:uci-section-type name="rule"/>
-            <key value="mark"/>
-            <leaf name="mark">
-                <uci:uci-option name="mark"/>
-                <type name="string"/>
-                <description>
-                    <text>Specifies the fwmark</text>
-                </description>
-            </leaf>
-            <leaf name="in">
-                <uci:uci-option name="in"/>
-                <type name="string"/>
-                <description>
-                    <text>Specifies the incoming logical interface name</text>
-                </description>
-            </leaf>
-            <leaf name="out">
-                <uci:uci-option name="out"/>
-                <type name="string"/>
-                <description>
-                    <text>Specifies the outgoing logical interface name</text>
-                </description>
-            </leaf>
-            <leaf name="src">
-                <uci:uci-option name="src"/>
-                <type name="inet:ipv6-prefix"/>
-                <description>
-                    <text>Specifies the source subnet to match</text>
-                </description>
-            </leaf>
-            <leaf name="dest">
-                <uci:uci-option name="dest"/>
-                <type name="inet:ipv6-prefix"/>
-                <description>
-                    <text>Specifies the destination subnet to match</text>
-                </description>
-            </leaf>
-            <leaf name="tos">
-                <uci:uci-option name="tos"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Specifies the TOS value to match in the IP headers</text>
-                </description>
-            </leaf>
-            <leaf name="invert">
-                <uci:uci-option name="invert"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Inverts the meaning of match options</text>
-                </description>
-            </leaf>
-            <leaf name="priority">
-                <uci:uci-option name="priority"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Declares the priority of the rule</text>
-                </description>
-            </leaf>
-            <leaf name="lookup">
-                <uci:uci-option name="lookup"/>
-                <type name="string"/>
-                <description>
-                    <text>The rule lookup target</text>
-                </description>
-            </leaf>
-            <leaf name="goto">
-                <uci:uci-option name="goto"/>
-                <type name="uint64"/>
-                <description>
-                    <text>The rule target is another rule with priority</text>
-                </description>
-            </leaf>
-            <leaf name="action">
-                <uci:uci-option name="action"/>
-                <type name="string"/>
-            </leaf>
-        </list>
-    </container>
-    <container name="routes">
-        <list name="ip4routes">
-            <uci:uci-section-type name="route"/>
-            <key value="name"/>
-            <leaf name="name">
-                <uci:uci-option name="name"/>
-                <type name="string"/>
-                <description>
-                    <text>Name of rule</text>
-                </description>
-            </leaf>
-            <leaf name="interface">
-                <uci:uci-option name="interface"/>
-                <type name="string"/>
-                <mandatory value="true"/>
-                <description>
-                    <text>Specifies the interface name this route belongs to</text>
-                </description>
-            </leaf>
-            <leaf name="target">
-                <uci:uci-option name="target"/>
-                <type name="inet:ipv4-address"/>
-                <description>
-                    <text>The target network address</text>
-                </description>
-            </leaf>
-            <leaf name="netmask">
-                <uci:uci-option name="netmask"/>
-                <type name="inet:ipv4-prefix"/>
-                <description>
-                    <text>The route netmask</text>
-                </description>
-            </leaf>
-            <leaf name="gateway">
-                <uci:uci-option name="gateway"/>
-                <type name="inet:ipv4-address"/>
-                <description>
-                    <text>The network gateway</text>
-                </description>
-            </leaf>
-            <leaf name="metric">
-                <uci:uci-option name="metric"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Specifies the route metric to use</text>
-                </description>
-            </leaf>
-            <leaf name="mtu">
-                <uci:uci-option name="mtu"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Specifies a MTU for this route</text>
-                </description>
-            </leaf>
-            <leaf name="table">
-                <uci:uci-option name="table"/>
-                <type name="string"/>
-                <description>
-                    <text>Specifies the table id to use for route</text>
-                </description>
-            </leaf>
-            <leaf name="source">
-                <uci:uci-option name="source"/>
-                <type name="inet:ipv4-address"/>
-                <description>
-                    <text>The preferred source address when sending to destinations</text>
-                </description>
-            </leaf>
-            <leaf name="onlink">
-                <uci:uci-option name="onlink"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable gateway on link, even if gateway does not match any interface prefix</text>
-                </description>
-            </leaf>
-            <leaf name="rtype">
-                <uci:uci-option name="type"/>
-                <type name="string"/>
-            </leaf>
-        </list>
-        <list name="ip6routes">
-            <uci:uci-section-type name="route6"/>
-            <key value="name"/>
-            <leaf name="name">
-                <uci:uci-option name="name"/>
-                <type name="string"/>
-                <description>
-                    <text>Name of rule</text>
-                </description>
-            </leaf>
-            <leaf name="interface">
-                <uci:uci-option name="interface"/>
-                <type name="string"/>
-                <mandatory value="true"/>
-                <description>
-                    <text>Specifies the interface name this route belongs to</text>
-                </description>
-            </leaf>
-            <leaf name="target">
-                <uci:uci-option name="target"/>
-                <type name="inet:ipv6-address"/>
-                <description>
-                    <text>The target network address</text>
-                </description>
-            </leaf>
-            <leaf name="gateway">
-                <uci:uci-option name="gateway"/>
-                <type name="inet:ipv6-address"/>
-                <description>
-                    <text>The network gateway</text>
-                </description>
-            </leaf>
-            <leaf name="metric">
-                <uci:uci-option name="metric"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Specifies the route metric to use</text>
-                </description>
-            </leaf>
-            <leaf name="mtu">
-                <uci:uci-option name="mtu"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Specifies a MTU for this route</text>
-                </description>
-            </leaf>
-            <leaf name="table">
-                <uci:uci-option name="table"/>
-                <type name="string"/>
-                <description>
-                    <text>Specifies the table id to use for route</text>
-                </description>
-            </leaf>
-            <leaf name="source">
-                <uci:uci-option name="source"/>
-                <type name="inet:ipv4-address"/>
-                <description>
-                    <text>The preferred source address when sending to destinations</text>
-                </description>
-            </leaf>
-            <leaf name="onlink">
-                <uci:uci-option name="onlink"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable gateway on link, even if gateway does not match any interface prefix</text>
-                </description>
-            </leaf>
-            <leaf name="rtype">
-                <uci:uci-option name="type"/>
-                <type name="string"/>
-            </leaf>
-        </list>
-    </container>
-    <container name="switches">
-        <list name="switch">
-            <uci:uci-section-type name="switch"/>
-            <key value="name"/>
-            <leaf name="name">
-                <uci:uci-option name="name"/>
-                <type name="string"/>
-                <description>
-                    <text>The name of the switch to configure</text>
-                </description>
-            </leaf>
-            <leaf name="reset">
-                <uci:uci-option name="reset"/>
-                <type name="openwrt-bool"/>
-            </leaf>
-            <leaf name="enable_vlan">
-                <uci:uci-option name="enable_vlan"/>
-                <type name="openwrt-bool"/>
-            </leaf>
-            <leaf name="enable_mirror_rx">
-                <uci:uci-option name="enable_mirror_rx"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Mirror received packets from the mirror_source_port to the mirror_monitor_port</text>
-                </description>
-            </leaf>
-            <leaf name="enable_mirror_tx">
-                <uci:uci-option name="enable_mirror_tx"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Mirror transmitted packets from the mirror_source_port to the mirror_monitor_port</text>
-                </description>
-            </leaf>
-            <leaf name="mirror_monitor_port">
-                <uci:uci-option name="mirror_monitor_port"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Switch port to which the packets are mirrored</text>
-                </description>
-            </leaf>
-            <leaf name="mirror_source_port">
-                <uci:uci-option name="mirror_source_port"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Switch port from which packets are mirrored</text>
-                </description>
-            </leaf>
-            <leaf name="arl_age_time">
-                <uci:uci-option name="arl_age_time"/>
-                <type name="uint64"/>
-                <description>
-                    <text>Adjust the address resolution table's aging time</text>
-                </description>
-            </leaf>
-            <leaf name="igmp_snooping">
-                <uci:uci-option name="igmp_snooping"/>
-                <type name="openwrt-bool"/>
-            </leaf>
-            <leaf name="igmp_v3">
-                <uci:uci-option name="igmp_v3"/>
-                <type name="openwrt-bool"/>
-            </leaf>
-        </list>
-        <list name="switch_vlan">
-            <uci:uci-section-type name="switch_vlan"/>
-            <key value="device vlan"/>
-            <leaf name="device">
-                <uci:uci-option name="device"/>
-                <type name="string"/>
-                <description>
-                    <text>The device to configure</text>
-                </description>
-            </leaf>
-            <leaf name="vlan">
-                <uci:uci-option name="vlan"/>
-                <type name="uint64"/>
-                <description>
-                    <text>The VLAN table index to configure</text>
-                </description>
-            </leaf>
-            <leaf name="vid">
-                <uci:uci-option name="vid"/>
-                <type name="uint64"/>
-                <description>
-                    <text>The VLAN tag number to use</text>
-                </description>
-            </leaf>
-            <leaf-list name="ports">
-                <uci:uci-option name="ports"/>
-                <type name="string"/>
-                <description>
-                    <text>List of port indices that should be associated with VLAN</text>
-                </description>
-            </leaf-list>
-        </list>
-        <list name="switch_port">
-            <uci:uci-section-type name="switch_port"/>
-            <key value="device port"/>
-            <leaf name="device">
-                <uci:uci-option name="device"/>
-                <type name="string"/>
-                <description>
-                    <text>The device to configure</text>
-                </description>
-            </leaf>
-            <leaf name="port">
-                <uci:uci-option name="port"/>
-                <type name="uint64"/>
-                <description>
-                    <text>The port index to configure</text>
-                </description>
-            </leaf>
-            <leaf name="pvid">
-                <uci:uci-option name="pvid"/>
-                <type name="uint64"/>
-                <description>
-                    <text>The port PVID</text>
-                </description>
-            </leaf>
-            <leaf name="enable_eee">
-                <uci:uci-option name="enable_eee"/>
-                <type name="openwrt-bool"/>
-                <description>
-                    <text>Enable power-saving features</text>
-                </description>
-            </leaf>
-            <leaf name="igmp_snooping">
-                <uci:uci-option name="igmp_snooping"/>
-                <type name="openwrt-bool"/>
-            </leaf>
-            <leaf name="igmp_v3">
-                <uci:uci-option name="igmp_v3"/>
-                <type name="openwrt-bool"/>
-            </leaf>
-        </list>
-    </container>
+        <description>
+          <text>Selects the interface to attach to for stacked protocols</text>
+        </description>
+      </leaf>
+    </list>
+  </container>
+  <container name="rules">
+    <list name="ip4rules">
+      <uci:section name="rule"/>
+      <key value="mark"/>
+      <leaf name="mark">
+        <uci:option name="mark"/>
+        <type name="string"/>
+        <description>
+          <text>Specifies the fwmark</text>
+        </description>
+      </leaf>
+      <leaf name="in">
+        <uci:option name="in"/>
+        <type name="string"/>
+        <description>
+          <text>Specifies the incoming logical interface name</text>
+        </description>
+      </leaf>
+      <leaf name="out">
+        <uci:option name="out"/>
+        <type name="string"/>
+        <description>
+          <text>Specifies the outgoing logical interface name</text>
+        </description>
+      </leaf>
+      <leaf name="src">
+        <uci:option name="src"/>
+        <type name="inet:ipv4-prefix"/>
+        <description>
+          <text>Specifies the source subnet to match</text>
+        </description>
+      </leaf>
+      <leaf name="dest">
+        <uci:option name="dest"/>
+        <type name="inet:ipv4-prefix"/>
+        <description>
+          <text>Specifies the destination subnet to match</text>
+        </description>
+      </leaf>
+      <leaf name="tos">
+        <uci:option name="tos"/>
+        <type name="uint64"/>
+        <description>
+          <text>Specifies the TOS value to match in the IP headers</text>
+        </description>
+      </leaf>
+      <leaf name="invert">
+        <uci:option name="invert"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Inverts the meaning of match options</text>
+        </description>
+      </leaf>
+      <leaf name="priority">
+        <uci:option name="priority"/>
+        <type name="uint64"/>
+        <description>
+          <text>Declares the priority of the rule</text>
+        </description>
+      </leaf>
+      <leaf name="lookup">
+        <uci:option name="lookup"/>
+        <type name="string"/>
+        <description>
+          <text>The rule lookup target</text>
+        </description>
+      </leaf>
+      <leaf name="goto">
+        <uci:option name="goto"/>
+        <type name="uint64"/>
+        <description>
+          <text>The rule target is another rule with priority</text>
+        </description>
+      </leaf>
+      <leaf name="action">
+        <uci:option name="action"/>
+        <type name="string"/>
+      </leaf>
+    </list>
+    <list name="ip6rules">
+      <uci:section name="rule"/>
+      <key value="mark"/>
+      <leaf name="mark">
+        <uci:option name="mark"/>
+        <type name="string"/>
+        <description>
+          <text>Specifies the fwmark</text>
+        </description>
+      </leaf>
+      <leaf name="in">
+        <uci:option name="in"/>
+        <type name="string"/>
+        <description>
+          <text>Specifies the incoming logical interface name</text>
+        </description>
+      </leaf>
+      <leaf name="out">
+        <uci:option name="out"/>
+        <type name="string"/>
+        <description>
+          <text>Specifies the outgoing logical interface name</text>
+        </description>
+      </leaf>
+      <leaf name="src">
+        <uci:option name="src"/>
+        <type name="inet:ipv6-prefix"/>
+        <description>
+          <text>Specifies the source subnet to match</text>
+        </description>
+      </leaf>
+      <leaf name="dest">
+        <uci:option name="dest"/>
+        <type name="inet:ipv6-prefix"/>
+        <description>
+          <text>Specifies the destination subnet to match</text>
+        </description>
+      </leaf>
+      <leaf name="tos">
+        <uci:option name="tos"/>
+        <type name="uint64"/>
+        <description>
+          <text>Specifies the TOS value to match in the IP headers</text>
+        </description>
+      </leaf>
+      <leaf name="invert">
+        <uci:option name="invert"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Inverts the meaning of match options</text>
+        </description>
+      </leaf>
+      <leaf name="priority">
+        <uci:option name="priority"/>
+        <type name="uint64"/>
+        <description>
+          <text>Declares the priority of the rule</text>
+        </description>
+      </leaf>
+      <leaf name="lookup">
+        <uci:option name="lookup"/>
+        <type name="string"/>
+        <description>
+          <text>The rule lookup target</text>
+        </description>
+      </leaf>
+      <leaf name="goto">
+        <uci:option name="goto"/>
+        <type name="uint64"/>
+        <description>
+          <text>The rule target is another rule with priority</text>
+        </description>
+      </leaf>
+      <leaf name="action">
+        <uci:option name="action"/>
+        <type name="string"/>
+      </leaf>
+    </list>
+  </container>
+  <container name="routes">
+    <list name="ip4routes">
+      <uci:section name="route"/>
+      <key value="name"/>
+      <leaf name="name">
+        <uci:option name="name"/>
+        <type name="string"/>
+        <description>
+          <text>Name of rule</text>
+        </description>
+      </leaf>
+      <leaf name="interface">
+        <uci:option name="interface"/>
+        <type name="string"/>
+        <mandatory value="true"/>
+        <description>
+          <text>Specifies the interface name this route belongs to</text>
+        </description>
+      </leaf>
+      <leaf name="target">
+        <uci:option name="target"/>
+        <type name="inet:ipv4-address"/>
+        <description>
+          <text>The target network address</text>
+        </description>
+      </leaf>
+      <leaf name="netmask">
+        <uci:option name="netmask"/>
+        <type name="inet:ipv4-prefix"/>
+        <description>
+          <text>The route netmask</text>
+        </description>
+      </leaf>
+      <leaf name="gateway">
+        <uci:option name="gateway"/>
+        <type name="inet:ipv4-address"/>
+        <description>
+          <text>The network gateway</text>
+        </description>
+      </leaf>
+      <leaf name="metric">
+        <uci:option name="metric"/>
+        <type name="uint64"/>
+        <description>
+          <text>Specifies the route metric to use</text>
+        </description>
+      </leaf>
+      <leaf name="mtu">
+        <uci:option name="mtu"/>
+        <type name="uint64"/>
+        <description>
+          <text>Specifies a MTU for this route</text>
+        </description>
+      </leaf>
+      <leaf name="table">
+        <uci:option name="table"/>
+        <type name="string"/>
+        <description>
+          <text>Specifies the table id to use for route</text>
+        </description>
+      </leaf>
+      <leaf name="source">
+        <uci:option name="source"/>
+        <type name="inet:ipv4-address"/>
+        <description>
+          <text>The preferred source address when sending to destinations</text>
+        </description>
+      </leaf>
+      <leaf name="onlink">
+        <uci:option name="onlink"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable gateway on link, even if gateway does not match any interface prefix</text>
+        </description>
+      </leaf>
+      <leaf name="rtype">
+        <uci:option name="type"/>
+        <type name="string"/>
+      </leaf>
+    </list>
+    <list name="ip6routes">
+      <uci:section name="route6"/>
+      <key value="name"/>
+      <leaf name="name">
+        <uci:option name="name"/>
+        <type name="string"/>
+        <description>
+          <text>Name of rule</text>
+        </description>
+      </leaf>
+      <leaf name="interface">
+        <uci:option name="interface"/>
+        <type name="string"/>
+        <mandatory value="true"/>
+        <description>
+          <text>Specifies the interface name this route belongs to</text>
+        </description>
+      </leaf>
+      <leaf name="target">
+        <uci:option name="target"/>
+        <type name="inet:ipv6-address"/>
+        <description>
+          <text>The target network address</text>
+        </description>
+      </leaf>
+      <leaf name="gateway">
+        <uci:option name="gateway"/>
+        <type name="inet:ipv6-address"/>
+        <description>
+          <text>The network gateway</text>
+        </description>
+      </leaf>
+      <leaf name="metric">
+        <uci:option name="metric"/>
+        <type name="uint64"/>
+        <description>
+          <text>Specifies the route metric to use</text>
+        </description>
+      </leaf>
+      <leaf name="mtu">
+        <uci:option name="mtu"/>
+        <type name="uint64"/>
+        <description>
+          <text>Specifies a MTU for this route</text>
+        </description>
+      </leaf>
+      <leaf name="table">
+        <uci:option name="table"/>
+        <type name="string"/>
+        <description>
+          <text>Specifies the table id to use for route</text>
+        </description>
+      </leaf>
+      <leaf name="source">
+        <uci:option name="source"/>
+        <type name="inet:ipv4-address"/>
+        <description>
+          <text>The preferred source address when sending to destinations</text>
+        </description>
+      </leaf>
+      <leaf name="onlink">
+        <uci:option name="onlink"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable gateway on link, even if gateway does not match any interface prefix</text>
+        </description>
+      </leaf>
+      <leaf name="rtype">
+        <uci:option name="type"/>
+        <type name="string"/>
+      </leaf>
+    </list>
+  </container>
+  <container name="switches">
+    <list name="switch">
+      <uci:section name="switch"/>
+      <key value="name"/>
+      <leaf name="name">
+        <uci:option name="name"/>
+        <type name="string"/>
+        <description>
+          <text>The name of the switch to configure</text>
+        </description>
+      </leaf>
+      <leaf name="reset">
+        <uci:option name="reset"/>
+        <type name="openwrt-bool"/>
+      </leaf>
+      <leaf name="enable_vlan">
+        <uci:option name="enable_vlan"/>
+        <type name="openwrt-bool"/>
+      </leaf>
+      <leaf name="enable_mirror_rx">
+        <uci:option name="enable_mirror_rx"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Mirror received packets from the mirror_source_port to the mirror_monitor_port</text>
+        </description>
+      </leaf>
+      <leaf name="enable_mirror_tx">
+        <uci:option name="enable_mirror_tx"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Mirror transmitted packets from the mirror_source_port to the  mirror_monitor_port</text>
+        </description>
+      </leaf>
+      <leaf name="mirror_monitor_port">
+        <uci:option name="mirror_monitor_port"/>
+        <type name="uint64"/>
+        <description>
+          <text>Switch port to which the packets are mirrored</text>
+        </description>
+      </leaf>
+      <leaf name="mirror_source_port">
+        <uci:option name="mirror_source_port"/>
+        <type name="uint64"/>
+        <description>
+          <text>Switch port from which packets are mirrored</text>
+        </description>
+      </leaf>
+      <leaf name="arl_age_time">
+        <uci:option name="arl_age_time"/>
+        <type name="uint64"/>
+        <description>
+          <text>Adjust the address resolution table's aging time</text>
+        </description>
+      </leaf>
+      <leaf name="igmp_snooping">
+        <uci:option name="igmp_snooping"/>
+        <type name="openwrt-bool"/>
+      </leaf>
+      <leaf name="igmp_v3">
+        <uci:option name="igmp_v3"/>
+        <type name="openwrt-bool"/>
+      </leaf>
+    </list>
+    <list name="switch_vlan">
+      <uci:section name="switch_vlan"/>
+      <key value="device vlan"/>
+      <leaf name="device">
+        <uci:option name="device"/>
+        <type name="string"/>
+        <description>
+          <text>The device to configure</text>
+        </description>
+      </leaf>
+      <leaf name="vlan">
+        <uci:option name="vlan"/>
+        <type name="uint64"/>
+        <description>
+          <text>The VLAN table index to configure</text>
+        </description>
+      </leaf>
+      <leaf name="vid">
+        <uci:option name="vid"/>
+        <type name="uint64"/>
+        <description>
+          <text>The VLAN tag number to use</text>
+        </description>
+      </leaf>
+      <leaf-list name="ports">
+        <uci:option name="ports"/>
+        <type name="string"/>
+        <description>
+          <text>List of port indices that should be associated with VLAN</text>
+        </description>
+      </leaf-list>
+    </list>
+    <list name="switch_port">
+      <uci:section name="switch_port"/>
+      <key value="device port"/>
+      <leaf name="device">
+        <uci:option name="device"/>
+        <type name="string"/>
+        <description>
+          <text>The device to configure</text>
+        </description>
+      </leaf>
+      <leaf name="port">
+        <uci:option name="port"/>
+        <type name="uint64"/>
+        <description>
+          <text>The port index to configure</text>
+        </description>
+      </leaf>
+      <leaf name="pvid">
+        <uci:option name="pvid"/>
+        <type name="uint64"/>
+        <description>
+          <text>The port PVID</text>
+        </description>
+      </leaf>
+      <leaf name="enable_eee">
+        <uci:option name="enable_eee"/>
+        <type name="openwrt-bool"/>
+        <description>
+          <text>Enable power-saving features</text>
+        </description>
+      </leaf>
+      <leaf name="igmp_snooping">
+        <uci:option name="igmp_snooping"/>
+        <type name="openwrt-bool"/>
+      </leaf>
+      <leaf name="igmp_v3">
+        <uci:option name="igmp_v3"/>
+        <type name="openwrt-bool"/>
+      </leaf>
+    </list>
+  </container>
 </module>

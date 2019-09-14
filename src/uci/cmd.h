@@ -5,17 +5,17 @@
 
 enum uci_object_type { list, option, container };
 
-struct uci_write_pair {
-  struct uci_path path;
+struct UciWritePair {
+  struct UciPath path;
   char *value;
   enum uci_object_type type;
 };
-typedef struct uci_write_pair uci_write_pair;
+typedef struct UciWritePair UciWritePair;
 
-struct uci_write_pair *initialize_uci_write_pair(struct uci_path *path,
-                                                 char *value,
-                                                 enum uci_object_type type);
-int write_uci_write_list(uci_write_pair **write_list);
-int free_uci_write_list(uci_write_pair **list);
+struct UciWritePair *initialize_uci_write_pair(struct UciPath *path,
+                                               char *value,
+                                               enum uci_object_type type);
+int write_uci_write_list(UciWritePair **write_list);
+int free_uci_write_list(UciWritePair **list);
 
 #endif  // RESTCONF_CMD_H

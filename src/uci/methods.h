@@ -8,7 +8,7 @@
 /**
  * A structure to represent the path to an UCI object
  */
-struct uci_path {
+struct UciPath {
   char *package;
   char *section;
   char *section_type;
@@ -17,8 +17,8 @@ struct uci_path {
   int index;
 };
 
-struct uci_where {
-  struct uci_path *path;
+struct UciWhere {
+  struct UciPath *path;
   map_str2str *key_value;
   int key_value_length;
 };
@@ -29,10 +29,10 @@ struct uci_where {
 int uci_read_option(char *path, char *buffer, size_t size);
 char **uci_read_list(char *path);
 int uci_path_exists(char *path);
-int uci_index_where(struct uci_where *where);
+int uci_index_where(struct UciWhere *where);
 int uci_write_option(char *path, const char *value);
 int uci_write_list(char *path, const char *value);
-int uci_list_length(struct uci_path *path);
+int uci_list_length(struct UciPath *path);
 struct uci_section *uci_add_section_anon(char *package_name, char *type);
 int uci_add_section_named(char *package_name, const char *type, char *name);
 int uci_revert_package(char *package);

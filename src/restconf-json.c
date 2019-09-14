@@ -1,6 +1,8 @@
 #include "restconf-json.h"
 #include <stdio.h>
 #include "error.h"
+#include "restconf.h"
+#include "yang-util.h"
 
 /**
  * Return json_object's value as a string
@@ -35,7 +37,7 @@ struct json_object* json_get_array(struct json_object* jobj, const char* key) {
 struct json_object* json_get_object_from_map(struct json_object* jobj,
                                              const char* key) {
   json_object* tmp = NULL;
-  json_object_object_get_ex(jobj, "map", &tmp);
+  json_object_object_get_ex(jobj, YANG_MAP, &tmp);
   json_object_object_get_ex(tmp, key, &tmp);
   return tmp;
 }
@@ -130,22 +132,23 @@ error json_yang_verify_list(struct json_object* list,
   int keys_exist = 1;
   int mandatory_exist = 1;
   int unique_exist = 1;
+  int leaf_as_name_exist = 1;
   struct json_object* keys = NULL;
   struct json_object* mandatory = NULL;
   struct json_object* unique = NULL;
 
-  if (json_object_get_type(list) != json_type_array) {
+  if (!json_is_array(json_object_get_type(list))) {
     return INVALID_TYPE;
   }
 
-  if (!(keys = json_get_array(yang, "keys"))) {
+  if (!(keys = json_get_array(yang, YANG_KEYS))) {
     // No keys defined in YANG
     keys_exist = 0;
   }
-  if (!(unique = json_get_array(yang, "unique"))) {
+  if (!(unique = json_get_array(yang, YANG_UNIQUE))) {
     unique_exist = 0;
   }
-  if (!(mandatory = json_get_array(yang, "mandatory"))) {
+  if (!(mandatory = json_get_array(yang, YANG_MANDATORY))) {
     mandatory_exist = 0;
   }
   for (size_t list_i = 0; list_i < json_object_array_length(list); list_i++) {
@@ -248,7 +251,7 @@ int json_value_in_array(struct json_object* array, char* value) {
 yang_type json_extract_yang_type(struct json_object* item) {
   const char* leaf_type = NULL;
   if (json_object_get_type(item) == json_type_object) {
-    leaf_type = json_get_string(item, "leaf-type");
+    leaf_type = json_get_string(item, YANG_LEAF_TYPE);
   } else {
     leaf_type = json_object_get_string(item);
   }
@@ -257,3 +260,7 @@ yang_type json_extract_yang_type(struct json_object* item) {
   }
   return str_to_yang_type(leaf_type);
 }
+
+int json_is_object(json_type type) { return type == json_type_object; }
+
+int json_is_array(json_type type) { return type == json_type_array; }

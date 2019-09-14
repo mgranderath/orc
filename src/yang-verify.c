@@ -1,6 +1,8 @@
 #include "yang-verify.h"
 #include <regex.h>
 #include "restconf-json.h"
+#include "restconf.h"
+#include "yang-util.h"
 
 static int yang_verify_value_type(struct json_object* type, const char* value);
 
@@ -19,7 +21,7 @@ error yang_verify_leaf(struct json_object* leaf, struct json_object* yang) {
     return INVALID_TYPE;
   }
 
-  json_object_object_get_ex(yang, "leaf-type", &type);
+  json_object_object_get_ex(yang, YANG_LEAF_TYPE, &type);
   if (!type) {
     return YANG_SCHEMA_ERROR;
   }
@@ -47,7 +49,7 @@ error yang_verify_leaf_list(struct json_object* list,
     return INVALID_TYPE;
   }
 
-  json_object_object_get_ex(yang, "leaf-type", &type);
+  json_object_object_get_ex(yang, YANG_LEAF_TYPE, &type);
   if (!type) {
     return YANG_SCHEMA_ERROR;
   }
@@ -129,10 +131,10 @@ int yang_verify_json_type(yang_type type, json_type val_type) {
  */
 int yang_mandatory(struct json_object* yang) {
   const char* type_string = NULL;
-  type_string = json_get_string(yang, "type");
-  if (!type_string || strcmp(type_string, "leaf") == 0) {
+  type_string = json_get_string(yang, YANG_TYPE);
+  if (!type_string || yang_is_leaf(type_string)) {
     struct json_object* mandatory = NULL;
-    json_object_object_get_ex(yang, "mandatory", &mandatory);
+    json_object_object_get_ex(yang, YANG_MANDATORY, &mandatory);
     if (mandatory && json_object_get_boolean(mandatory)) {
       return 1;
     }
@@ -196,7 +198,7 @@ static int yang_verify_value_type(struct json_object* type, const char* value) {
   int is_object = 0;
   enum other_check { NONE, RANGE, PATTERN } verify_type = NONE;
   if (json_object_get_type(type) == json_type_object) {
-    leaf_type = json_get_string(type, "leaf-type");
+    leaf_type = json_get_string(type, YANG_LEAF_TYPE);
     is_object = 1;
   } else {
     leaf_type = json_object_get_string(type);

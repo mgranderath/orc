@@ -7,7 +7,7 @@ module openwrt-system {
   }
 
   import openwrt-uci-extension {
-    prefix ex;
+    prefix uci;
   }
 
   contact "Malte Granderath <m.granderath@jacobs-university.de>";
@@ -15,25 +15,25 @@ module openwrt-system {
     description "initial revision";
   }
 
-  ex:uci-package "system";
+  uci:package "system";
   container system {
-    ex:uci-section "OpenWrt";
-    ex:uci-section-type "system";
+    uci:section-name "OpenWrt";
+    uci:section "system";
 
     leaf hostname {
-      ex:uci-option "hostname";
+      uci:option "hostname";
       type string;
       description "The hostname of the system";
     }
 
     leaf buffersize {
-      ex:uci-option "buffersize";
+      uci:option "buffersize";
       type uint32;
       description "Size of the kernel message buffer.";
     }
 
     leaf conloglevel {
-      ex:uci-option "conloglevel";
+      uci:option "conloglevel";
       type uint8 {
         range "0..7";
       }
@@ -47,7 +47,7 @@ module openwrt-system {
     }
 
     leaf cronloglevel {
-      ex:uci-option "cronloglevel";
+      uci:option "cronloglevel";
       type uint8;
       default 5;
       description
@@ -56,7 +56,7 @@ module openwrt-system {
     }
 
     leaf klogconloglevel {
-      ex:uci-option "klogconloglevel";
+      uci:option "klogconloglevel";
       type uint8;
       default 7;
       description
@@ -65,7 +65,7 @@ module openwrt-system {
     }
 
     leaf log_buffer_size {
-      ex:uci-option "lof_buffer_size";
+      uci:option "lof_buffer_size";
       type uint32;
       default 16;
       description
@@ -73,7 +73,7 @@ module openwrt-system {
     }
 
     leaf log_file {
-      ex:uci-option "log_file";
+      uci:option "log_file";
       type string;
       description
         "File to write log messages to (type file). The default is to not write a log in a file. The most
@@ -87,28 +87,28 @@ module openwrt-system {
     }
 
     leaf log_ip {
-      ex:uci-option "log_ip";
+      uci:option "log_ip";
       type inet:ipv4-address;
       description
         "IP address of a syslog server to which the log messages should be sent in addition to the local destination.";
     }
 
     leaf log_port {
-      ex:uci-option "log_port";
+      uci:option "log_port";
       type uint32;
       description
         "Port number of the remote syslog server";
     }
 
     leaf log_prefix {
-      ex:uci-option "log_prefix";
+      uci:option "log_prefix";
       type string;
       description
         "Adds a prefix to all log messages send over network";
     }
 
     leaf log_proto {
-      ex:uci-option "log_proto";
+      uci:option "log_proto";
       type string {
         pattern "(udp|tcp)";
       }
@@ -118,28 +118,28 @@ module openwrt-system {
     }
 
     leaf log_remote {
-      ex:uci-option "log_remote";
+      uci:option "log_remote";
       type boolean;
       default false;
       description "Enables remote logging.";
     }
 
     leaf log_size {
-      ex:uci-option "log_size";
+      uci:option "log_size";
       type uint32;
       default 16;
       description "Size of the file or circular memory buffer in KiB.";
     }
 
     leaf log_trailer_null {
-      ex:uci-option "log_trailer_null";
+      uci:option "log_trailer_null";
       type boolean;
       default false;
       description 'Use \0 instead of \n as trailer when using TCP.';
     }
 
     leaf log_type {
-      ex:uci-option "log_type";
+      uci:option "log_type";
       type string {
         pattern "(circular|file)";
       }
@@ -147,31 +147,31 @@ module openwrt-system {
     }
 
     leaf urandom_seed {
-      ex:uci-option "urandom_seed";
+      uci:option "urandom_seed";
       type string;
       default "0";
       description "Path of the seed. Enables saving a new seed on each boot.";
     }
 
     leaf timezone {
-      ex:uci-option "timezone";
+      uci:option "timezone";
       type string;
       description "The time zone that date and time should be rendered in by default.";
     }
 
     leaf zonename {
-      ex:uci-option "zonename";
+      uci:option "zonename";
       type string;
       description "Only useful when using glibc and zoneinfo!";
     }
   }
 
   container ntp {
-    ex:uci-section-type "timeserver";
-    ex:uci-section "ntp";
+    uci:section "timeserver";
+    uci:section-name "ntp";
 
     leaf enabled {
-      ex:uci-option "enabled";
+      uci:option "enabled";
       type string {
         pattern "(0|1)";
       }
@@ -179,7 +179,7 @@ module openwrt-system {
     }
 
     leaf enable_server {
-      ex:uci-option "enable_server";
+      uci:option "enable_server";
       type string {
         pattern "(0|1)";
       }
@@ -187,7 +187,7 @@ module openwrt-system {
     }
 
     leaf-list server {
-      ex:uci-option "server";
+      uci:option "server";
       type string;
       description "list of ntp servers";
     }

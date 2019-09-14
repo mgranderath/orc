@@ -3,71 +3,35 @@
 #include "http.h"
 #include "restconf-json.h"
 #include "restconf-verify.h"
+#include "restconf.h"
 #include "uci/cmd.h"
 #include "uci/uci-get.h"
 #include "uci/uci-util.h"
 #include "url.h"
 #include "util.h"
 #include "vector.h"
+#include "yang-util.h"
 #include "yang-verify.h"
 
-uci_write_pair **verify_content_yang(struct json_object *content,
-                                     struct json_object *yang_node,
-                                     struct uci_path *path, error *err,
-                                     int root, int check_exists) {
-  uci_write_pair **command_list = NULL;
+static UciWritePair **verify_content_yang(struct json_object *content,
+                                          struct json_object *yang_node,
+                                          struct UciPath *path, error *err,
+                                          int root, int check_exists) {
+  UciWritePair **command_list = NULL;
   const char *child_type = NULL;
-  if (!(child_type = json_get_string(yang_node, "type"))) {
+  if (!(child_type = json_get_string(yang_node, YANG_TYPE))) {
     *err = YANG_SCHEMA_ERROR;
     return NULL;
   }
-  if (strcmp(child_type, "leaf-list") == 0) {
-    json_type value_type = json_object_get_type(content);
-    if (value_type == json_type_object) {
-      *err = INVALID_TYPE;
-      return NULL;
-    }
-    struct json_object *existing_items = NULL;
-    if (check_exists) {
-      if (!(existing_items = uci_get_leaf_list(yang_node, path, err))) {
-        existing_items = json_object_new_array();
-      }
-    } else {
-      existing_items = json_object_new_array();
-    }
-    if (*err != RE_OK && *err != UCI_READ_FAILED) {
-      return NULL;
-    }
-    if (value_type == json_type_array) {
-      json_array_forloop(content, index) {
-        struct json_object *tmp = json_object_array_get_idx(content, index);
-        json_object_array_add(existing_items, tmp);
-      }
-    } else {
-      json_object_array_add(existing_items, content);
-    }
-    if ((*err = restconf_verify_leaf_list(existing_items, path, yang_node,
-                                          0)) != RE_OK) {
-      return NULL;
-    }
-    json_array_forloop(existing_items, index) {
-      json_object *item = json_object_array_get_idx(existing_items, index);
-      const char *value = json_object_get_string(item);
-      uci_write_pair *output =
-          initialize_uci_write_pair(path, (char *)value, list);
-      if (!output) {
-        *err = INTERNAL;
-        return NULL;
-      }
-      vector_push_back(command_list, output);
-    }
-    return command_list;
-  } else if (strcmp(child_type, "leaf") == 0) {
+  if (yang_is_leaf_list(child_type)) {
+    return restconf_verify_leaf_list(content, yang_node, command_list, err,
+                                     check_exists, path);
+  } else if (yang_is_leaf(child_type)) {
     if ((*err = restconf_verify_leaf(content, path, yang_node, check_exists)) !=
         RE_OK) {
       return NULL;
     }
-    uci_write_pair *output = initialize_uci_write_pair(
+    UciWritePair *output = initialize_uci_write_pair(
         path, (char *)json_object_get_string(content), option);
     if (!output) {
       *err = INTERNAL;
@@ -75,7 +39,7 @@ uci_write_pair **verify_content_yang(struct json_object *content,
     }
     vector_push_back(command_list, output);
     return command_list;
-  } else if (strcmp(child_type, "list") == 0 && path->where == 0) {
+  } else if (yang_is_list(child_type) && path->where == 0) {
     json_type value_type = json_object_get_type(content);
     if (value_type != json_type_array && value_type != json_type_object) {
       *err = INVALID_TYPE;
@@ -132,7 +96,7 @@ uci_write_pair **verify_content_yang(struct json_object *content,
         struct json_object *tmp = json_object_array_get_idx(content, index);
         path->index = pos;
         path->where = 1;
-        uci_write_pair **tmp_list =
+        UciWritePair **tmp_list =
             verify_content_yang(tmp, yang_node, path, err, 0, check_exists);
         if (*err != RE_OK) {
           free_uci_write_list(tmp_list);
@@ -146,7 +110,7 @@ uci_write_pair **verify_content_yang(struct json_object *content,
     } else {
       path->index = (path->where || !root) ? path->index : list_length;
       path->where = 1;
-      uci_write_pair **tmp_list =
+      UciWritePair **tmp_list =
           verify_content_yang(content, yang_node, path, err, 0, check_exists);
       if (*err != RE_OK) {
         free_uci_write_list(tmp_list);
@@ -160,6 +124,9 @@ uci_write_pair **verify_content_yang(struct json_object *content,
     path->index = 0;
     path->where = 0;
     return command_list;
+  }
+  if (yang_is_list(child_type)) {
+      get_leaf_as_name(yang_node, content, path);
   }
   json_object_object_foreach(content, key, val) {
     struct json_object *child = NULL;
@@ -178,7 +145,7 @@ uci_write_pair **verify_content_yang(struct json_object *content,
       return NULL;
     }
     get_path_from_yang(child, path);
-    uci_write_pair **tmp_list =
+    UciWritePair **tmp_list =
         verify_content_yang(val, child, path, err, root, check_exists);
     if (*err != RE_OK) {
       free_uci_write_list(tmp_list);
@@ -193,12 +160,12 @@ uci_write_pair **verify_content_yang(struct json_object *content,
   return command_list;
 }
 
-error get_list_item_where(struct json_object *yang, char *keylist,
-                          struct uci_path *uci) {
+static error get_list_item_where(struct json_object *yang, char *keylist,
+                                 struct UciPath *uci) {
   struct json_object *keys = NULL;
   int array_length;
 
-  if (!(keys = json_get_array(yang, "keys"))) {
+  if (!(keys = json_get_array(yang, YANG_KEYS))) {
     return YANG_SCHEMA_ERROR;
   }
   array_length = json_object_array_length(keys);
@@ -223,14 +190,14 @@ error get_list_item_where(struct json_object *yang, char *keylist,
     if (!key_child) {
       return LEAF_NO_OPTION;
     }
-    uci_option_name = json_get_string(key_child, "uci-option");
+    uci_option_name = json_get_string(key_child, YANG_UCI_OPTION);
     if (uci_option_name == NULL) {
       return LEAF_NO_OPTION;
     }
     key_value[index].key = (char *)uci_option_name;
     key_value[index].str = keylist_vec[index];
   }
-  struct uci_where where = {
+  struct UciWhere where = {
       .path = uci, .key_value = key_value, .key_value_length = array_length};
   int where_index = uci_index_where(&where);
   if (where_index == -1) {
@@ -245,9 +212,9 @@ error get_list_item_where(struct json_object *yang, char *keylist,
   return RE_OK;
 }
 
-error check_path(struct json_object **root_yang, char **path, size_t start,
-                 size_t end, struct uci_path *uci, int check_keys,
-                 int stop_at_key) {
+static error check_path(struct json_object **root_yang, char **path,
+                        size_t start, size_t end, struct UciPath *uci,
+                        int check_keys, int stop_at_key) {
   struct json_object *iter = *root_yang;
   struct json_object *keys = NULL;
   size_t i;
@@ -283,8 +250,8 @@ error check_path(struct json_object **root_yang, char **path, size_t start,
       return NO_SUCH_ELEMENT;
     }
     get_path_from_yang(child, uci);
-    type = json_get_string(child, "type");
-    if (type && strcmp(type, "list") == 0) {
+    type = json_get_string(child, YANG_TYPE);
+    if (type && yang_is_list(type)) {
       int next_is_end = i + 1 == end;
       if (!keylist && !next_is_end) {
         return LIST_NO_FILTER;
@@ -298,10 +265,10 @@ error check_path(struct json_object **root_yang, char **path, size_t start,
         }
       }
 
-      if (check_keys && !(keys = json_get_array(child, "keys"))) {
+      if (check_keys && !(keys = json_get_array(child, YANG_KEYS))) {
         return YANG_SCHEMA_ERROR;
       }
-    } else if (type && strcmp(type, "leaf-list") == 0) {
+    } else if (type && yang_is_leaf_list(type)) {
       int next_is_end = i + 1 == end;
       if (!next_is_end) {
         return LIST_NO_FILTER;
@@ -321,12 +288,12 @@ error check_path(struct json_object **root_yang, char **path, size_t start,
 }
 
 struct json_object *build_recursive(struct json_object *jobj,
-                                    struct uci_path *path, error *err,
+                                    struct UciPath *path, error *err,
                                     int root) {
   struct json_object *map = NULL;
   char path_string[512];
   const char *type = NULL;
-  if (!(type = json_get_string(jobj, "type"))) {
+  if (!(type = json_get_string(jobj, YANG_TYPE))) {
     *err = YANG_SCHEMA_ERROR;
     return NULL;
   }
@@ -334,13 +301,13 @@ struct json_object *build_recursive(struct json_object *jobj,
     get_path_from_yang(jobj, path);
   }
 
-  if (strcmp(type, "leaf") == 0) {
+  if (yang_is_leaf(type)) {
     return uci_get_leaf(jobj, path, err);
-  } else if (strcmp(type, "leaf-list") == 0) {
+  } else if (yang_is_leaf_list(type)) {
     struct json_object *retval = uci_get_leaf_list(jobj, path, err);
     path->option = "";
     return retval;
-  } else if (strcmp(type, "list") == 0) {
+  } else if (yang_is_list(type)) {
     return uci_get_list(jobj, path, err);
   }
 
@@ -352,7 +319,7 @@ struct json_object *build_recursive(struct json_object *jobj,
   }
 
   struct json_object *top_level = json_object_new_object();
-  json_object_object_get_ex(jobj, "map", &map);
+  json_object_object_get_ex(jobj, YANG_MAP, &map);
   json_object_object_foreach(map, key, val) {
     error err_rec = RE_OK;
     struct json_object *check = build_recursive(val, path, &err_rec, 0);
@@ -363,7 +330,7 @@ struct json_object *build_recursive(struct json_object *jobj,
     }
     if (err_rec != UCI_READ_FAILED && check) {
       json_object_object_add(top_level, key, check);
-    } else if (!check && err_rec == RE_OK && strcmp(type, "container") == 0) {
+    } else if (!check && err_rec == RE_OK && yang_is_container(type)) {
       json_object_object_add(top_level, key, json_object_new_object());
     }
   }
@@ -374,7 +341,7 @@ struct json_object *build_recursive(struct json_object *jobj,
   return top_level;
 }
 
-int data_get(struct cgi_context *cgi, char **pathvec) {
+int data_get(struct CgiContext *cgi, char **pathvec) {
   json_object *module = NULL;
   json_object *top_level = NULL;
   json_object *yang_tree = NULL;
@@ -389,7 +356,7 @@ int data_get(struct cgi_context *cgi, char **pathvec) {
     goto done;
   }
 
-  struct uci_path uci = INIT_UCI_PATH();
+  struct UciPath uci = INIT_UCI_PATH();
 
   module = yang_module_exists(module_name);
   if (!module) {
@@ -408,7 +375,7 @@ int data_get(struct cgi_context *cgi, char **pathvec) {
     retval = print_error(err);
     goto done;
   }
-  type_string = json_get_string(top_level, "type");
+  type_string = json_get_string(top_level, YANG_TYPE);
   if (!type_string) {
     retval = restconf_badrequest();
     goto done;
@@ -423,9 +390,8 @@ int data_get(struct cgi_context *cgi, char **pathvec) {
   }
   content_type_json();
   headers_end();
-  if (strcmp(type_string, "leaf") == 0 ||
-      strcmp(type_string, "leaf-list") == 0 ||
-      strcmp(type_string, "list") == 0) {
+  if (yang_is_leaf(type_string) || yang_is_leaf_list(type_string) ||
+      yang_is_list(type_string)) {
     struct json_object *parent = json_object_new_object();
     char buf[512];
     char *object_requested = pathvec[vector_size(pathvec) - 1];
@@ -440,7 +406,7 @@ int data_get(struct cgi_context *cgi, char **pathvec) {
     json_object_object_add(parent, buf, yang_tree);
     json_pretty_print(parent);
     json_object_put(parent);
-  } else if (strcmp(type_string, "container") == 0) {
+  } else if (yang_is_container(type_string)) {
     struct json_object *parent = json_object_new_object();
     json_object_object_add(parent, pathvec[1], yang_tree);
     json_pretty_print(parent);
@@ -460,7 +426,7 @@ done:
   return retval;
 }
 
-int data_post(struct cgi_context *cgi, char **pathvec, int root) {
+int data_post(struct CgiContext *cgi, char **pathvec, int root) {
   json_object *module = NULL;
   json_object *top_level = NULL;
   struct json_object *content = NULL;
@@ -477,8 +443,8 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
   enum json_tokener_error parse_error;
   char path_string[512];
   char key_out[1024];
-  uci_write_pair **cmds = NULL;
-  struct uci_path uci = INIT_UCI_PATH();
+  UciWritePair **cmds = NULL;
+  struct UciPath uci = INIT_UCI_PATH();
 
   if ((content_raw = get_content()) == NULL) {
     retval = restconf_malformed();
@@ -536,8 +502,8 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
     }
   }
 
-  type_string = json_get_string(top_level, "type");
-  if (!type_string || strcmp(type_string, "leaf") == 0) {
+  type_string = json_get_string(top_level, YANG_TYPE);
+  if (!type_string || yang_is_leaf(type_string)) {
     restconf_badrequest();
     goto done;
   }
@@ -556,7 +522,7 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
     goto done;
   }
 
-  uci_write_pair *container_create =
+  UciWritePair *container_create =
       initialize_uci_write_pair(&uci, NULL, container);
   if (!container_create) {
     retval = restconf_operation_failed_internal();
@@ -565,9 +531,9 @@ int data_post(struct cgi_context *cgi, char **pathvec, int root) {
   root_key_copy = str_dup(root_key);
   struct json_object *created = NULL;
   if ((created = json_get_object_from_map(top_level, root_key_copy))) {
-    if (strcmp(json_get_string(created, "type"), "list") == 0) {
+    if (yang_is_list(json_get_string(created, YANG_TYPE))) {
       struct json_object *keys = NULL;
-      if ((keys = json_get_array(created, "keys"))) {
+      if ((keys = json_get_array(created, YANG_KEYS))) {
         struct json_object *values = NULL;
         if (json_extract_key_values(keys, root_object, &values) == RE_OK) {
           json_object_object_foreach(values, key, value) {
@@ -620,7 +586,7 @@ done:
   return retval;
 }
 
-int data_put(struct cgi_context *cgi, char **pathvec, int root) {
+int data_put(struct CgiContext *cgi, char **pathvec, int root) {
   // Cannot update the key values for list item
   char *content_raw = NULL;
   char *module_name = NULL;
@@ -630,12 +596,12 @@ int data_put(struct cgi_context *cgi, char **pathvec, int root) {
   struct json_object *content = NULL;
   struct json_object *module = NULL;
   json_object *top_level = NULL;
-  struct uci_path uci = INIT_UCI_PATH();
-  struct uci_path delete_uci = INIT_UCI_PATH();
+  struct UciPath uci = INIT_UCI_PATH();
+  struct UciPath delete_uci = INIT_UCI_PATH();
   enum json_tokener_error parse_error;
-  uci_write_pair **cmds = NULL;
+  UciWritePair **cmds = NULL;
   char **package_list = NULL;
-  struct uci_path *delete = NULL;
+  struct UciPath *delete = NULL;
   char key_out[1024];
   error err;
   int retval = 1;
@@ -734,9 +700,9 @@ int data_put(struct cgi_context *cgi, char **pathvec, int root) {
 
   delete_uci = uci;
 
-  if (strcmp(json_get_string(top_level, "type"), "list") == 0) {
+  if (yang_is_list(json_get_string(top_level, YANG_TYPE))) {
     struct json_object *keys = NULL;
-    if ((keys = json_get_array(top_level, "keys"))) {
+    if ((keys = json_get_array(top_level, YANG_KEYS))) {
       struct json_object *values = NULL;
       if (json_extract_key_values(keys, root_object, &values) == RE_OK) {
         json_object_object_foreach(values, key, value) {
@@ -786,7 +752,7 @@ int data_put(struct cgi_context *cgi, char **pathvec, int root) {
 
   for (size_t i = 0; i < vector_size(delete); i++) {
     char path_string[512];
-    struct uci_path tmp = delete[i];
+    struct UciPath tmp = delete[i];
 
     uci_combine_to_path(&tmp, path_string, sizeof(path_string));
 
@@ -829,32 +795,32 @@ done:
   return retval;
 }
 
-struct uci_path *extract_paths(struct json_object *node, struct uci_path *uci,
-                               error *err) {
+struct UciPath *extract_paths(struct json_object *node, struct UciPath *uci,
+                              error *err) {
   struct json_object *map = NULL;
-  struct uci_path *path_list = NULL;
+  struct UciPath *path_list = NULL;
 
   const char *type = NULL;
-  if (!(type = json_get_string(node, "type"))) {
+  if (!(type = json_get_string(node, YANG_TYPE))) {
     *err = YANG_SCHEMA_ERROR;
     return NULL;
   }
 
-  if (strcmp(type, "leaf") == 0) {
+  if (yang_is_leaf(type)) {
     // add path of leaf
     vector_push_back(path_list, *uci);
     uci->option = "";
     *err = RE_OK;
     return path_list;
-  } else if (strcmp(type, "leaf-list") == 0) {
+  } else if (yang_is_leaf_list(type)) {
     // add path of
     vector_push_back(path_list, *uci);
     uci->option = "";
     *err = RE_OK;
     return path_list;
-  } else if (strcmp(type, "list") == 0) {
+  } else if (yang_is_list(type)) {
     int list_length = uci_list_length(uci);
-    json_object_object_get_ex(node, "map", &map);
+    json_object_object_get_ex(node, YANG_MAP, &map);
     int start = (uci->where) ? uci->index : 0;
     int end = (uci->where) ? uci->index + 1 : list_length;
     for (int index = start; index < end; index++) {
@@ -863,13 +829,12 @@ struct uci_path *extract_paths(struct json_object *node, struct uci_path *uci,
       vector_push_back(path_list, *uci);
       json_object_object_foreach(map, key, val) {
         const char *subnode_type = NULL;
-        if (!(subnode_type = json_get_string(val, "type"))) {
+        if (!(subnode_type = json_get_string(val, YANG_TYPE))) {
           *err = YANG_SCHEMA_ERROR;
           return NULL;
         }
-        if (strcmp(subnode_type, "container") == 0 ||
-            strcmp(subnode_type, "list") == 0) {
-          struct uci_path *nested_path_list = NULL;
+        if (yang_is_container(subnode_type) || yang_is_list(subnode_type)) {
+          struct UciPath *nested_path_list = NULL;
           get_path_from_yang(val, uci);
           nested_path_list = extract_paths(val, uci, err);
           if (*err != RE_OK) {
@@ -890,15 +855,14 @@ struct uci_path *extract_paths(struct json_object *node, struct uci_path *uci,
     return path_list;
   }
   vector_push_back(path_list, *uci);
-  json_object_object_get_ex(node, "map", &map);
+  json_object_object_get_ex(node, YANG_MAP, &map);
   json_object_object_foreach(map, key, val) {
     const char *subnode_type = NULL;
-    if (!(subnode_type = json_get_string(val, "type"))) {
+    if (!(subnode_type = json_get_string(val, YANG_TYPE))) {
       *err = YANG_SCHEMA_ERROR;
     }
-    if (strcmp(subnode_type, "container") == 0 ||
-        strcmp(subnode_type, "list") == 0) {
-      struct uci_path *nested_path_list = NULL;
+    if (yang_is_container(subnode_type) || yang_is_list(subnode_type)) {
+      struct UciPath *nested_path_list = NULL;
       get_path_from_yang(val, uci);
       nested_path_list = extract_paths(val, uci, err);
       if (*err != RE_OK) {
@@ -914,14 +878,14 @@ struct uci_path *extract_paths(struct json_object *node, struct uci_path *uci,
   return path_list;
 }
 
-int data_delete(struct cgi_context *cgi, char **pathvec, int root) {
+int data_delete(struct CgiContext *cgi, char **pathvec, int root) {
   json_object *module = NULL;
   json_object *top_level = NULL;
   char *module_name = NULL;
   char *top_level_name = NULL;
   int retval = 1;
-  struct uci_path uci = INIT_UCI_PATH();
-  struct uci_path *delete = NULL;
+  struct UciPath uci = INIT_UCI_PATH();
+  struct UciPath *delete = NULL;
   char **package_list = NULL;
   error err;
   char exists_path[512];
@@ -966,7 +930,7 @@ int data_delete(struct cgi_context *cgi, char **pathvec, int root) {
   }
   for (size_t i = 0; i < vector_size(delete); i++) {
     char path_string[512];
-    struct uci_path tmp = delete[i];
+    struct UciPath tmp = delete[i];
 
     uci_combine_to_path(&tmp, path_string, sizeof(path_string));
 

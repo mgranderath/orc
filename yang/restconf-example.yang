@@ -18,75 +18,76 @@ module restconf-example {
     }
   }
 
-  uci:uci-package "restconf-example";
+  uci:package "restconf-example";
   container course {
-    uci:uci-section "course";
-    uci:uci-section-type "course";
+    uci:section-name "course";
+    uci:section "course";
 
     leaf name {
-      uci:uci-option "name";
+      uci:option "name";
       type string;
       description "name of the course";
     }
 
     leaf-list instructors {
-      uci:uci-option "instructors";
+      uci:option "instructors";
       type string;
       description "list of names of instructors";
     }
 
     leaf semester {
-      uci:uci-option "semester";
+      uci:option "semester";
       type uint8 {
         range "1..6";
       }
     }
 
     list students {
-      uci:uci-section-type "student";
+      uci:section "student";
+      uci:leaf-as-name "lastname";
 
       key "firstname lastname age";
       leaf firstname {
-        uci:uci-option "firstname";
+        uci:option "firstname";
         type string;
       }
 
       leaf lastname {
-        uci:uci-option "lastname";
+        uci:option "lastname";
         type string;
       }
 
       leaf age {
-        uci:uci-option "age";
+        uci:option "age";
         type uint8 {
           range "0..120";
         }
       }
 
       leaf major {
-        uci:uci-option "major";
+        uci:option "major";
         type string {
           pattern "(CS|IMS)";
         }
       }
 
       leaf grade {
-        uci:uci-option "grade";
+        uci:option "grade";
         type grade;
       }
     }
 
     container instructor {
-      uci:uci-section "instructor";
-      uci:uci-section-type "instructor";
+      uci:section-name "instructor";
+      uci:section "instructor";
 
       leaf name {
-        uci:uci-option "name";
+        uci:option "name";
         type string;
       }
 
       leaf email {
-        uci:uci-option "email";
+        uci:option "email";
         type email;
       }
     }

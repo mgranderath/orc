@@ -4,10 +4,10 @@
 #include "uci-util.h"
 #include "vector.h"
 
-struct uci_write_pair *initialize_uci_write_pair(struct uci_path *path,
-                                                 char *value,
-                                                 enum uci_object_type type) {
-  uci_write_pair *output = malloc(sizeof(uci_write_pair));
+struct UciWritePair *initialize_uci_write_pair(struct UciPath *path,
+                                               char *value,
+                                               enum uci_object_type type) {
+  UciWritePair *output = malloc(sizeof(UciWritePair));
   if (!output) {
     return NULL;
   }
@@ -17,9 +17,9 @@ struct uci_write_pair *initialize_uci_write_pair(struct uci_path *path,
   return output;
 }
 
-int free_uci_write_list(uci_write_pair **list) {
+int free_uci_write_list(UciWritePair **list) {
   for (size_t i = 0; i < vector_size(list); i++) {
-    uci_write_pair *cmd = list[i];
+    UciWritePair *cmd = list[i];
     free(cmd->value);
   }
   vector_free(list);
@@ -37,9 +37,9 @@ static int section_already_created(struct path_section_pair *sections,
   return 0;
 }
 
-static int leaf_list_deleted(struct uci_path *path, struct uci_path *comp) {
+static int leaf_list_deleted(struct UciPath *path, struct UciPath *comp) {
   for (size_t i = 0; i < vector_size(path); i++) {
-    struct uci_path curr = path[i];
+    struct UciPath curr = path[i];
     if (strcmp(curr.section_type, comp->section_type) == 0 &&
         strcmp(curr.section, comp->section) == 0 &&
         strcmp(curr.option, comp->option) == 0) {
@@ -49,14 +49,14 @@ static int leaf_list_deleted(struct uci_path *path, struct uci_path *comp) {
   return 0;
 }
 
-int write_uci_write_list(uci_write_pair **write_list) {
+int write_uci_write_list(UciWritePair **write_list) {
   struct path_section_pair *section_list = NULL;
-  struct uci_path *path = NULL;
+  struct UciPath *path = NULL;
   for (size_t i = 0; i < vector_size(write_list); i++) {
     int failed = 1;
     char local_path_string[512];
-    uci_write_pair *cmd = write_list[i];
-    if (cmd->path.where && cmd->path.section_type) {
+    UciWritePair *cmd = write_list[i];
+    if ((cmd->path.where && cmd->path.section == NULL) && cmd->path.section_type) {
       int section_exists = section_already_created(
           section_list, cmd->path.section_type, cmd->path.index);
       snprintf(local_path_string, sizeof(local_path_string), "%s.@%s[%d]",

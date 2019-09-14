@@ -1,7 +1,6 @@
 #include "http.h"
 #include <stdio.h>
 #include <string.h>
-#include "util.h"
 #include "vector.h"
 
 /**
@@ -27,7 +26,7 @@ char **path2vec(char *path, char *identifier) {
  * @param ctx CGI context
  * @return int success value
  */
-int badrequest(struct cgi_context *ctx) {
+int bad_request(struct CgiContext *ctx) {
   printf("Status: 400 Bad Request\r\n");
   printf("Content-Type: text/html\r\n\r\n");
 
@@ -43,7 +42,7 @@ int badrequest(struct cgi_context *ctx) {
  * @param ctx CGI context
  * @return int success value
  */
-int notfound(struct cgi_context *ctx) {
+int not_found(struct CgiContext *ctx) {
   printf("Status: 404 Not Found\r\n");
   printf("Content-Type: text/html\r\n\r\n");
 
@@ -59,7 +58,7 @@ int notfound(struct cgi_context *ctx) {
  * @param ctx CGI context
  * @return int success value
  */
-int forbidden(struct cgi_context *ctx) {
+int forbidden(struct CgiContext *ctx) {
   printf("Status: 403 Forbidden\r\n");
   printf("Content-Type: text/html\r\n\r\n");
 
@@ -75,7 +74,7 @@ int forbidden(struct cgi_context *ctx) {
  * @param ctx CGI context
  * @return int success value
  */
-int notacceptable(struct cgi_context *ctx) {
+int not_acceptable(struct CgiContext *ctx) {
   printf("Status: 406 Not Acceptable\r\n");
   printf("Content-Type: text/html\r\n\r\n");
 
@@ -90,11 +89,25 @@ int notacceptable(struct cgi_context *ctx) {
  * @param ctx CGI context
  * @return int success value
  */
-int internal_server_error(struct cgi_context *ctx) {
+int internal_server_error(struct CgiContext *ctx) {
   printf("Status: 500 Internal Server Error\r\n");
   printf("Content-Type: text/html\r\n\r\n");
 
   printf("<h1>Internal server error</h1>\n");
+  return 0;
+}
+
+/**
+ * @brief HTTP error 501
+ *
+ * @param ctx CGI context
+ * @return int success value
+ */
+int not_implemented(struct CgiContext *ctx) {
+  printf("Status: 501 Not Implemented\r\n");
+  printf("Content-Type: text/html\r\n\r\n");
+
+  printf("<h1>Not Implemented</h1>");
   return 0;
 }
 
@@ -109,3 +122,27 @@ void content_type_json() {
  * prints the characters to end the header
  */
 void headers_end() { printf("\n\n"); }
+
+int is_OPTIONS(const char* method) {
+  return strcmp(method, "OPTIONS") == 0;
+}
+
+int is_GET(const char* method) {
+  return strcmp(method, "GET") == 0;
+}
+
+int is_HEAD(const char* method) {
+  return strcmp(method, "HEAD") == 0;
+}
+
+int is_POST(const char* method) {
+  return strcmp(method, "POST") == 0;
+}
+
+int is_DELETE(const char* method) {
+  return strcmp(method, "DELETE") == 0;
+}
+
+int is_PUT(const char* method) {
+  return strcmp(method, "PUT") == 0;
+}

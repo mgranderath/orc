@@ -3,23 +3,27 @@ module openwrt-uci-extension {
     prefix "ouci";
 
     contact "Malte Granderath <m.granderath@jacobs-university.de>";
-    revision 2019-04-24 {
+    revision 2019-09-14 {
       description "initial revision";
     }
 
-    extension uci-package {
+    extension package {
         argument name;
     }
 
-    extension uci-section {
+    extension section {
         argument name;
     }
 
-    extension uci-option {
+    extension option {
         argument name;
     }
 
-    extension uci-section-type {
+    extension section-name {
+        argument name;
+    }
+
+    extension leaf-as-name {
         argument name;
     }
 }

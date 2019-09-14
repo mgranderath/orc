@@ -179,7 +179,7 @@ stages:
     response:
       status_code: 201
       headers:
-        location: "{url}/data/restconf-example:course/students=test2,student,21"
+        location: "{url}/data/restconf-example:course/students=test2,student2,21"
         connection: close
         transfer-encoding: chunked
   - name: check item was createed
@@ -195,7 +195,7 @@ stages:
         !include GET/root-valid-extended.yaml
   - name: delete item
     request:
-      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      url: "{url}/data/restconf-example:course/students=test2,student2,21"
       method: DELETE
       headers:
         content-type: application/yang-data+json
@@ -205,7 +205,7 @@ stages:
         - 204
   - name: put item
     request:
-      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      url: "{url}/data/restconf-example:course/students=test2,student2,21"
       method: PUT
       headers:
         content-type: application/yang-data+json
@@ -216,7 +216,7 @@ stages:
       status_code: 201
   - name: update key
     request:
-      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      url: "{url}/data/restconf-example:course/students=test2,student2,21"
       method: PUT
       headers:
         content-type: application/yang-data+json
@@ -235,7 +235,7 @@ stages:
       status_code: 400
   - name: update content
     request:
-      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      url: "{url}/data/restconf-example:course/students=test2,student2,21"
       method: PUT
       headers:
         content-type: application/yang-data+json
@@ -244,7 +244,7 @@ stages:
         {
           "students": {
             "firstname": "test2",
-            "lastname": "student",
+            "lastname": "student2",
             "age": 21,
             "major": "IMS",
             "grade": 20
@@ -254,7 +254,7 @@ stages:
       status_code: 204
   - name: check updated content
     request:
-      url: "{url}/data/restconf-example:course/students=test2,student,21"
+      url: "{url}/data/restconf-example:course/students=test2,student2,21"
       method: GET
     response:
       status_code: 200
@@ -264,7 +264,7 @@ stages:
                                           "age": 21,
                                           "firstname": "test2",
                                           "grade": 20,
-                                          "lastname": "student",
+                                          "lastname": "student2",
                                           "major": "IMS"
                                         }]
         }

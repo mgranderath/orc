@@ -1,21 +1,19 @@
-#include "uci-get.h"
 #include "cmd.h"
 #include "error.h"
 #include "http.h"
 #include "restconf-json.h"
 #include "restconf-method.h"
 #include "uci/uci-util.h"
-#include "url.h"
-#include "util.h"
 #include "vector.h"
+#include "yang-util.h"
 
-struct json_object *uci_get_list(struct json_object *yang,
-                                 struct uci_path *path, error *err) {
+struct json_object *uci_get_list(struct json_object *yang, struct UciPath *path,
+                                 error *err) {
   struct json_object *array = NULL;
   int list_length;
   int single_item = path->where;
 
-  if (!json_get_string(yang, "type")) {
+  if (!json_get_string(yang, YANG_TYPE)) {
     *err = YANG_SCHEMA_ERROR;
     return NULL;
   }
@@ -25,7 +23,7 @@ struct json_object *uci_get_list(struct json_object *yang,
   }
 
   struct json_object *map = NULL;
-  json_object_object_get_ex(yang, "map", &map);
+  json_object_object_get_ex(yang, YANG_MAP, &map);
 
   if ((list_length = uci_list_length(path)) < 1) {
     *err = RE_OK;
@@ -61,8 +59,8 @@ struct json_object *uci_get_list(struct json_object *yang,
   return array;
 }
 
-struct json_object *uci_get_leaf(struct json_object *yang,
-                                 struct uci_path *path, error *err) {
+struct json_object *uci_get_leaf(struct json_object *yang, struct UciPath *path,
+                                 error *err) {
   char path_string[512], buf[512];
   yang_type leaf_type;
   struct json_object *output = NULL;
@@ -73,7 +71,7 @@ struct json_object *uci_get_leaf(struct json_object *yang,
     *err = UCI_READ_FAILED;
     goto done;
   }
-  json_object_object_get_ex(yang, "leaf-type", &type);
+  json_object_object_get_ex(yang, YANG_LEAF_TYPE, &type);
   if (!type) {
     *err = YANG_SCHEMA_ERROR;
     goto done;
@@ -95,7 +93,7 @@ done:
 }
 
 struct json_object *uci_get_leaf_list(struct json_object *yang,
-                                      struct uci_path *path, error *err) {
+                                      struct UciPath *path, error *err) {
   char path_string[512];
   char **items = NULL;
   yang_type leaf_type;
@@ -107,7 +105,7 @@ struct json_object *uci_get_leaf_list(struct json_object *yang,
     *err = UCI_READ_FAILED;
     goto done;
   }
-  json_object_object_get_ex(yang, "leaf-type", &type);
+  json_object_object_get_ex(yang, YANG_LEAF_TYPE, &type);
   if (!type) {
     *err = YANG_SCHEMA_ERROR;
     goto done;

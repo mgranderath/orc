@@ -1,14 +1,9 @@
 #include "uci/uci-util.h"
-#include "cmd.h"
-#include "error.h"
+#include <restconf.h>
 #include "http.h"
 #include "restconf-json.h"
-#include "restconf-method.h"
-#include "uci-util.h"
-#include "uci/uci-get.h"
-#include "url.h"
-#include "util.h"
 #include "vector.h"
+#include "yang-util.h"
 
 /**
  * Combines the uci_path struct to a string
@@ -17,7 +12,7 @@
  * @param size the size of the buffer
  * @return EXIT_SUCCESS or EXIT_FAILURE
  */
-int combine_to_path(struct uci_path *path, char *buffer, size_t size) {
+int combine_to_path(struct UciPath *path, char *buffer, size_t size) {
   int retval;
   if (!path->option || strlen(path->option) == 0) {
     retval = snprintf(buffer, size, "%s.%s", path->package, path->section);
@@ -40,7 +35,7 @@ int combine_to_path(struct uci_path *path, char *buffer, size_t size) {
  * @param size the size of the buffer
  * @return EXIT_SUCCESS or EXIT_FAILURE
  */
-int combine_to_anonymous_path(struct uci_path *path, int index, char *buffer,
+int combine_to_anonymous_path(struct UciPath *path, int index, char *buffer,
                               size_t size) {
   int retval;
   if (!path->option || strlen(path->option) == 0) {
@@ -64,7 +59,7 @@ int combine_to_anonymous_path(struct uci_path *path, int index, char *buffer,
  * @param buffer_size the size of the output buffer
  * @return 0
  */
-int uci_combine_to_path(struct uci_path *path, char *buffer,
+int uci_combine_to_path(struct UciPath *path, char *buffer,
                         size_t buffer_size) {
   if (path->where) {
     combine_to_anonymous_path(path, path->index, buffer, buffer_size);
@@ -74,25 +69,25 @@ int uci_combine_to_path(struct uci_path *path, char *buffer,
   return 0;
 }
 
-int get_path_from_yang(struct json_object *jobj, struct uci_path *uci) {
+int get_path_from_yang(struct json_object *jobj, struct UciPath *uci) {
   struct json_object *uci_value = NULL;
   char *uci_package = NULL;
   char *uci_section = NULL;
   char *uci_option = NULL;
   char *uci_section_type = NULL;
-  json_object_object_get_ex(jobj, "uci-package", &uci_value);
+  json_object_object_get_ex(jobj, YANG_UCI_PACKAGE, &uci_value);
   if (json_object_get_type(uci_value) == json_type_string) {
     uci_package = (char *)json_object_get_string(uci_value);
   }
-  json_object_object_get_ex(jobj, "uci-section", &uci_value);
+  json_object_object_get_ex(jobj, YANG_UCI_SECTION_NAME, &uci_value);
   if (json_object_get_type(uci_value) == json_type_string) {
     uci_section = (char *)json_object_get_string(uci_value);
   }
-  json_object_object_get_ex(jobj, "uci-option", &uci_value);
+  json_object_object_get_ex(jobj, YANG_UCI_OPTION, &uci_value);
   if (json_object_get_type(uci_value) == json_type_string) {
     uci_option = (char *)json_object_get_string(uci_value);
   }
-  json_object_object_get_ex(jobj, "uci-section-type", &uci_value);
+  json_object_object_get_ex(jobj, YANG_UCI_SECTION, &uci_value);
   if (json_object_get_type(uci_value) == json_type_string) {
     uci_section_type = (char *)json_object_get_string(uci_value);
   }
@@ -169,6 +164,23 @@ int get_path_from_yang(struct json_object *jobj, struct uci_path *uci) {
   return 1;
 }
 
+int get_leaf_as_name(struct json_object *yang, struct json_object *json,
+                     struct UciPath *uci) {
+  struct json_object *uci_value = NULL;
+  char *uci_leaf_as_name = NULL;
+  json_object_object_get_ex(yang, YANG_UCI_LEAF_AS_NAME, &uci_value);
+  if (json_object_get_type(uci_value) == json_type_string) {
+    uci_leaf_as_name = (char *)json_object_get_string(uci_value);
+  } else {
+    return 0;
+  }
+  json_object_object_get_ex(json, uci_leaf_as_name, &uci_value);
+  if (json_object_get_type(uci_value) == json_type_string) {
+    uci->section = (char *)json_object_get_string(uci_value);
+  }
+  return 0;
+}
+
 int uci_revert_all(char **package_list) {
   for (size_t i = 0; i < vector_size(package_list); i++) {
     char *item = package_list[i];
@@ -189,7 +201,7 @@ int uci_commit_all(char **package_list) {
   return 0;
 }
 
-int uci_element_exists(struct uci_path *path) {
+int uci_element_exists(struct UciPath *path) {
   char path_string[512];
   uci_combine_to_path(path, path_string, sizeof(path_string));
   if (uci_path_exists(path_string)) {

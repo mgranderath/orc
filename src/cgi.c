@@ -9,10 +9,10 @@
  * Create the cgi_context from environment variables
  * @return cgi_context
  */
-struct cgi_context *cgi_context_init() {
-  struct cgi_context *ctx;
+struct CgiContext *cgi_context_init() {
+  struct CgiContext *ctx;
 
-  ctx = (struct cgi_context *)malloc(sizeof(struct cgi_context));
+  ctx = (struct CgiContext *)malloc(sizeof(struct CgiContext));
   if (!ctx) {
     return NULL;
   }
@@ -44,7 +44,7 @@ struct cgi_context *cgi_context_init() {
  * Frees the cgi_context
  * @param ctx the cgi_context to be freed
  */
-void cgi_context_free(struct cgi_context *ctx) { free(ctx); }
+void cgi_context_free(struct CgiContext *ctx) { free(ctx); }
 
 /**
  * Get the content passed in stdin

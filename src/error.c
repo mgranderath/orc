@@ -25,9 +25,6 @@ static int restconf_error(char *error_tag) {
 
   json_pretty_print(jobj);
   json_object_put(error_message);
-  json_object_put(array);
-  json_object_put(ietf);
-  json_object_put(jobj);
   return 0;
 }
 

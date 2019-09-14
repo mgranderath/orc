@@ -78,14 +78,16 @@ def handle_import(js, imported):
 
 
 def extract_uci_statements(generated, key, value, imported):
-    if key == imported.openwrt_prefix + ":uci-package":
-        generated["uci-package"] = value["@name"]
-    if key == imported.openwrt_prefix + ":uci-section":
-        generated["uci-section"] = value["@name"]
-    if key == imported.openwrt_prefix + ":uci-option":
-        generated["uci-option"] = value["@name"]
-    if key == imported.openwrt_prefix + ":uci-section-type":
-        generated["uci-section-type"] = value["@name"]
+    if key == imported.openwrt_prefix + ":package":
+        generated["package"] = value["@name"]
+    if key == imported.openwrt_prefix + ":section-name":
+        generated["section-name"] = value["@name"]
+    if key == imported.openwrt_prefix + ":option":
+        generated["option"] = value["@name"]
+    if key == imported.openwrt_prefix + ":section":
+        generated["section"] = value["@name"]
+    if key == imported.openwrt_prefix + ":leaf-as-name":
+        generated["leaf-as-name"] = value["@name"]
 
 
 def extract_type_statements(generated, key, value, imported):

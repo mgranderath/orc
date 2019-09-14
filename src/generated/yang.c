@@ -1,4 +1,5 @@
 #include "yang.h"
+#include "yang-util.h"
 
 /**
  * Check if YANG module exists
@@ -46,7 +47,7 @@ yang_type str_to_yang_type(const char *str) {
 
   if (!(leaf_type = yang_for_type(str))) return NONE;
   struct json_object *yang = json_tokener_parse(leaf_type);
-  json_object_object_get_ex(yang, "leaf-type", &tmp);
+  json_object_object_get_ex(yang, YANG_LEAF_TYPE, &tmp);
   if (!tmp || json_object_get_type(tmp) != json_type_string) {
     return NONE;
   }

@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "cgi.h"
-#include "generated/yang.h"
 #include "http.h"
 #include "restconf-json.h"
 #include "restconf-method.h"
@@ -14,7 +13,7 @@
  * @brief the api root method
  * @param cgi the cgi context
  */
-static int api_root(struct cgi_context *cgi) {
+static int api_root(struct CgiContext *cgi) {
   char api[] =
       "{\n"
       "  \"ietf-restconf:restconf\" : {\n"
@@ -36,37 +35,38 @@ static int api_root(struct cgi_context *cgi) {
  * @param cgi the cgi context
  * @param pathvec the path vector
  */
-static int data_root(struct cgi_context *cgi, char **pathvec) {
+static int data_root(struct CgiContext *cgi, char **pathvec) {
   int retval = 1;
 
   if (pathvec[1] == NULL) {
     // root
-    if (strcmp(cgi->method, "OPTIONS") == 0) {
+    if (is_OPTIONS(cgi->method)) {
       content_type_json();
       printf("Allow: OPTIONS,HEAD,GET,POST,PUT,DELETE\n");
       headers_end();
       goto done;
-    } else if (strcmp(cgi->method, "HEAD") == 0) {
-    } else if (strcmp(cgi->method, "POST") == 0) {
+    } else if (is_HEAD(cgi->method) || is_GET(cgi->method)) {
+      retval = not_implemented(cgi);
+    } else if (is_POST(cgi->method)) {
       retval = data_post(cgi, pathvec, 1);
-    } else if (strcmp(cgi->method, "PUT") == 0) {
+    } else if (is_PUT(cgi->method)) {
       retval = data_put(cgi, pathvec, 1);
     } else {
-      retval = notfound(cgi);
+      retval = not_found(cgi);
     }
     goto done;
   }
 
-  if (strcmp(cgi->method, "GET") == 0) {
+  if (is_GET(cgi->method)) {
     retval = data_get(cgi, pathvec);
-  } else if (strcmp(cgi->method, "POST") == 0) {
+  } else if (is_POST(cgi->method)) {
     retval = data_post(cgi, pathvec, 0);
-  } else if (strcmp(cgi->method, "DELETE") == 0) {
+  } else if (is_DELETE(cgi->method)) {
     retval = data_delete(cgi, pathvec, 0);
-  } else if (strcmp(cgi->method, "PUT") == 0) {
+  } else if (is_PUT(cgi->method)) {
     retval = data_put(cgi, pathvec, 0);
   } else {
-    retval = notfound(cgi);
+    retval = not_found(cgi);
   }
 
 done:
@@ -77,7 +77,7 @@ done:
  * @brief the operations root
  * @param cgi the cgi context
  */
-static int operations_root(struct cgi_context *cgi) {
+static int operations_root(struct CgiContext *cgi) {
   content_type_json();
   headers_end();
 
@@ -89,7 +89,7 @@ static int operations_root(struct cgi_context *cgi) {
  * @brief the yang library version method
  * @param cgi the cgi context
  */
-static int yang_library_version(struct cgi_context *cgi) {
+static int yang_library_version(struct CgiContext *cgi) {
   char yang_version[] =
       "{ \"yang-library-version\": \"" IETF_YANG_VERSION "\" }";
   struct json_object *retval = NULL;
@@ -106,7 +106,7 @@ int main(void) {
   int retval = 1;
   char *path_modify = NULL;
   char **vec = NULL;
-  struct cgi_context *ctx = NULL;
+  struct CgiContext *ctx = NULL;
 
   ctx = cgi_context_init();
   if (!ctx) {
@@ -117,12 +117,12 @@ int main(void) {
   if (ctx->media_accept &&
       (strcmp(ctx->media_accept, "application/yang-data+json") != 0 &&
        strcmp(ctx->media_accept, "*/*") != 0)) {
-    notacceptable(ctx);
+    not_acceptable(ctx);
     goto done;
   }
   if (ctx->content_type &&
       strcmp(ctx->content_type, "application/yang-data+json") != 0) {
-    notacceptable(ctx);
+    not_acceptable(ctx);
     goto done;
   }
 
@@ -134,7 +134,7 @@ int main(void) {
   path_modify = str_dup(ctx->path);
 
   if (!(vec = path2vec(path_modify, "/"))) {
-    retval = notfound(ctx);
+    retval = not_found(ctx);
     goto done;
   }
 
@@ -145,7 +145,7 @@ int main(void) {
   } else if (strcmp(vec[0], "yang-library-version") == 0) {
     retval = yang_library_version(ctx);
   } else {
-    retval = notfound(ctx);
+    retval = not_found(ctx);
   }
 
 done:

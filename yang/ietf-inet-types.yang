@@ -272,7 +272,7 @@ module ietf-inet-types {
 
   typedef ip-prefix {
     type union {
-      type inet:;
+      type inet:ipv4-prefix;
       type inet:ipv6-prefix;
     }
     description

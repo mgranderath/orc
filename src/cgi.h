@@ -4,19 +4,19 @@
 /**
  * A structure to combine the individual env variables
  */
-struct cgi_context {
+struct CgiContext {
   char *path;
   char *path_full;
-  char *query;
-  char *method;
-  char *media_accept;
-  char *content_type;
+  const char *query;
+  const char *method;
+  const char *media_accept;
+  const char *content_type;
   int https;
-  char *host;
+  const char *host;
 };
 
-struct cgi_context *cgi_context_init();
-void cgi_context_free(struct cgi_context *ctx);
+struct CgiContext *cgi_context_init();
+void cgi_context_free(struct CgiContext *ctx);
 char *get_content();
 
 #endif
