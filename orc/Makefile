@@ -12,7 +12,7 @@ SOURCE_DIR:=/restconf
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
 
-define Package/wrtrestconf
+define Package/orc
 	SECTION:=utils
 	DEPENDS:=+libuci +libjson-c +libubox +uhttpd
 	CATEGORY:=Utilities
@@ -20,7 +20,7 @@ define Package/wrtrestconf
 	URL:=https://github.com/mgranderath/orc
 endef
 
-define Package/wrtrestconf/description
+define Package/orc/description
 	RESTCONF for OpenWrt
 endef
 
@@ -29,7 +29,7 @@ define Build/Prepare
 	$(CP) -a $(SOURCE_DIR)/* $(PKG_BUILD_DIR)/
 endef
 
-define Package/wrtrestconf/install
+define Package/orc/install
 	$(INSTALL_DIR) $(1)/www/cgi-bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/restconf $(1)/www/cgi-bin/
 endef

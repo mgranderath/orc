@@ -1,14 +1,12 @@
-# ORC (**O**penWrt **R**EST**C**ONF)
+# ORC (OpenWrt RESTCONF)
 
 This is a prototype implementation of RESTCONF for the OpenWrt system that utilizes the UCI configuration files as a
 datastore.
 
 ## Requirements
 
-1. The OpenWrt Buildroot has to be installed on the system ([Tutorial](https://openwrt.org/docs/guide-developer/build-system/use-buildsystem))
-2. Two environment variables have to be set. An example of them can be seen in `.env.example`.
-3. Python 3 for the YANG conversion script
-4. Tool for converting YANG to YIN
+1. Python 3 for the YANG conversion script
+2. Tool for converting YANG to YIN
 
 ## Adding YANG modules
 
@@ -36,33 +34,14 @@ An example of an annotated module is `/yang/restconf-example.yang`
 
 ## Building
 
-1. Create a new directory `mkdir build`
-2. Change into the directory `cd build`
-3. Run cmake `cmake ..`
-4. Run make `make`
-
-After this a `restconf` binary will have compiled that can then be used as a CGI
-script on OpenWrt
+1. Clone this repository
+2. `Docker pull mgranderath/openwrt-build`
+3. `docker run -v $(pwd):/restconf mgranderath/openwrt-build`
+4. The generated `.ipk` will be in the `build` folder
 
 ## Architecture
 
 ![Architecture](docs/resources/Architecture.png)
-
-The binary that is compiled is a CGI script that can be used with any
-CGI enabled web server but on OpenWrt the uHTTP server is recommended.
-
-To utilize the script with the uHTTP server the following steps have to
-be followed:
-
-1. Install uHTTP with
-   ```console
-   opkg update
-   opkg install uhttpd
-   ```
-2. Configure uHTTPd ([Documentation](https://openwrt.org/docs/guide-user/services/webserver/uhttpd))
-3. Make sure the `http_keepalive` option in `/etc/config/uhttpd` is set to `0`
-4. Copy the script into the `/www/cgi-bin/` folder
-5. Now you should be able to make requests at the `<IP>/cgi-bin/restconf` URL
 
 ## Testing
 
