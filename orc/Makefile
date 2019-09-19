@@ -5,7 +5,7 @@ PKG_VERSION:=0.1.0
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Malte Granderath <malte.granderath@gmail.com>
-PKG_LICENSE:=CC0-1.0
+PKG_LICENSE:=BSD-3-Clause
 
 SOURCE_DIR:=/restconf
 
@@ -17,7 +17,7 @@ define Package/wrtrestconf
 	DEPENDS:=+libuci +libjson-c +libubox +uhttpd
 	CATEGORY:=Utilities
 	TITLE:=RESTCONF for OpenWrt
-	URL:=https://www.example.com
+	URL:=https://github.com/mgranderath/orc
 endef
 
 define Package/wrtrestconf/description
@@ -34,4 +34,4 @@ define Package/wrtrestconf/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/restconf $(1)/www/cgi-bin/
 endef
 
-$(eval $(call BuildPackage,wrtrestconf))
+$(eval $(call BuildPackage,orc))
