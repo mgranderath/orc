@@ -528,6 +528,8 @@ int data_post(struct CgiContext *cgi, char **pathvec, int root) {
     retval = restconf_operation_failed_internal();
     goto done;
   }
+
+  key_out[0] = 0;
   root_key_copy = str_dup(root_key);
   struct json_object *created = NULL;
   if ((created = json_get_object_from_map(top_level, root_key_copy))) {
@@ -700,6 +702,7 @@ int data_put(struct CgiContext *cgi, char **pathvec, int root) {
 
   delete_uci = uci;
 
+  key_out[0] = 0;
   if (yang_is_list(json_get_string(top_level, YANG_TYPE))) {
     struct json_object *keys = NULL;
     if ((keys = json_get_array(top_level, YANG_KEYS))) {
