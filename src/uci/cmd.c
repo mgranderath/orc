@@ -19,8 +19,7 @@ struct UciWritePair *initialize_uci_write_pair(struct UciPath *path,
 
 int free_uci_write_list(UciWritePair **list) {
   for (size_t i = 0; i < vector_size(list); i++) {
-    UciWritePair *cmd = list[i];
-    free(cmd->value);
+    free(list[i]);
   }
   vector_free(list);
   return 0;
