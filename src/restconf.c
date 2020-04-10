@@ -38,7 +38,7 @@ static int api_root(struct CgiContext *cgi) {
 static int data_root(struct CgiContext *cgi, char **pathvec) {
   int retval = 1;
 
-  if (pathvec[1] == NULL) {
+  if (vector_size(pathvec) <= 1) {
     // root
     if (is_OPTIONS(cgi->method)) {
       content_type_json();
