@@ -2,7 +2,7 @@
 #define _RESTCONF_UCI_H
 
 #include <stddef.h>
-#include <uci.h>
+#include <uci/uci.h>
 #include "generated/yang.h"
 
 /**
