@@ -705,6 +705,7 @@ int data_put(struct CgiContext *cgi, char **pathvec, int root) {
     if ((keys = json_get_array(top_level, YANG_KEYS))) {
       struct json_object *values = NULL;
       if (json_extract_key_values(keys, root_object, &values) == RE_OK) {
+        key_out[0] = '\0';
         json_object_object_foreach(values, key, value) {
           strcat(key_out, json_object_get_string(value));
           strcat(key_out, ",");
