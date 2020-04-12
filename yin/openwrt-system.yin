@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="openwrt-system"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:os="urn:jacobs:yang:openwrt-system"
+        xmlns:inet="urn:ietf:params:xml:ns:yang:ietf-inet-types"
+        xmlns:uci="urn:jacobs:yang:openwrt-uci">
+  <namespace uri="urn:jacobs:yang:openwrt-system"/>
+  <prefix value="os"/>
+  <import module="ietf-inet-types">
+    <prefix value="inet"/>
+  </import>
+  <import module="openwrt-uci-extension">
+    <prefix value="uci"/>
+  </import>
+  <contact>
+    <text>Malte Granderath &lt;m.granderath@jacobs-university.de&gt;</text>
+  </contact>
+  <revision date="2019-04-24">
+    <description>
+      <text>initial revision</text>
+    </description>
+  </revision>
+  <uci:package name="system"/>
+  <container name="system">
+    <uci:section-name name="OpenWrt"/>
+    <uci:section name="system"/>
+    <leaf name="hostname">
+      <uci:option name="hostname"/>
+      <type name="string"/>
+      <description>
+        <text>The hostname of the system</text>
+      </description>
+    </leaf>
+    <leaf name="buffersize">
+      <uci:option name="buffersize"/>
+      <type name="uint32"/>
+      <description>
+        <text>Size of the kernel message buffer.</text>
+      </description>
+    </leaf>
+    <leaf name="conloglevel">
+      <uci:option name="conloglevel"/>
+      <type name="uint8">
+        <range value="0..7"/>
+      </type>
+      <default value="7"/>
+      <description>
+        <text>Number between 1-8. The maximum log level for kernel messages to be logged to the
+console. Only messages with a level lower than this will be printed to the console.
+Higher level messages have lower log level number. Highest level messages are ones with
+log level 0. If you want more verbose messages in console put conloglevel to 8
+if you want less messages lower conloglevel to 4 or even less.</text>
+      </description>
+    </leaf>
+    <leaf name="cronloglevel">
+      <uci:option name="cronloglevel"/>
+      <type name="uint8"/>
+      <default value="5"/>
+      <description>
+        <text>The minimum level for cron messages to be logged to syslog. 0 will print all debug messages,
+8 will log command executions, and 9 or higher will only log error messages.</text>
+      </description>
+    </leaf>
+    <leaf name="klogconloglevel">
+      <uci:option name="klogconloglevel"/>
+      <type name="uint8"/>
+      <default value="7"/>
+      <description>
+        <text>The maximum log level for kernel messages to be logged to the console. Only messages with a level
+lower than this will be printed to the console. Identical to conloglevel and will override it.</text>
+      </description>
+    </leaf>
+    <leaf name="log_buffer_size">
+      <uci:option name="lof_buffer_size"/>
+      <type name="uint32"/>
+      <default value="16"/>
+      <description>
+        <text>Size of the log buffer of the “new” procd based system log, that is output by the logread command</text>
+      </description>
+    </leaf>
+    <leaf name="log_file">
+      <uci:option name="log_file"/>
+      <type name="string"/>
+      <description>
+        <text>File to write log messages to (type file). The default is to not write a log in a file. The most
+often used location for a system log file is /var/log/messages.</text>
+      </description>
+    </leaf>
+    <leaf name="log_hostname">
+      <type name="string"/>
+      <description>
+        <text>Hostname to send to remote syslog. If none is provided, the actual hostname is send.</text>
+      </description>
+    </leaf>
+    <leaf name="log_ip">
+      <uci:option name="log_ip"/>
+      <type name="inet:ipv4-address"/>
+      <description>
+        <text>IP address of a syslog server to which the log messages should be sent in addition to the local destination.</text>
+      </description>
+    </leaf>
+    <leaf name="log_port">
+      <uci:option name="log_port"/>
+      <type name="uint32"/>
+      <description>
+        <text>Port number of the remote syslog server</text>
+      </description>
+    </leaf>
+    <leaf name="log_prefix">
+      <uci:option name="log_prefix"/>
+      <type name="string"/>
+      <description>
+        <text>Adds a prefix to all log messages send over network</text>
+      </description>
+    </leaf>
+    <leaf name="log_proto">
+      <uci:option name="log_proto"/>
+      <type name="string">
+        <pattern value="(udp|tcp)"/>
+      </type>
+      <default value="udp"/>
+      <description>
+        <text>Sets the protocol to use for the connection</text>
+      </description>
+    </leaf>
+    <leaf name="log_remote">
+      <uci:option name="log_remote"/>
+      <type name="boolean"/>
+      <default value="false"/>
+      <description>
+        <text>Enables remote logging.</text>
+      </description>
+    </leaf>
+    <leaf name="log_size">
+      <uci:option name="log_size"/>
+      <type name="uint32"/>
+      <default value="16"/>
+      <description>
+        <text>Size of the file or circular memory buffer in KiB.</text>
+      </description>
+    </leaf>
+    <leaf name="log_trailer_null">
+      <uci:option name="log_trailer_null"/>
+      <type name="boolean"/>
+      <default value="false"/>
+      <description>
+        <text>Use \0 instead of \n as trailer when using TCP.</text>
+      </description>
+    </leaf>
+    <leaf name="log_type">
+      <uci:option name="log_type"/>
+      <type name="string">
+        <pattern value="(circular|file)"/>
+      </type>
+      <description>
+        <text>Either circular or file.</text>
+      </description>
+    </leaf>
+    <leaf name="urandom_seed">
+      <uci:option name="urandom_seed"/>
+      <type name="string"/>
+      <default value="0"/>
+      <description>
+        <text>Path of the seed. Enables saving a new seed on each boot.</text>
+      </description>
+    </leaf>
+    <leaf name="timezone">
+      <uci:option name="timezone"/>
+      <type name="string"/>
+      <description>
+        <text>The time zone that date and time should be rendered in by default.</text>
+      </description>
+    </leaf>
+    <leaf name="zonename">
+      <uci:option name="zonename"/>
+      <type name="string"/>
+      <description>
+        <text>Only useful when using glibc and zoneinfo!</text>
+      </description>
+    </leaf>
+  </container>
+  <container name="ntp">
+    <uci:section name="timeserver"/>
+    <uci:section-name name="ntp"/>
+    <leaf name="enabled">
+      <uci:option name="enabled"/>
+      <type name="string">
+        <pattern value="(0|1)"/>
+      </type>
+      <description>
+        <text>enable the ntp client</text>
+      </description>
+    </leaf>
+    <leaf name="enable_server">
+      <uci:option name="enable_server"/>
+      <type name="string">
+        <pattern value="(0|1)"/>
+      </type>
+      <description>
+        <text>enable the timeserver</text>
+      </description>
+    </leaf>
+    <leaf-list name="server">
+      <uci:option name="server"/>
+      <type name="string"/>
+      <description>
+        <text>list of ntp servers</text>
+      </description>
+    </leaf-list>
+  </container>
+</module>
