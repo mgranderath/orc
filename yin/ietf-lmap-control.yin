@@ -1,0 +1,1107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="ietf-lmap-control"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:lmapc="urn:ietf:params:xml:ns:yang:ietf-lmap-control"
+        xmlns:yang="urn:ietf:params:xml:ns:yang:ietf-yang-types"
+        xmlns:nacm="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"
+        xmlns:lmap="urn:ietf:params:xml:ns:yang:ietf-lmap-common"
+        xmlns:uci="urn:jacobs:yang:openwrt-uci">
+  <yang-version value="1.1"/>
+  <namespace uri="urn:ietf:params:xml:ns:yang:ietf-lmap-control"/>
+  <prefix value="lmapc"/>
+  <import module="ietf-yang-types">
+    <prefix value="yang"/>
+  </import>
+  <import module="ietf-netconf-acm">
+    <prefix value="nacm"/>
+  </import>
+  <import module="ietf-lmap-common">
+    <prefix value="lmap"/>
+  </import>
+  <import module="openwrt-uci-extension">
+    <prefix value="uci"/>
+  </import>
+  <organization>
+    <text>IETF Large-Scale Measurement of Broadband Performance
+Working Group</text>
+  </organization>
+  <contact>
+    <text>WG Web:   &lt;https://datatracker.ietf.org/wg/lmap&gt;
+WG List:  &lt;mailto:lmap@ietf.org&gt;
+
+Editor:   Juergen Schoenwaelder
+          &lt;j.schoenwaelder@jacobs-university.de&gt;
+
+Editor:   Vaibhav Bajpai
+          &lt;bajpaiv@in.tum.de&gt;</text>
+  </contact>
+  <description>
+    <text>This module defines a data model for controlling Measurement
+Agents that are part of a Large-Scale Measurement Platform
+(LMAP).  This data model is expected to be implemented by
+Measurement Agents.</text>
+  </description>
+  <revision date="2017-08-08">
+    <description>
+      <text>Initial version</text>
+    </description>
+    <reference>
+      <text>RFC 8194: A YANG Data Model for LMAP Measurement Agents</text>
+    </reference>
+  </revision>
+  <typedef name="event-ref">
+    <type name="leafref">
+      <path value="/lmap/events/event/name"/>
+    </type>
+    <description>
+      <text>This type is used by data models that need to reference
+a configured event source.</text>
+    </description>
+  </typedef>
+  <typedef name="task-ref">
+    <type name="leafref">
+      <path value="/lmap/tasks/task/name"/>
+    </type>
+    <description>
+      <text>This type is used by data models that need to reference
+a configured Task.</text>
+    </description>
+  </typedef>
+  <typedef name="schedule-ref">
+    <type name="leafref">
+      <path value="/lmap/schedules/schedule/name"/>
+    </type>
+    <description>
+      <text>This type is used by data models that need to reference
+a configured Schedule.</text>
+    </description>
+  </typedef>
+  <grouping name="start-end-grouping">
+    <description>
+      <text>A grouping that provides start and end times for
+Event objects.</text>
+    </description>
+    <leaf name="start">
+      <uci:option name="start"/>
+      <type name="yang:date-and-time"/>
+      <description>
+        <text>The date and time when the Event object
+starts to create triggers.</text>
+      </description>
+    </leaf>
+    <leaf name="end">
+      <uci:option name="end"/>
+      <type name="yang:date-and-time"/>
+      <description>
+        <text>The date and time when the Event object
+stops to create triggers.
+
+It is generally a good idea to always configure
+an end time and to refresh the end time as needed
+to ensure that agents that lose connectivity to
+their Controller do not continue executing Schedules
+forever.</text>
+      </description>
+    </leaf>
+  </grouping>
+  <uci:package name="ietf-lmap-control"/>
+  <container name="lmap">
+    <description>
+      <text>Configuration and control of a Measurement Agent.</text>
+    </description>
+    <container name="capabilities">
+      <uci:section name="capabilities"/>
+      <uci:section-name name="capabilities"/>
+      <config value="false"/>
+      <description>
+        <text>Agent capabilities including a list of supported Tasks.</text>
+      </description>
+      <leaf name="version">
+        <uci:option name="version"/>
+        <type name="string"/>
+        <config value="false"/>
+        <mandatory value="true"/>
+        <description>
+          <text>A short description of the software implementing the
+Measurement Agent.  This should include the version
+number of the Measurement Agent software.</text>
+        </description>
+      </leaf>
+      <leaf-list name="tag">
+        <uci:option name="tag"/>
+        <type name="lmap:tag"/>
+        <config value="false"/>
+        <description>
+          <text>An optional unordered set of tags that provide
+additional information about the capabilities of
+the Measurement Agent.</text>
+        </description>
+      </leaf-list>
+      <container name="tasks">
+        <uci:section name="tasks"/>
+        <uci:section-name name="tasks"/>
+        <description>
+          <text>A list of Tasks that the Measurement Agent supports.</text>
+        </description>
+        <list name="task">
+          <uci:section name="task"/>
+          <uci:leaf-as-name name="name"/>
+          <key value="name"/>
+          <description>
+            <text>The list of Tasks supported by the Measurement Agent.</text>
+          </description>
+          <leaf name="name">
+            <uci:option name="name"/>
+            <type name="lmap:identifier"/>
+            <description>
+              <text>The unique name of a Task capability.</text>
+            </description>
+          </leaf>
+          <uses name="lmap:registry-grouping"/>
+          <leaf name="version">
+            <uci:option name="version"/>
+            <type name="string"/>
+            <description>
+              <text>A short description of the software implementing
+the Task.  This should include the version
+number of the Measurement Task software.</text>
+            </description>
+          </leaf>
+          <leaf name="program">
+            <uci:option name="program"/>
+            <type name="string"/>
+            <description>
+              <text>The (local) program to invoke in order to execute
+the Task.</text>
+            </description>
+          </leaf>
+        </list>
+      </container>
+    </container>
+    <container name="agent">
+      <uci:section name="agent"/>
+      <uci:section-name name="agent"/>
+      <description>
+        <text>Configuration of parameters affecting the whole
+Measurement Agent.</text>
+      </description>
+      <leaf name="agent-id">
+        <uci:option name="agent-id"/>
+        <type name="yang:uuid"/>
+        <description>
+          <text>The agent-id identifies a Measurement Agent with
+a very low probability of collision.  In certain
+deployments, the agent-id may be considered
+sensitive, and hence this object is optional.</text>
+        </description>
+      </leaf>
+      <leaf name="group-id">
+        <uci:option name="group-id"/>
+        <type name="string"/>
+        <description>
+          <text>The group-id identifies a group of Measurement
+Agents.  In certain deployments, the group-id
+may be considered less sensitive than the
+agent-id.</text>
+        </description>
+      </leaf>
+      <leaf name="measurement-point">
+        <uci:option name="measurement-point"/>
+        <type name="string"/>
+        <description>
+          <text>The measurement point indicating where the
+ Measurement Agent is located on a path.</text>
+        </description>
+        <reference>
+          <text>RFC 7398: A Reference Path and Measurement Points
+          for Large-Scale Measurement of Broadband
+          Performance</text>
+        </reference>
+      </leaf>
+      <leaf name="report-agent-id">
+        <uci:option name="report-agent-id"/>
+        <type name="boolean"/>
+        <must condition='. != "true" or ../agent-id'>
+          <description>
+            <text>An agent-id must exist for this to be set
+to true.</text>
+          </description>
+        </must>
+        <default value="false"/>
+        <description>
+          <text>The 'report-agent-id' controls whether the
+'agent-id' is reported to Collectors.</text>
+        </description>
+      </leaf>
+      <leaf name="report-group-id">
+        <uci:option name="report-group-id"/>
+        <type name="boolean"/>
+        <must condition='. != "true" or ../group-id'>
+          <description>
+            <text>A group-id must exist for this to be set
+to true.</text>
+          </description>
+        </must>
+        <default value="false"/>
+        <description>
+          <text>The 'report-group-id' controls whether the
+'group-id' is reported to Collectors.</text>
+        </description>
+      </leaf>
+      <leaf name="report-measurement-point">
+        <uci:option name="report-measurement-point"/>
+        <type name="boolean"/>
+        <must condition='. != "true" or ../measurement-point'>
+          <description>
+            <text>A measurement-point must exist for this to be
+set to true.</text>
+          </description>
+        </must>
+        <default value="false"/>
+        <description>
+          <text>The 'report-measurement-point' controls whether
+the 'measurement-point' is reported to Collectors.</text>
+        </description>
+      </leaf>
+      <leaf name="controller-timeout">
+        <uci:option name="controller-timeout"/>
+        <type name="uint32"/>
+        <units name="seconds"/>
+        <description>
+          <text>A timer is started after each successful contact
+with a Controller.  When the timer reaches the
+controller-timeout, an event (controller-lost) is
+raised indicating that connectivity to the Controller
+has been lost.</text>
+        </description>
+      </leaf>
+      <leaf name="last-started">
+        <uci:option name="last-started"/>
+        <type name="yang:date-and-time"/>
+        <config value="false"/>
+        <mandatory value="true"/>
+        <description>
+          <text>The date and time the Measurement Agent last started.</text>
+        </description>
+      </leaf>
+    </container>
+    <container name="tasks">
+      <uci:section name="tasks"/>
+      <uci:section-name name="tasks"/>
+      <description>
+        <text>Configuration of LMAP Tasks.</text>
+      </description>
+      <list name="task">
+        <uci:section name="task"/>
+        <uci:leaf-as-name name="name"/>
+        <key value="name"/>
+        <description>
+          <text>The list of Tasks configured on the Measurement
+Agent.  Note that a configured Task MUST resolve to a
+Task listed in the capabilities.  Attempts to execute
+a configured Task that is not listed in the capabilities
+result in a runtime execution error.</text>
+        </description>
+        <leaf name="name">
+          <uci:option name="name"/>
+          <type name="lmap:identifier"/>
+          <description>
+            <text>The unique name of a Task.</text>
+          </description>
+        </leaf>
+        <uses name="lmap:registry-grouping"/>
+        <leaf name="program">
+          <uci:option name="program"/>
+          <type name="string"/>
+          <nacm:default-deny-write/>
+          <description>
+            <text>The (local) program to invoke in order to execute
+the Task.  If this leaf is not set, then the system
+will try to identify a suitable program based on
+the registry information present.</text>
+          </description>
+        </leaf>
+        <uses name="lmap:options-grouping">
+          <description>
+            <text>The list of Task-specific options.</text>
+          </description>
+        </uses>
+        <leaf-list name="tag">
+          <uci:option name="tag"/>
+          <type name="lmap:identifier"/>
+          <description>
+            <text>A set of Task-specific tags that are reported
+together with the measurement results to a Collector.
+A tag can be used, for example, to carry the
+Measurement Cycle ID.</text>
+          </description>
+        </leaf-list>
+      </list>
+    </container>
+    <container name="schedules">
+      <uci:section name="schedules"/>
+      <uci:section-name name="schedules"/>
+      <description>
+        <text>Configuration of LMAP Schedules.  Schedules control
+which Tasks are executed by the LMAP implementation.</text>
+      </description>
+      <list name="schedule">
+        <uci:section name="schedule"/>
+        <uci:leaf-as-name name="name"/>
+        <key value="name"/>
+        <description>
+          <text>Configuration of a particular Schedule.</text>
+        </description>
+        <leaf name="name">
+          <uci:option name="name"/>
+          <type name="lmap:identifier"/>
+          <description>
+            <text>The locally unique, administratively assigned name
+for this Schedule.</text>
+          </description>
+        </leaf>
+        <leaf name="start">
+          <uci:option name="start"/>
+          <type name="event-ref"/>
+          <mandatory value="true"/>
+          <description>
+            <text>The event source controlling the start of the
+scheduled Actions.</text>
+          </description>
+        </leaf>
+        <choice name="stop">
+          <description>
+            <text>This choice contains optional leafs that control the
+graceful forced termination of scheduled Actions.
+When the end has been reached, the scheduled Actions
+should be forced to terminate the measurements.
+This may involve being active some additional time in
+order to properly finish the Action's activity (e.g.,
+waiting for any messages that are still outstanding).</text>
+          </description>
+          <leaf name="end">
+            <uci:option name="end"/>
+            <type name="event-ref"/>
+            <description>
+              <text>The event source controlling the graceful
+forced termination of the scheduled Actions.</text>
+            </description>
+          </leaf>
+          <leaf name="duration">
+            <uci:option name="duration"/>
+            <type name="uint32"/>
+            <units name="seconds"/>
+            <description>
+              <text>The duration controlling the graceful forced
+termination of the scheduled Actions.</text>
+            </description>
+          </leaf>
+        </choice>
+        <leaf name="execution-mode">
+          <uci:option name="execution-mode"/>
+          <type name="enumeration">
+            <enum name="sequential">
+              <value value="1"/>
+              <description>
+                <text>The Actions of the Schedule are executed
+sequentially.</text>
+              </description>
+            </enum>
+            <enum name="parallel">
+              <value value="2"/>
+              <description>
+                <text>The Actions of the Schedule are executed
+concurrently.</text>
+              </description>
+            </enum>
+            <enum name="pipelined">
+              <value value="3"/>
+              <description>
+                <text>The Actions of the Schedule are executed in a
+pipelined mode.  Output created by an Action is
+passed as input to the subsequent Action.</text>
+              </description>
+            </enum>
+          </type>
+          <default value="pipelined"/>
+          <description>
+            <text>The execution mode of this Schedule determines in
+which order the Actions of the Schedule are executed.</text>
+          </description>
+        </leaf>
+        <leaf-list name="tag">
+          <uci:option name="tag"/>
+          <type name="lmap:tag"/>
+          <description>
+            <text>A set of Schedule-specific tags that are reported
+together with the measurement results to a Collector.</text>
+          </description>
+        </leaf-list>
+        <leaf-list name="suppression-tag">
+          <uci:option name="suppression-tag"/>
+          <type name="lmap:tag"/>
+          <description>
+            <text>A set of Suppression tags that are used to select
+Schedules to be suppressed.</text>
+          </description>
+        </leaf-list>
+        <leaf name="state">
+          <uci:option name="state"/>
+          <type name="enumeration">
+            <enum name="enabled">
+              <value value="1"/>
+              <description>
+                <text>The value 'enabled' indicates that the
+Schedule is currently enabled.</text>
+              </description>
+            </enum>
+            <enum name="disabled">
+              <value value="2"/>
+              <description>
+                <text>The value 'disabled' indicates that the
+Schedule is currently disabled.</text>
+              </description>
+            </enum>
+            <enum name="running">
+              <value value="3"/>
+              <description>
+                <text>The value 'running' indicates that the
+Schedule is currently running.</text>
+              </description>
+            </enum>
+            <enum name="suppressed">
+              <value value="4"/>
+              <description>
+                <text>The value 'suppressed' indicates that the
+Schedule is currently suppressed.</text>
+              </description>
+            </enum>
+          </type>
+          <config value="false"/>
+          <mandatory value="true"/>
+          <description>
+            <text>The current state of the Schedule.</text>
+          </description>
+        </leaf>
+        <leaf name="storage">
+          <uci:option name="storage"/>
+          <type name="yang:gauge64"/>
+          <units name="bytes"/>
+          <config value="false"/>
+          <mandatory value="true"/>
+          <description>
+            <text>The amount of secondary storage (e.g., allocated in a
+file system) holding temporary data allocated to the
+Schedule in bytes.  This object reports the amount of
+allocated physical storage and not the storage used
+by logical data records.</text>
+          </description>
+        </leaf>
+        <leaf name="invocations">
+          <uci:option name="invocations"/>
+          <type name="yang:counter32"/>
+          <config value="false"/>
+          <mandatory value="true"/>
+          <description>
+            <text>Number of invocations of this Schedule.  This counter
+does not include suppressed invocations or invocations
+that were prevented due to an overlap with a previous
+invocation of this Schedule.</text>
+          </description>
+        </leaf>
+        <leaf name="suppressions">
+          <uci:option name="suppressions"/>
+          <type name="yang:counter32"/>
+          <config value="false"/>
+          <mandatory value="true"/>
+          <description>
+            <text>Number of suppressed executions of this Schedule.</text>
+          </description>
+        </leaf>
+        <leaf name="overlaps">
+          <uci:option name="overlaps"/>
+          <type name="yang:counter32"/>
+          <config value="false"/>
+          <mandatory value="true"/>
+          <description>
+            <text>Number of executions prevented due to overlaps with
+a previous invocation of this Schedule.</text>
+          </description>
+        </leaf>
+        <leaf name="failures">
+          <uci:option name="failures"/>
+          <type name="yang:counter32"/>
+          <config value="false"/>
+          <mandatory value="true"/>
+          <description>
+            <text>Number of failed executions of this Schedule.  A
+failed execution is an execution where at least
+one Action failed.</text>
+          </description>
+        </leaf>
+        <leaf name="last-invocation">
+          <uci:option name="last-invocation"/>
+          <type name="yang:date-and-time"/>
+          <config value="false"/>
+          <description>
+            <text>The date and time of the last invocation of
+this Schedule.</text>
+          </description>
+        </leaf>
+        <list name="action">
+          <uci:section name="action"/>
+          <uci:leaf-as-name name="name"/>
+          <key value="name"/>
+          <description>
+            <text>An Action describes a Task that is invoked by the
+Schedule.  Multiple Actions are invoked according to
+the execution-mode of the Schedule.</text>
+          </description>
+          <leaf name="name">
+            <uci:option name="name"/>
+            <type name="lmap:identifier"/>
+            <description>
+              <text>The unique identifier for this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="task">
+            <uci:option name="task"/>
+            <type name="task-ref"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The Task invoked by this Action.</text>
+            </description>
+          </leaf>
+          <container name="parameters">
+            <description>
+              <text>This container is a placeholder for runtime
+parameters defined in Task-specific data models
+augmenting the base LMAP control data model.</text>
+            </description>
+            <choice name="extension">
+              <description>
+                <text>This choice is provided to augment in different
+sets of parameters.</text>
+              </description>
+            </choice>
+          </container>
+          <uses name="lmap:options-grouping">
+            <description>
+              <text>The list of Action-specific options that are
+appended to the list of Task-specific options.</text>
+            </description>
+          </uses>
+          <leaf-list name="destination">
+            <uci:option name="destination"/>
+            <type name="schedule-ref"/>
+            <description>
+              <text>A set of Schedules receiving the output produced
+by this Action.  The output is stored temporarily
+since the Destination Schedules will in general
+not be running when output is passed to them.  The
+behavior of an Action passing data to its own
+Schedule is implementation specific.
+
+Data passed to a sequential or pipelined Schedule
+is received by the Schedule's first Action.  Data
+passed to a parallel Schedule is received by all
+Actions of the Schedule.</text>
+            </description>
+          </leaf-list>
+          <leaf-list name="tag">
+            <uci:option name="tag"/>
+            <type name="lmap:tag"/>
+            <description>
+              <text>A set of Action-specific tags that are reported
+together with the measurement results to a
+Collector.</text>
+            </description>
+          </leaf-list>
+          <leaf-list name="suppression-tag">
+            <uci:option name="suppression-tag"/>
+            <type name="lmap:tag"/>
+            <description>
+              <text>A set of Suppression tags that are used to select
+Actions to be suppressed.</text>
+            </description>
+          </leaf-list>
+          <leaf name="state">
+            <uci:option name="state"/>
+            <type name="enumeration">
+              <enum name="enabled">
+                <value value="1"/>
+                <description>
+                  <text>The value 'enabled' indicates that the
+Action is currently enabled.</text>
+                </description>
+              </enum>
+              <enum name="disabled">
+                <value value="2"/>
+                <description>
+                  <text>The value 'disabled' indicates that the
+Action is currently disabled.</text>
+                </description>
+              </enum>
+              <enum name="running">
+                <value value="3"/>
+                <description>
+                  <text>The value 'running' indicates that the
+Action is currently running.</text>
+                </description>
+              </enum>
+              <enum name="suppressed">
+                <value value="4"/>
+                <description>
+                  <text>The value 'suppressed' indicates that the
+Action is currently suppressed.</text>
+                </description>
+              </enum>
+            </type>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The current state of the Action.</text>
+            </description>
+          </leaf>
+          <leaf name="storage">
+            <uci:option name="storage"/>
+            <type name="yang:gauge64"/>
+            <units name="bytes"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The amount of secondary storage (e.g., allocated in a
+file system) holding temporary data allocated to the
+Schedule in bytes.  This object reports the amount of
+allocated physical storage and not the storage used
+by logical data records.</text>
+            </description>
+          </leaf>
+          <leaf name="invocations">
+            <uci:option name="invocations"/>
+            <type name="yang:counter32"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>Number of invocations of this Action.  This counter
+does not include suppressed invocations or invocations
+that were prevented due to an overlap with a previous
+invocation of this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="suppressions">
+            <uci:option name="suppressions"/>
+            <type name="yang:counter32"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>Number of suppressed executions of this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="overlaps">
+            <uci:option name="overlaps"/>
+            <type name="yang:counter32"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>Number of executions prevented due to overlaps with
+a previous invocation of this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="failures">
+            <uci:option name="failures"/>
+            <type name="yang:counter32"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>Number of failed executions of this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="last-invocation">
+            <uci:option name="last-invocation"/>
+            <type name="yang:date-and-time"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The date and time of the last invocation of
+this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="last-completion">
+            <uci:option name="last-completion"/>
+            <type name="yang:date-and-time"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The date and time of the last completion of
+this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="last-status">
+            <uci:option name="last-status"/>
+            <type name="lmap:status-code"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The status code returned by the last execution of
+this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="last-message">
+            <uci:option name="last-message"/>
+            <type name="string"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The status message produced by the last execution
+of this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="last-failed-completion">
+            <uci:option name="last-failed-completion"/>
+            <type name="yang:date-and-time"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The date and time of the last failed completion
+of this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="last-failed-status">
+            <uci:option name="last-failed-status"/>
+            <type name="lmap:status-code"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The status code returned by the last failed
+execution of this Action.</text>
+            </description>
+          </leaf>
+          <leaf name="last-failed-message">
+            <uci:option name="last-failed-message"/>
+            <type name="string"/>
+            <config value="false"/>
+            <mandatory value="true"/>
+            <description>
+              <text>The status message produced by the last failed
+execution of this Action.</text>
+            </description>
+          </leaf>
+        </list>
+      </list>
+    </container>
+    <container name="suppressions">
+      <uci:section name="suppressions"/>
+      <uci:section-name name="suppressions"/>
+      <description>
+        <text>Suppression information to prevent Schedules or
+certain Actions from starting.</text>
+      </description>
+      <list name="suppression">
+        <uci:section name="suppression"/>
+        <uci:leaf-as-name name="name"/>
+        <key value="name"/>
+        <description>
+          <text>Configuration of a particular Suppression.</text>
+        </description>
+        <leaf name="name">
+          <uci:option name="name"/>
+          <type name="lmap:identifier"/>
+          <description>
+            <text>The locally unique, administratively assigned name
+for this Suppression.</text>
+          </description>
+        </leaf>
+        <leaf name="start">
+          <uci:option name="start"/>
+          <type name="event-ref"/>
+          <description>
+            <text>The event source controlling the start of the
+Suppression period.</text>
+          </description>
+        </leaf>
+        <leaf name="end">
+          <uci:option name="end"/>
+          <type name="event-ref"/>
+          <description>
+            <text>The event source controlling the end of the
+Suppression period.  If not present, Suppression
+continues indefinitely.</text>
+          </description>
+        </leaf>
+        <leaf-list name="match">
+          <uci:option name="match"/>
+          <type name="lmap:glob-pattern"/>
+          <description>
+            <text>A set of Suppression match patterns.  The Suppression
+will apply to all Schedules (and their Actions) that
+have a matching value in their suppression-tags
+and to all Actions that have a matching value in
+their suppression-tags.</text>
+          </description>
+        </leaf-list>
+        <leaf name="stop-running">
+          <uci:option name="stop-running"/>
+          <type name="boolean"/>
+          <default value="false"/>
+          <description>
+            <text>If 'stop-running' is true, running Schedules and
+Actions matching the Suppression will be terminated
+when Suppression is activated.  If 'stop-running' is
+false, running Schedules and Actions will not be
+affected if Suppression is activated.</text>
+          </description>
+        </leaf>
+        <leaf name="state">
+          <uci:option name="state"/>
+          <type name="enumeration">
+            <enum name="enabled">
+              <value value="1"/>
+              <description>
+                <text>The value 'enabled' indicates that the
+Suppression is currently enabled.</text>
+              </description>
+            </enum>
+            <enum name="disabled">
+              <value value="2"/>
+              <description>
+                <text>The value 'disabled' indicates that the
+Suppression is currently disabled.</text>
+              </description>
+            </enum>
+            <enum name="active">
+              <value value="3"/>
+              <description>
+                <text>The value 'active' indicates that the
+Suppression is currently active.</text>
+              </description>
+            </enum>
+          </type>
+          <config value="false"/>
+          <mandatory value="true"/>
+          <description>
+            <text>The current state of the Suppression.</text>
+          </description>
+        </leaf>
+      </list>
+    </container>
+    <container name="events">
+      <uci:section name="events"/>
+      <uci:section-name name="events"/>
+      <description>
+        <text>Configuration of LMAP events.
+
+Implementations may be forced to delay acting
+upon the occurrence of events in the face of local
+constraints.  An Action triggered by an event
+therefore should not rely on the accuracy
+provided by the scheduler implementation.</text>
+      </description>
+      <list name="event">
+        <uci:section name="event"/>
+        <uci:leaf-as-name name="name"/>
+        <key value="name"/>
+        <description>
+          <text>The list of event sources configured on the
+Measurement Agent.</text>
+        </description>
+        <leaf name="name">
+          <uci:option name="name"/>
+          <type name="lmap:identifier"/>
+          <description>
+            <text>The unique name of an event source.</text>
+          </description>
+        </leaf>
+        <leaf name="random-spread">
+          <uci:option name="random-spread"/>
+          <type name="uint32"/>
+          <units name="seconds"/>
+          <description>
+            <text>This optional leaf adds a random spread to the
+computation of the event's trigger time.  The
+random spread is a uniformly distributed random
+number taken from the interval [0:random-spread].</text>
+          </description>
+        </leaf>
+        <leaf name="cycle-interval">
+          <uci:option name="cycle-interval"/>
+          <type name="uint32"/>
+          <units name="seconds"/>
+          <description>
+            <text>The optional cycle-interval defines the duration
+of the time interval in seconds that is used to
+calculate cycle numbers.  No cycle number is
+calculated if the optional cycle-interval does
+not exist.</text>
+          </description>
+        </leaf>
+        <choice name="event-type">
+          <description>
+            <text>Different types of events are handled by
+different branches of this choice.  Note that
+this choice can be extended via augmentations.</text>
+          </description>
+          <case name="periodic">
+            <container name="periodic">
+              <description>
+                <text>A periodic timing object triggers periodically
+according to a regular interval.</text>
+              </description>
+              <leaf name="interval">
+                <uci:option name="interval"/>
+                <type name="uint32">
+                  <range value="1..max"/>
+                </type>
+                <units name="seconds"/>
+                <mandatory value="true"/>
+                <description>
+                  <text>The number of seconds between two triggers
+generated by this periodic timing object.</text>
+                </description>
+              </leaf>
+              <uses name="start-end-grouping"/>
+            </container>
+          </case>
+          <case name="calendar">
+            <container name="calendar">
+              <description>
+                <text>A calendar timing object triggers based on the
+current calendar date and time.</text>
+              </description>
+              <leaf-list name="month">
+                <uci:option name="month"/>
+                <type name="lmap:month-or-all"/>
+                <min-elements value="1"/>
+                <description>
+                  <text>A set of months at which this calendar timing
+will trigger.  The wildcard means all months.</text>
+                </description>
+              </leaf-list>
+              <leaf-list name="day-of-month">
+                <uci:option name="day-of-month"/>
+                <type name="lmap:day-of-months-or-all"/>
+                <min-elements value="1"/>
+                <description>
+                  <text>A set of days of the month at which this
+calendar timing will trigger.  The wildcard means
+all days of a month.</text>
+                </description>
+              </leaf-list>
+              <leaf-list name="day-of-week">
+                <uci:option name="day-of-week"/>
+                <type name="lmap:weekday-or-all"/>
+                <min-elements value="1"/>
+                <description>
+                  <text>A set of weekdays at which this calendar timing
+will trigger.  The wildcard means all weekdays.</text>
+                </description>
+              </leaf-list>
+              <leaf-list name="hour">
+                <uci:option name="hour"/>
+                <type name="lmap:hour-or-all"/>
+                <min-elements value="1"/>
+                <description>
+                  <text>A set of hours at which this calendar timing will
+trigger.  The wildcard means all hours of a day.</text>
+                </description>
+              </leaf-list>
+              <leaf-list name="minute">
+                <uci:option name="minute"/>
+                <type name="lmap:minute-or-all"/>
+                <min-elements value="1"/>
+                <description>
+                  <text>A set of minutes at which this calendar timing
+will trigger.  The wildcard means all minutes of
+an hour.</text>
+                </description>
+              </leaf-list>
+              <leaf-list name="second">
+                <uci:option name="second"/>
+                <type name="lmap:second-or-all"/>
+                <min-elements value="1"/>
+                <description>
+                  <text>A set of seconds at which this calendar timing
+will trigger.  The wildcard means all seconds of
+a minute.</text>
+                </description>
+              </leaf-list>
+              <leaf name="timezone-offset">
+                <uci:option name="timezone-offset"/>
+                <type name="lmap:timezone-offset"/>
+                <description>
+                  <text>The time zone in which this calendar timing
+object will be evaluated.  If not present,
+the system's local time zone will be used.</text>
+                </description>
+              </leaf>
+              <uses name="start-end-grouping"/>
+            </container>
+          </case>
+          <case name="one-off">
+            <container name="one-off">
+              <description>
+                <text>A one-off timing object triggers exactly once.</text>
+              </description>
+              <leaf name="time">
+                <uci:option name="time"/>
+                <type name="yang:date-and-time"/>
+                <mandatory value="true"/>
+                <description>
+                  <text>This one-off timing object triggers once at
+the configured date and time.</text>
+                </description>
+              </leaf>
+            </container>
+          </case>
+          <case name="immediate">
+            <leaf name="immediate">
+              <uci:option name="immediate"/>
+              <type name="empty"/>
+              <mandatory value="true"/>
+              <description>
+                <text>This immediate Event object triggers immediately
+when it is configured.</text>
+              </description>
+            </leaf>
+          </case>
+          <case name="startup">
+            <leaf name="startup">
+              <uci:option name="startup"/>
+              <type name="empty"/>
+              <mandatory value="true"/>
+              <description>
+                <text>This startup Event object triggers whenever the
+Measurement Agent (re)starts.</text>
+              </description>
+            </leaf>
+          </case>
+          <case name="controller-lost">
+            <leaf name="controller-lost">
+              <uci:option name="controller-lost"/>
+              <type name="empty"/>
+              <mandatory value="true"/>
+              <description>
+                <text>The controller-lost Event object triggers when
+the connectivity to the Controller has been lost
+for at least 'controller-timeout' seconds.</text>
+              </description>
+            </leaf>
+          </case>
+          <case name="controller-connected">
+            <leaf name="controller-connected">
+              <uci:option name="controller-connected"/>
+              <type name="empty"/>
+              <mandatory value="true"/>
+              <description>
+                <text>The controller-connected Event object triggers
+when the connectivity to the Controller has been
+restored after it was lost for at least
+'controller-timeout' seconds.</text>
+              </description>
+            </leaf>
+          </case>
+        </choice>
+      </list>
+    </container>
+  </container>
+</module>

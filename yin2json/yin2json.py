@@ -28,7 +28,8 @@ ALLOWED_TYPES = {
     "union": "UNION",
     "bits": "BITS",
     "yang:xpath1.0": "STRING",
-    "counter32": "INT_32"
+    "counter32": "INT_32",
+    "leafref": "LEAF_REF"
 }
 
 

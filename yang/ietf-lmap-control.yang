@@ -13,6 +13,9 @@ module ietf-lmap-control {
   import ietf-lmap-common {
     prefix lmap;
   }
+  import openwrt-uci-extension {
+    prefix uci;
+  }
 
   organization
     "IETF Large-Scale Measurement of Broadband Performance
@@ -81,12 +84,14 @@ module ietf-lmap-control {
       "A grouping that provides start and end times for
        Event objects.";
     leaf start {
+      uci:option "start";
       type yang:date-and-time;
       description
         "The date and time when the Event object
          starts to create triggers.";
     }
     leaf end {
+      uci:option "end";
       type yang:date-and-time;
       description
         "The date and time when the Event object
@@ -104,16 +109,20 @@ module ietf-lmap-control {
    * Capability, configuration, and state data nodes
    */
 
+  uci:package "ietf-lmap-control";
   container lmap {
     description
       "Configuration and control of a Measurement Agent.";
 
     container capabilities {
+      uci:section "capabilities";
+      uci:section-name "capabilities";
       config false;
       description
         "Agent capabilities including a list of supported Tasks.";
 
       leaf version {
+        uci:option "version";
         type string;
         config false;
         mandatory true;
@@ -124,6 +133,7 @@ module ietf-lmap-control {
       }
 
       leaf-list tag {
+        uci:option "tag";
         type lmap:tag;
         config false;
         description
@@ -133,15 +143,20 @@ module ietf-lmap-control {
       }
 
       container tasks {
+        uci:section "tasks";
+        uci:section-name "tasks";
         description
           "A list of Tasks that the Measurement Agent supports.";
 
         list task {
+          uci:section "task";
+          uci:leaf-as-name "name";
           key name;
           description
             "The list of Tasks supported by the Measurement Agent.";
 
           leaf name {
+            uci:option "name";
             type lmap:identifier;
             description
               "The unique name of a Task capability.";
@@ -150,6 +165,7 @@ module ietf-lmap-control {
           uses lmap:registry-grouping;
 
           leaf version {
+            uci:option "version";
             type string;
 
             description
@@ -159,6 +175,7 @@ module ietf-lmap-control {
           }
 
           leaf program {
+            uci:option "program";
             type string;
             description
               "The (local) program to invoke in order to execute
@@ -173,11 +190,14 @@ module ietf-lmap-control {
      */
 
     container agent {
+      uci:section "agent";
+      uci:section-name "agent";
       description
         "Configuration of parameters affecting the whole
          Measurement Agent.";
 
       leaf agent-id {
+        uci:option "agent-id";
         type yang:uuid;
         description
           "The agent-id identifies a Measurement Agent with
@@ -187,6 +207,7 @@ module ietf-lmap-control {
       }
 
       leaf group-id {
+        uci:option "group-id";
         type string;
         description
           "The group-id identifies a group of Measurement
@@ -196,6 +217,7 @@ module ietf-lmap-control {
       }
 
       leaf measurement-point {
+        uci:option "measurement-point";
         type string;
         description
           "The measurement point indicating where the
@@ -207,6 +229,7 @@ module ietf-lmap-control {
       }
 
       leaf report-agent-id {
+        uci:option "report-agent-id";
         type boolean;
         must '. != "true" or ../agent-id' {
           description
@@ -220,6 +243,7 @@ module ietf-lmap-control {
       }
 
       leaf report-group-id {
+        uci:option "report-group-id";
         type boolean;
         must '. != "true" or ../group-id' {
           description
@@ -233,6 +257,7 @@ module ietf-lmap-control {
       }
 
       leaf report-measurement-point {
+        uci:option "report-measurement-point";
         type boolean;
         must '. != "true" or ../measurement-point' {
           description
@@ -246,6 +271,7 @@ module ietf-lmap-control {
       }
 
       leaf controller-timeout {
+        uci:option "controller-timeout";
         type uint32;
         units "seconds";
         description
@@ -257,6 +283,7 @@ module ietf-lmap-control {
       }
 
       leaf last-started {
+        uci:option "last-started";
         type yang:date-and-time;
         config false;
         mandatory true;
@@ -270,10 +297,14 @@ module ietf-lmap-control {
      */
 
     container tasks {
+      uci:section "tasks";
+      uci:section-name "tasks";
       description
         "Configuration of LMAP Tasks.";
 
       list task {
+        uci:section "task";
+        uci:leaf-as-name "name";
         key name;
         description
           "The list of Tasks configured on the Measurement
@@ -283,6 +314,7 @@ module ietf-lmap-control {
            result in a runtime execution error.";
 
         leaf name {
+          uci:option "name";
           type lmap:identifier;
           description
             "The unique name of a Task.";
@@ -291,6 +323,7 @@ module ietf-lmap-control {
         uses lmap:registry-grouping;
 
         leaf program {
+          uci:option "program";
           type string;
           nacm:default-deny-write;
 
@@ -307,6 +340,7 @@ module ietf-lmap-control {
         }
 
         leaf-list tag {
+          uci:option "tag";
           type lmap:identifier;
           description
             "A set of Task-specific tags that are reported
@@ -322,16 +356,21 @@ module ietf-lmap-control {
      */
 
     container schedules {
+      uci:section "schedules";
+      uci:section-name "schedules";
       description
         "Configuration of LMAP Schedules.  Schedules control
          which Tasks are executed by the LMAP implementation.";
 
       list schedule {
+        uci:section "schedule";
+        uci:leaf-as-name "name";
         key name;
         description
           "Configuration of a particular Schedule.";
 
         leaf name {
+          uci:option "name";
           type lmap:identifier;
           description
             "The locally unique, administratively assigned name
@@ -339,6 +378,7 @@ module ietf-lmap-control {
         }
 
         leaf start {
+          uci:option "start";
           type event-ref;
           mandatory true;
 
@@ -358,6 +398,7 @@ module ietf-lmap-control {
              waiting for any messages that are still outstanding).";
 
           leaf end {
+            uci:option "end";
             type event-ref;
             description
               "The event source controlling the graceful
@@ -365,6 +406,7 @@ module ietf-lmap-control {
           }
 
           leaf duration {
+            uci:option "duration";
             type uint32;
             units "seconds";
             description
@@ -374,6 +416,7 @@ module ietf-lmap-control {
         }
 
         leaf execution-mode {
+          uci:option "execution-mode";
           type enumeration {
             enum sequential {
               value 1;
@@ -403,6 +446,7 @@ module ietf-lmap-control {
         }
 
         leaf-list tag {
+          uci:option "tag";
           type lmap:tag;
           description
             "A set of Schedule-specific tags that are reported
@@ -410,6 +454,7 @@ module ietf-lmap-control {
         }
 
         leaf-list suppression-tag {
+          uci:option "suppression-tag";
           type lmap:tag;
           description
             "A set of Suppression tags that are used to select
@@ -417,6 +462,7 @@ module ietf-lmap-control {
         }
 
         leaf state {
+          uci:option "state";
           type enumeration {
             enum enabled {
               value 1;
@@ -450,6 +496,7 @@ module ietf-lmap-control {
         }
 
         leaf storage {
+          uci:option "storage";
           type yang:gauge64;
           units "bytes";
           config false;
@@ -463,6 +510,7 @@ module ietf-lmap-control {
         }
 
         leaf invocations {
+          uci:option "invocations";
           type yang:counter32;
           config false;
           mandatory true;
@@ -474,6 +522,7 @@ module ietf-lmap-control {
         }
 
         leaf suppressions {
+          uci:option "suppressions";
           type yang:counter32;
           config false;
           mandatory true;
@@ -482,6 +531,7 @@ module ietf-lmap-control {
         }
 
         leaf overlaps {
+          uci:option "overlaps";
           type yang:counter32;
           config false;
           mandatory true;
@@ -492,6 +542,7 @@ module ietf-lmap-control {
         }
 
         leaf failures {
+          uci:option "failures";
           type yang:counter32;
           config false;
           mandatory true;
@@ -502,6 +553,7 @@ module ietf-lmap-control {
         }
 
         leaf last-invocation {
+          uci:option "last-invocation";
           type yang:date-and-time;
           config false;
           description
@@ -510,6 +562,8 @@ module ietf-lmap-control {
         }
 
         list action {
+          uci:section "action";
+          uci:leaf-as-name "name";
           key name;
           description
             "An Action describes a Task that is invoked by the
@@ -517,12 +571,14 @@ module ietf-lmap-control {
              the execution-mode of the Schedule.";
 
           leaf name {
+            uci:option "name";
             type lmap:identifier;
             description
               "The unique identifier for this Action.";
           }
 
           leaf task {
+            uci:option "task";
             type task-ref;
             mandatory true;
             description
@@ -548,6 +604,7 @@ module ietf-lmap-control {
           }
 
           leaf-list destination {
+            uci:option "destination";
             type schedule-ref;
             description
               "A set of Schedules receiving the output produced
@@ -564,6 +621,7 @@ module ietf-lmap-control {
           }
 
           leaf-list tag {
+            uci:option "tag";
             type lmap:tag;
             description
               "A set of Action-specific tags that are reported
@@ -572,6 +630,7 @@ module ietf-lmap-control {
           }
 
           leaf-list suppression-tag {
+            uci:option "suppression-tag";
             type lmap:tag;
             description
               "A set of Suppression tags that are used to select
@@ -579,6 +638,7 @@ module ietf-lmap-control {
           }
 
           leaf state {
+            uci:option "state";
             type enumeration {
               enum enabled {
                 value 1;
@@ -612,6 +672,7 @@ module ietf-lmap-control {
           }
 
           leaf storage {
+            uci:option "storage";
             type yang:gauge64;
             units "bytes";
             config false;
@@ -625,6 +686,7 @@ module ietf-lmap-control {
           }
 
           leaf invocations {
+            uci:option "invocations";
             type yang:counter32;
             config false;
             mandatory true;
@@ -637,6 +699,7 @@ module ietf-lmap-control {
           }
 
           leaf suppressions {
+            uci:option "suppressions";
             type yang:counter32;
             config false;
             mandatory true;
@@ -645,6 +708,7 @@ module ietf-lmap-control {
           }
 
           leaf overlaps {
+            uci:option "overlaps";
             type yang:counter32;
             config false;
             mandatory true;
@@ -654,6 +718,7 @@ module ietf-lmap-control {
           }
 
           leaf failures {
+            uci:option "failures";
             type yang:counter32;
             config false;
             mandatory true;
@@ -662,6 +727,7 @@ module ietf-lmap-control {
           }
 
           leaf last-invocation {
+            uci:option "last-invocation";
             type yang:date-and-time;
             config false;
             mandatory true;
@@ -671,6 +737,7 @@ module ietf-lmap-control {
           }
 
           leaf last-completion {
+            uci:option "last-completion";
             type yang:date-and-time;
             config false;
             mandatory true;
@@ -680,6 +747,7 @@ module ietf-lmap-control {
           }
 
           leaf last-status {
+            uci:option "last-status";
             type lmap:status-code;
             config false;
             mandatory true;
@@ -689,6 +757,7 @@ module ietf-lmap-control {
           }
 
           leaf last-message {
+            uci:option "last-message";
             type string;
             config false;
             mandatory true;
@@ -698,6 +767,7 @@ module ietf-lmap-control {
           }
 
           leaf last-failed-completion {
+            uci:option "last-failed-completion";
             type yang:date-and-time;
             config false;
             mandatory true;
@@ -707,6 +777,7 @@ module ietf-lmap-control {
           }
 
           leaf last-failed-status {
+            uci:option "last-failed-status";
             type lmap:status-code;
             config false;
             mandatory true;
@@ -716,6 +787,7 @@ module ietf-lmap-control {
           }
 
           leaf last-failed-message {
+            uci:option "last-failed-message";
             type string;
             config false;
             mandatory true;
@@ -732,16 +804,21 @@ module ietf-lmap-control {
      */
 
     container suppressions {
+      uci:section "suppressions";
+      uci:section-name "suppressions";
       description
         "Suppression information to prevent Schedules or
          certain Actions from starting.";
 
       list suppression {
+        uci:section "suppression";
+        uci:leaf-as-name "name";
         key name;
         description
           "Configuration of a particular Suppression.";
 
         leaf name {
+          uci:option "name";
           type lmap:identifier;
           description
             "The locally unique, administratively assigned name
@@ -749,6 +826,7 @@ module ietf-lmap-control {
         }
 
         leaf start {
+          uci:option "start";
           type event-ref;
           description
             "The event source controlling the start of the
@@ -756,6 +834,7 @@ module ietf-lmap-control {
         }
 
         leaf end {
+          uci:option "end";
           type event-ref;
           description
             "The event source controlling the end of the
@@ -764,6 +843,7 @@ module ietf-lmap-control {
         }
 
         leaf-list match {
+          uci:option "match";
           type lmap:glob-pattern;
           description
             "A set of Suppression match patterns.  The Suppression
@@ -774,6 +854,7 @@ module ietf-lmap-control {
         }
 
         leaf stop-running {
+          uci:option "stop-running";
           type boolean;
           default false;
           description
@@ -785,6 +866,7 @@ module ietf-lmap-control {
         }
 
         leaf state {
+          uci:option "state";
           type enumeration {
             enum enabled {
               value 1;
@@ -818,6 +900,8 @@ module ietf-lmap-control {
      */
 
     container events {
+      uci:section "events";
+      uci:section-name "events";
       description
         "Configuration of LMAP events.
 
@@ -828,18 +912,22 @@ module ietf-lmap-control {
          provided by the scheduler implementation.";
 
       list event {
+        uci:section "event";
+        uci:leaf-as-name "name";
         key name;
         description
           "The list of event sources configured on the
            Measurement Agent.";
 
         leaf name {
+          uci:option "name";
           type lmap:identifier;
           description
             "The unique name of an event source.";
         }
 
         leaf random-spread {
+          uci:option "random-spread";
           type uint32;
           units seconds;
           description
@@ -850,6 +938,7 @@ module ietf-lmap-control {
         }
 
         leaf cycle-interval {
+          uci:option "cycle-interval";
           type uint32;
           units seconds;
           description
@@ -874,6 +963,7 @@ module ietf-lmap-control {
                  according to a regular interval.";
 
               leaf interval {
+                uci:option "interval";
                 type uint32 {
                   range "1..max";
                 }
@@ -894,6 +984,7 @@ module ietf-lmap-control {
                  current calendar date and time.";
 
               leaf-list month {
+                uci:option "month";
                 type lmap:month-or-all;
                 min-elements 1;
                 description
@@ -902,6 +993,7 @@ module ietf-lmap-control {
               }
 
               leaf-list day-of-month {
+                uci:option "day-of-month";
                 type lmap:day-of-months-or-all;
                 min-elements 1;
                 description
@@ -911,6 +1003,7 @@ module ietf-lmap-control {
               }
 
               leaf-list day-of-week {
+                uci:option "day-of-week";
                 type lmap:weekday-or-all;
                 min-elements 1;
                 description
@@ -918,6 +1011,7 @@ module ietf-lmap-control {
                    will trigger.  The wildcard means all weekdays.";
               }
               leaf-list hour {
+                uci:option "hour";
                 type lmap:hour-or-all;
                 min-elements 1;
                 description
@@ -926,6 +1020,7 @@ module ietf-lmap-control {
               }
 
               leaf-list minute {
+                uci:option "minute";
                 type lmap:minute-or-all;
                 min-elements 1;
                 description
@@ -935,6 +1030,7 @@ module ietf-lmap-control {
               }
 
               leaf-list second {
+                uci:option "second";
                 type lmap:second-or-all;
                 min-elements 1;
                 description
@@ -944,6 +1040,7 @@ module ietf-lmap-control {
               }
 
               leaf timezone-offset {
+                uci:option "timezone-offset";
                 type lmap:timezone-offset;
                 description
                   "The time zone in which this calendar timing
@@ -960,6 +1057,7 @@ module ietf-lmap-control {
                 "A one-off timing object triggers exactly once.";
 
               leaf time {
+                uci:option "time";
                 type yang:date-and-time;
                 mandatory true;
                 description
@@ -971,6 +1069,7 @@ module ietf-lmap-control {
 
           case immediate {
             leaf immediate {
+              uci:option "immediate";
               type empty;
               mandatory true;
               description
@@ -981,6 +1080,7 @@ module ietf-lmap-control {
 
           case startup {
             leaf startup {
+              uci:option "startup";
               type empty;
               mandatory true;
               description
@@ -991,6 +1091,7 @@ module ietf-lmap-control {
 
           case controller-lost {
             leaf controller-lost {
+              uci:option "controller-lost";
               type empty;
               mandatory true;
               description
@@ -1002,6 +1103,7 @@ module ietf-lmap-control {
 
           case controller-connected {
             leaf controller-connected {
+              uci:option "controller-connected";
               type empty;
               mandatory true;
               description
@@ -1012,7 +1114,6 @@ module ietf-lmap-control {
             }
           }
         }
-
       }
     }
   }

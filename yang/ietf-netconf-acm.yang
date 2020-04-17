@@ -214,7 +214,7 @@ module ietf-netconf-acm {
    * Data definition statements
    */
 
-  uci:package "nacm";
+  uci:package "ietf-netconf-acm";
   container nacm {
     uci:section "nacm";
     uci:section-name "nacm";
