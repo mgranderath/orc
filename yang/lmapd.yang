@@ -1,8 +1,8 @@
-module ietf-lmap-control {
+module lmapd {
 
   yang-version 1.1;
-  namespace "urn:ietf:params:xml:ns:yang:ietf-lmap-control";
-  prefix "lmapc";
+  namespace "urn:ietf:params:xml:ns:yang:lmapd";
+  prefix "lmapd";
 
   import ietf-yang-types {
     prefix yang;
@@ -109,7 +109,7 @@ module ietf-lmap-control {
    * Capability, configuration, and state data nodes
    */
 
-  uci:package "ietf-lmap-control";
+  uci:package "lmapd";
   container lmap {
     description
       "Configuration and control of a Measurement Agent.";

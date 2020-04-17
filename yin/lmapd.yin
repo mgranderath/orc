@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module name="ietf-lmap-control"
+<module name="lmapd"
         xmlns="urn:ietf:params:xml:ns:yang:yin:1"
-        xmlns:lmapc="urn:ietf:params:xml:ns:yang:ietf-lmap-control"
+        xmlns:lmapd="urn:ietf:params:xml:ns:yang:lmapd"
         xmlns:yang="urn:ietf:params:xml:ns:yang:ietf-yang-types"
         xmlns:nacm="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"
         xmlns:lmap="urn:ietf:params:xml:ns:yang:ietf-lmap-common"
         xmlns:uci="urn:jacobs:yang:openwrt-uci">
   <yang-version value="1.1"/>
-  <namespace uri="urn:ietf:params:xml:ns:yang:ietf-lmap-control"/>
-  <prefix value="lmapc"/>
+  <namespace uri="urn:ietf:params:xml:ns:yang:lmapd"/>
+  <prefix value="lmapd"/>
   <import module="ietf-yang-types">
     <prefix value="yang"/>
   </import>
@@ -104,7 +104,7 @@ forever.</text>
       </description>
     </leaf>
   </grouping>
-  <uci:package name="ietf-lmap-control"/>
+  <uci:package name="lmapd"/>
   <container name="lmap">
     <description>
       <text>Configuration and control of a Measurement Agent.</text>
