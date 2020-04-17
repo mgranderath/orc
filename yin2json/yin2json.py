@@ -23,7 +23,9 @@ ALLOWED_TYPES = {
     "uint64": "UINT_64",
     "binary": "BINARY",
     "boolean": "BOOLEAN",
-    "decimal64": "DECIMAL_64"
+    "decimal64": "DECIMAL_64",
+    "enumeration": "ENUMERATION",
+    "union": "UNION"
 }
 
 

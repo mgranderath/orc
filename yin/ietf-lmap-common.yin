@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="ietf-lmap-common"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:lmap="urn:ietf:params:xml:ns:yang:ietf-lmap-common"
+        xmlns:inet="urn:ietf:params:xml:ns:yang:ietf-inet-types"
+        xmlns:uci="urn:jacobs:yang:openwrt-uci">
+  <yang-version value="1.1"/>
+  <namespace uri="urn:ietf:params:xml:ns:yang:ietf-lmap-common"/>
+  <prefix value="lmap"/>
+  <import module="ietf-inet-types">
+    <prefix value="inet"/>
+  </import>
+  <import module="openwrt-uci-extension">
+    <prefix value="uci"/>
+  </import>
+  <organization>
+    <text>IETF Large-Scale Measurement of Broadband Performance
+Working Group</text>
+  </organization>
+  <contact>
+    <text>WG Web:   &lt;https://datatracker.ietf.org/wg/lmap&gt;
+WG List:  &lt;mailto:lmap@ietf.org&gt;
+
+Editor:   Juergen Schoenwaelder
+          &lt;j.schoenwaelder@jacobs-university.de&gt;
+
+Editor:   Vaibhav Bajpai
+          &lt;bajpaiv@in.tum.de&gt;</text>
+  </contact>
+  <description>
+    <text>This module provides common definitions used by the data
+models written for Large-Scale Measurement Platforms (LMAPs).
+This module defines typedefs and groupings but no schema
+tree elements.</text>
+  </description>
+  <revision date="2017-08-08">
+    <description>
+      <text>Initial version</text>
+    </description>
+    <reference>
+      <text>RFC 8194: A YANG Data Model for LMAP Measurement Agents</text>
+    </reference>
+  </revision>
+  <typedef name="identifier">
+    <type name="string">
+      <length value="1..max"/>
+    </type>
+    <description>
+      <text>A string value used to name something.</text>
+    </description>
+  </typedef>
+  <typedef name="tag">
+    <type name="string">
+      <length value="1..max"/>
+    </type>
+    <description>
+      <text>A tag consists of at least one character.</text>
+    </description>
+  </typedef>
+  <typedef name="glob-pattern">
+    <type name="string">
+      <length value="1..max"/>
+    </type>
+    <description>
+      <text>A glob style pattern (following POSIX.2 fnmatch() without
+       special treatment of file paths):
+
+         *         matches a sequence of characters
+         ?         matches a single character
+         [seq]     matches any character in seq
+         [!seq]    matches any character not in seq
+
+       A backslash followed by a character matches the following
+       character.  In particular:
+
+         \*        matches *
+         \?        matches ?
+         \\        matches \
+
+       A sequence seq may be a sequence of characters (e.g., [abc]
+       or a range of characters (e.g., [a-c]).</text>
+    </description>
+  </typedef>
+  <typedef name="wildcard">
+    <type name="string">
+      <pattern value="\*"/>
+    </type>
+    <description>
+      <text>A wildcard for calendar scheduling entries.</text>
+    </description>
+  </typedef>
+  <typedef name="cycle-number">
+    <type name="string">
+      <pattern value="[0-9]{8}\.[0-9]{6}"/>
+    </type>
+    <description>
+      <text>A cycle number represented in the format YYYYMMDD.HHMMSS
+where YYYY represents the year, MM the month (1..12), DD
+the day of the months (01..31), HH the hour (00..23), MM
+the minute (00..59), and SS the second (00..59).  The cycle
+number is using Coordinated Universal Time (UTC).</text>
+    </description>
+  </typedef>
+  <typedef name="month">
+    <type name="enumeration">
+      <enum name="january">
+        <value value="1"/>
+        <description>
+          <text>January of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="february">
+        <value value="2"/>
+        <description>
+          <text>February of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="march">
+        <value value="3"/>
+        <description>
+          <text>March of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="april">
+        <value value="4"/>
+        <description>
+          <text>April of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="may">
+        <value value="5"/>
+        <description>
+          <text>May of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="june">
+        <value value="6"/>
+        <description>
+          <text>June of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="july">
+        <value value="7"/>
+        <description>
+          <text>July of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="august">
+        <value value="8"/>
+        <description>
+          <text>August of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="september">
+        <value value="9"/>
+        <description>
+          <text>September of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="october">
+        <value value="10"/>
+        <description>
+          <text>October of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="november">
+        <value value="11"/>
+        <description>
+          <text>November of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="december">
+        <value value="12"/>
+        <description>
+          <text>December of the Gregorian calendar.</text>
+        </description>
+      </enum>
+    </type>
+    <description>
+      <text>A type modeling the month in the Gregorian calendar.</text>
+    </description>
+  </typedef>
+  <typedef name="month-or-all">
+    <type name="union">
+      <type name="month"/>
+      <type name="wildcard"/>
+    </type>
+    <description>
+      <text>A month or a wildcard indicating all twelve months.</text>
+    </description>
+  </typedef>
+  <typedef name="day-of-month">
+    <type name="uint8">
+      <range value="1..31"/>
+    </type>
+    <description>
+      <text>A day of a month of the Gregorian calendar.</text>
+    </description>
+  </typedef>
+  <typedef name="day-of-months-or-all">
+    <type name="union">
+      <type name="day-of-month"/>
+      <type name="wildcard"/>
+    </type>
+    <description>
+      <text>A day of a month or a wildcard indicating all days
+of a month.</text>
+    </description>
+  </typedef>
+  <typedef name="weekday">
+    <type name="enumeration">
+      <enum name="monday">
+        <value value="1"/>
+        <description>
+          <text>Monday of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="tuesday">
+        <value value="2"/>
+        <description>
+          <text>Tuesday of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="wednesday">
+        <value value="3"/>
+        <description>
+          <text>Wednesday of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="thursday">
+        <value value="4"/>
+        <description>
+          <text>Thursday of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="friday">
+        <value value="5"/>
+        <description>
+          <text>Friday of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="saturday">
+        <value value="6"/>
+        <description>
+          <text>Saturday of the Gregorian calendar.</text>
+        </description>
+      </enum>
+      <enum name="sunday">
+        <value value="7"/>
+        <description>
+          <text>Sunday of the Gregorian calendar.</text>
+        </description>
+      </enum>
+    </type>
+    <description>
+      <text>A type modeling the weekdays in the Gregorian calendar.
+The numbering follows the ISO 8601 scheme.</text>
+    </description>
+    <reference>
+      <text>ISO 8601:2004: Data elements and interchange formats --
+               Information interchange -- Representation
+               of dates and times</text>
+    </reference>
+  </typedef>
+  <typedef name="weekday-or-all">
+    <type name="union">
+      <type name="weekday"/>
+      <type name="wildcard"/>
+    </type>
+    <description>
+      <text>A weekday or a wildcard indicating all seven weekdays.</text>
+    </description>
+  </typedef>
+  <typedef name="hour">
+    <type name="uint8">
+      <range value="0..23"/>
+    </type>
+    <description>
+      <text>An hour of a day.</text>
+    </description>
+  </typedef>
+  <typedef name="hour-or-all">
+    <type name="union">
+      <type name="hour"/>
+      <type name="wildcard"/>
+    </type>
+    <description>
+      <text>An hour of a day or a wildcard indicating all hours
+of a day.</text>
+    </description>
+  </typedef>
+  <typedef name="minute">
+    <type name="uint8">
+      <range value="0..59"/>
+    </type>
+    <description>
+      <text>A minute of an hour.</text>
+    </description>
+  </typedef>
+  <typedef name="minute-or-all">
+    <type name="union">
+      <type name="minute"/>
+      <type name="wildcard"/>
+    </type>
+    <description>
+      <text>A minute of an hour or a wildcard indicating all
+minutes of an hour.</text>
+    </description>
+  </typedef>
+  <typedef name="second">
+    <type name="uint8">
+      <range value="0..59"/>
+    </type>
+    <description>
+      <text>A second of a minute.</text>
+    </description>
+  </typedef>
+  <typedef name="second-or-all">
+    <type name="union">
+      <type name="second"/>
+      <type name="wildcard"/>
+    </type>
+    <description>
+      <text>A second of a minute or a wildcard indicating all
+seconds of a minute.</text>
+    </description>
+  </typedef>
+  <typedef name="status-code">
+    <type name="int32"/>
+    <description>
+      <text>A status code returned by the execution of a Task.  Note
+that the actual range is implementation dependent, but it
+should be portable to use values in the range 0..127 for
+regular exit codes.  By convention, 0 indicates successful
+termination.  Negative values may be used to indicate
+abnormal termination due to a signal; the absolute value
+may identify the signal number in this case.</text>
+    </description>
+  </typedef>
+  <typedef name="timezone-offset">
+    <type name="string">
+      <pattern value="Z|[\+\-]\d{2}:\d{2}"/>
+    </type>
+    <description>
+      <text>A time zone offset as it is used by the date-and-time type
+defined in the ietf-yang-types module.  The value Z is
+equivalent to +00:00.  The value -00:00 indicates an
+unknown time-offset.</text>
+    </description>
+    <reference>
+      <text>RFC 6991: Common YANG Data Types</text>
+    </reference>
+  </typedef>
+  <grouping name="registry-grouping">
+    <description>
+      <text>This grouping models a list of entries in a registry
+that identify functions of a Task.</text>
+    </description>
+    <list name="function">
+      <uci:section name="function"/>
+      <uci:leaf-as-name name="uri"/>
+      <key value="uri"/>
+      <description>
+        <text>A list of entries in a registry identifying functions.</text>
+      </description>
+      <leaf name="uri">
+        <uci:option name="uri"/>
+        <type name="inet:uri"/>
+        <description>
+          <text>A URI identifying an entry in a registry.</text>
+        </description>
+      </leaf>
+      <leaf-list name="role">
+        <uci:option name="role"/>
+        <type name="string"/>
+        <description>
+          <text>A set of roles for the identified registry entry.</text>
+        </description>
+      </leaf-list>
+    </list>
+  </grouping>
+  <grouping name="options-grouping">
+    <description>
+      <text>A list of options of a Task.  Each option is a name/value
+pair (where the value may be absent).</text>
+    </description>
+    <list name="option">
+      <uci:section name="option"/>
+      <uci:leaf-as-name name="id"/>
+      <key value="id"/>
+      <ordered-by value="user"/>
+      <description>
+        <text>A list of options passed to the Task.  It is a list of
+key/value pairs and may be used to model options.
+Options may be used to identify the role of a Task
+or to pass a Channel name to a Task.</text>
+      </description>
+      <leaf name="id">
+        <uci:option name="id"/>
+        <type name="lmap:identifier"/>
+        <description>
+          <text>An identifier uniquely identifying an option.  This
+identifier is required by YANG to uniquely identify
+a name/value pair, but it otherwise has no semantic
+value</text>
+        </description>
+      </leaf>
+      <leaf name="name">
+        <uci:option name="name"/>
+        <type name="string"/>
+        <description>
+          <text>The name of the option.</text>
+        </description>
+      </leaf>
+      <leaf name="value">
+        <uci:option name="value"/>
+        <type name="string"/>
+        <description>
+          <text>The value of the option.</text>
+        </description>
+      </leaf>
+    </list>
+  </grouping>
+</module>
