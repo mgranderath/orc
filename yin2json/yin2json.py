@@ -25,7 +25,10 @@ ALLOWED_TYPES = {
     "boolean": "BOOLEAN",
     "decimal64": "DECIMAL_64",
     "enumeration": "ENUMERATION",
-    "union": "UNION"
+    "union": "UNION",
+    "bits": "BITS",
+    "yang:xpath1.0": "STRING",
+    "counter32": "INT_32"
 }
 
 
