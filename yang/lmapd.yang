@@ -197,7 +197,7 @@ module lmapd {
          Measurement Agent.";
 
       leaf agent-id {
-        uci:option "agent-id";
+        uci:option "agent_id";
         type yang:uuid;
         description
           "The agent-id identifies a Measurement Agent with
@@ -207,7 +207,7 @@ module lmapd {
       }
 
       leaf group-id {
-        uci:option "group-id";
+        uci:option "group_id";
         type string;
         description
           "The group-id identifies a group of Measurement
@@ -217,7 +217,7 @@ module lmapd {
       }
 
       leaf measurement-point {
-        uci:option "measurement-point";
+        uci:option "measurement_point";
         type string;
         description
           "The measurement point indicating where the
@@ -229,7 +229,7 @@ module lmapd {
       }
 
       leaf report-agent-id {
-        uci:option "report-agent-id";
+        uci:option "report_agent_id";
         type boolean;
         must '. != "true" or ../agent-id' {
           description
@@ -243,7 +243,7 @@ module lmapd {
       }
 
       leaf report-group-id {
-        uci:option "report-group-id";
+        uci:option "report_group_id";
         type boolean;
         must '. != "true" or ../group-id' {
           description
@@ -257,7 +257,7 @@ module lmapd {
       }
 
       leaf report-measurement-point {
-        uci:option "report-measurement-point";
+        uci:option "report_measurement_point";
         type boolean;
         must '. != "true" or ../measurement-point' {
           description
@@ -271,7 +271,7 @@ module lmapd {
       }
 
       leaf controller-timeout {
-        uci:option "controller-timeout";
+        uci:option "controller_timeout";
         type uint32;
         units "seconds";
         description
@@ -283,7 +283,7 @@ module lmapd {
       }
 
       leaf last-started {
-        uci:option "last-started";
+        uci:option "last_started";
         type yang:date-and-time;
         config false;
         mandatory true;
@@ -416,7 +416,7 @@ module lmapd {
         }
 
         leaf execution-mode {
-          uci:option "execution-mode";
+          uci:option "execution_mode";
           type enumeration {
             enum sequential {
               value 1;
@@ -454,7 +454,7 @@ module lmapd {
         }
 
         leaf-list suppression-tag {
-          uci:option "suppression-tag";
+          uci:option "suppression_tag";
           type lmap:tag;
           description
             "A set of Suppression tags that are used to select
@@ -553,7 +553,7 @@ module lmapd {
         }
 
         leaf last-invocation {
-          uci:option "last-invocation";
+          uci:option "last_invocation";
           type yang:date-and-time;
           config false;
           description
@@ -630,7 +630,7 @@ module lmapd {
           }
 
           leaf-list suppression-tag {
-            uci:option "suppression-tag";
+            uci:option "suppression_tag";
             type lmap:tag;
             description
               "A set of Suppression tags that are used to select
@@ -727,7 +727,7 @@ module lmapd {
           }
 
           leaf last-invocation {
-            uci:option "last-invocation";
+            uci:option "last_invocation";
             type yang:date-and-time;
             config false;
             mandatory true;
@@ -737,7 +737,7 @@ module lmapd {
           }
 
           leaf last-completion {
-            uci:option "last-completion";
+            uci:option "last_completion";
             type yang:date-and-time;
             config false;
             mandatory true;
@@ -747,7 +747,7 @@ module lmapd {
           }
 
           leaf last-status {
-            uci:option "last-status";
+            uci:option "last_status";
             type lmap:status-code;
             config false;
             mandatory true;
@@ -757,7 +757,7 @@ module lmapd {
           }
 
           leaf last-message {
-            uci:option "last-message";
+            uci:option "last_message";
             type string;
             config false;
             mandatory true;
@@ -767,7 +767,7 @@ module lmapd {
           }
 
           leaf last-failed-completion {
-            uci:option "last-failed-completion";
+            uci:option "last_failed_completion";
             type yang:date-and-time;
             config false;
             mandatory true;
@@ -777,7 +777,7 @@ module lmapd {
           }
 
           leaf last-failed-status {
-            uci:option "last-failed-status";
+            uci:option "last_failed_status";
             type lmap:status-code;
             config false;
             mandatory true;
@@ -787,7 +787,7 @@ module lmapd {
           }
 
           leaf last-failed-message {
-            uci:option "last-failed-message";
+            uci:option "last_failed_message";
             type string;
             config false;
             mandatory true;
@@ -854,7 +854,7 @@ module lmapd {
         }
 
         leaf stop-running {
-          uci:option "stop-running";
+          uci:option "stop_running";
           type boolean;
           default false;
           description
@@ -927,7 +927,7 @@ module lmapd {
         }
 
         leaf random-spread {
-          uci:option "random-spread";
+          uci:option "random_spread";
           type uint32;
           units seconds;
           description
@@ -938,7 +938,7 @@ module lmapd {
         }
 
         leaf cycle-interval {
-          uci:option "cycle-interval";
+          uci:option "cycle_interval";
           type uint32;
           units seconds;
           description
@@ -993,7 +993,7 @@ module lmapd {
               }
 
               leaf-list day-of-month {
-                uci:option "day-of-month";
+                uci:option "day_of_month";
                 type lmap:day-of-months-or-all;
                 min-elements 1;
                 description
@@ -1003,7 +1003,7 @@ module lmapd {
               }
 
               leaf-list day-of-week {
-                uci:option "day-of-week";
+                uci:option "day_of_week";
                 type lmap:weekday-or-all;
                 min-elements 1;
                 description
@@ -1040,7 +1040,7 @@ module lmapd {
               }
 
               leaf timezone-offset {
-                uci:option "timezone-offset";
+                uci:option "timezone_offset";
                 type lmap:timezone-offset;
                 description
                   "The time zone in which this calendar timing
@@ -1091,7 +1091,7 @@ module lmapd {
 
           case controller-lost {
             leaf controller-lost {
-              uci:option "controller-lost";
+              uci:option "controller_lost";
               type empty;
               mandatory true;
               description
@@ -1103,7 +1103,7 @@ module lmapd {
 
           case controller-connected {
             leaf controller-connected {
-              uci:option "controller-connected";
+              uci:option "controller_connected";
               type empty;
               mandatory true;
               description

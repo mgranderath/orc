@@ -186,7 +186,7 @@ the Task.</text>
 Measurement Agent.</text>
       </description>
       <leaf name="agent-id">
-        <uci:option name="agent-id"/>
+        <uci:option name="agent_id"/>
         <type name="yang:uuid"/>
         <description>
           <text>The agent-id identifies a Measurement Agent with
@@ -196,7 +196,7 @@ sensitive, and hence this object is optional.</text>
         </description>
       </leaf>
       <leaf name="group-id">
-        <uci:option name="group-id"/>
+        <uci:option name="group_id"/>
         <type name="string"/>
         <description>
           <text>The group-id identifies a group of Measurement
@@ -206,7 +206,7 @@ agent-id.</text>
         </description>
       </leaf>
       <leaf name="measurement-point">
-        <uci:option name="measurement-point"/>
+        <uci:option name="measurement_point"/>
         <type name="string"/>
         <description>
           <text>The measurement point indicating where the
@@ -219,7 +219,7 @@ agent-id.</text>
         </reference>
       </leaf>
       <leaf name="report-agent-id">
-        <uci:option name="report-agent-id"/>
+        <uci:option name="report_agent_id"/>
         <type name="boolean"/>
         <must condition='. != "true" or ../agent-id'>
           <description>
@@ -234,7 +234,7 @@ to true.</text>
         </description>
       </leaf>
       <leaf name="report-group-id">
-        <uci:option name="report-group-id"/>
+        <uci:option name="report_group_id"/>
         <type name="boolean"/>
         <must condition='. != "true" or ../group-id'>
           <description>
@@ -249,7 +249,7 @@ to true.</text>
         </description>
       </leaf>
       <leaf name="report-measurement-point">
-        <uci:option name="report-measurement-point"/>
+        <uci:option name="report_measurement_point"/>
         <type name="boolean"/>
         <must condition='. != "true" or ../measurement-point'>
           <description>
@@ -264,7 +264,7 @@ the 'measurement-point' is reported to Collectors.</text>
         </description>
       </leaf>
       <leaf name="controller-timeout">
-        <uci:option name="controller-timeout"/>
+        <uci:option name="controller_timeout"/>
         <type name="uint32"/>
         <units name="seconds"/>
         <description>
@@ -276,7 +276,7 @@ has been lost.</text>
         </description>
       </leaf>
       <leaf name="last-started">
-        <uci:option name="last-started"/>
+        <uci:option name="last_started"/>
         <type name="yang:date-and-time"/>
         <config value="false"/>
         <mandatory value="true"/>
@@ -398,7 +398,7 @@ termination of the scheduled Actions.</text>
           </leaf>
         </choice>
         <leaf name="execution-mode">
-          <uci:option name="execution-mode"/>
+          <uci:option name="execution_mode"/>
           <type name="enumeration">
             <enum name="sequential">
               <value value="1"/>
@@ -438,7 +438,7 @@ together with the measurement results to a Collector.</text>
           </description>
         </leaf-list>
         <leaf-list name="suppression-tag">
-          <uci:option name="suppression-tag"/>
+          <uci:option name="suppression_tag"/>
           <type name="lmap:tag"/>
           <description>
             <text>A set of Suppression tags that are used to select
@@ -540,7 +540,7 @@ one Action failed.</text>
           </description>
         </leaf>
         <leaf name="last-invocation">
-          <uci:option name="last-invocation"/>
+          <uci:option name="last_invocation"/>
           <type name="yang:date-and-time"/>
           <config value="false"/>
           <description>
@@ -618,7 +618,7 @@ Collector.</text>
             </description>
           </leaf-list>
           <leaf-list name="suppression-tag">
-            <uci:option name="suppression-tag"/>
+            <uci:option name="suppression_tag"/>
             <type name="lmap:tag"/>
             <description>
               <text>A set of Suppression tags that are used to select
@@ -718,7 +718,7 @@ a previous invocation of this Action.</text>
             </description>
           </leaf>
           <leaf name="last-invocation">
-            <uci:option name="last-invocation"/>
+            <uci:option name="last_invocation"/>
             <type name="yang:date-and-time"/>
             <config value="false"/>
             <mandatory value="true"/>
@@ -728,7 +728,7 @@ this Action.</text>
             </description>
           </leaf>
           <leaf name="last-completion">
-            <uci:option name="last-completion"/>
+            <uci:option name="last_completion"/>
             <type name="yang:date-and-time"/>
             <config value="false"/>
             <mandatory value="true"/>
@@ -738,7 +738,7 @@ this Action.</text>
             </description>
           </leaf>
           <leaf name="last-status">
-            <uci:option name="last-status"/>
+            <uci:option name="last_status"/>
             <type name="lmap:status-code"/>
             <config value="false"/>
             <mandatory value="true"/>
@@ -748,7 +748,7 @@ this Action.</text>
             </description>
           </leaf>
           <leaf name="last-message">
-            <uci:option name="last-message"/>
+            <uci:option name="last_message"/>
             <type name="string"/>
             <config value="false"/>
             <mandatory value="true"/>
@@ -758,7 +758,7 @@ of this Action.</text>
             </description>
           </leaf>
           <leaf name="last-failed-completion">
-            <uci:option name="last-failed-completion"/>
+            <uci:option name="last_failed_completion"/>
             <type name="yang:date-and-time"/>
             <config value="false"/>
             <mandatory value="true"/>
@@ -768,7 +768,7 @@ of this Action.</text>
             </description>
           </leaf>
           <leaf name="last-failed-status">
-            <uci:option name="last-failed-status"/>
+            <uci:option name="last_failed_status"/>
             <type name="lmap:status-code"/>
             <config value="false"/>
             <mandatory value="true"/>
@@ -778,7 +778,7 @@ execution of this Action.</text>
             </description>
           </leaf>
           <leaf name="last-failed-message">
-            <uci:option name="last-failed-message"/>
+            <uci:option name="last_failed_message"/>
             <type name="string"/>
             <config value="false"/>
             <mandatory value="true"/>
@@ -841,7 +841,7 @@ their suppression-tags.</text>
           </description>
         </leaf-list>
         <leaf name="stop-running">
-          <uci:option name="stop-running"/>
+          <uci:option name="stop_running"/>
           <type name="boolean"/>
           <default value="false"/>
           <description>
@@ -913,7 +913,7 @@ Measurement Agent.</text>
           </description>
         </leaf>
         <leaf name="random-spread">
-          <uci:option name="random-spread"/>
+          <uci:option name="random_spread"/>
           <type name="uint32"/>
           <units name="seconds"/>
           <description>
@@ -924,7 +924,7 @@ number taken from the interval [0:random-spread].</text>
           </description>
         </leaf>
         <leaf name="cycle-interval">
-          <uci:option name="cycle-interval"/>
+          <uci:option name="cycle_interval"/>
           <type name="uint32"/>
           <units name="seconds"/>
           <description>
@@ -978,7 +978,7 @@ will trigger.  The wildcard means all months.</text>
                 </description>
               </leaf-list>
               <leaf-list name="day-of-month">
-                <uci:option name="day-of-month"/>
+                <uci:option name="day_of_month"/>
                 <type name="lmap:day-of-months-or-all"/>
                 <min-elements value="1"/>
                 <description>
@@ -988,7 +988,7 @@ all days of a month.</text>
                 </description>
               </leaf-list>
               <leaf-list name="day-of-week">
-                <uci:option name="day-of-week"/>
+                <uci:option name="day_of_week"/>
                 <type name="lmap:weekday-or-all"/>
                 <min-elements value="1"/>
                 <description>
@@ -1026,7 +1026,7 @@ a minute.</text>
                 </description>
               </leaf-list>
               <leaf name="timezone-offset">
-                <uci:option name="timezone-offset"/>
+                <uci:option name="timezone_offset"/>
                 <type name="lmap:timezone-offset"/>
                 <description>
                   <text>The time zone in which this calendar timing
@@ -1077,7 +1077,7 @@ Measurement Agent (re)starts.</text>
           </case>
           <case name="controller-lost">
             <leaf name="controller-lost">
-              <uci:option name="controller-lost"/>
+              <uci:option name="controller_lost"/>
               <type name="empty"/>
               <mandatory value="true"/>
               <description>
@@ -1089,7 +1089,7 @@ for at least 'controller-timeout' seconds.</text>
           </case>
           <case name="controller-connected">
             <leaf name="controller-connected">
-              <uci:option name="controller-connected"/>
+              <uci:option name="controller_connected"/>
               <type name="empty"/>
               <mandatory value="true"/>
               <description>
