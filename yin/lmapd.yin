@@ -3,6 +3,7 @@
         xmlns="urn:ietf:params:xml:ns:yang:yin:1"
         xmlns:lmapd="urn:ietf:params:xml:ns:yang:lmapd"
         xmlns:yang="urn:ietf:params:xml:ns:yang:ietf-yang-types"
+        xmlns:inet="urn:ietf:params:xml:ns:yang:ietf-inet-types"
         xmlns:nacm="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"
         xmlns:lmap="urn:ietf:params:xml:ns:yang:ietf-lmap-common"
         xmlns:uci="urn:jacobs:yang:openwrt-uci">
@@ -11,6 +12,9 @@
   <prefix value="lmapd"/>
   <import module="ietf-yang-types">
     <prefix value="yang"/>
+  </import>
+  <import module="ietf-inet-types">
+    <prefix value="inet"/>
   </import>
   <import module="ietf-netconf-acm">
     <prefix value="nacm"/>
@@ -157,7 +161,28 @@ the Measurement Agent.</text>
               <text>The unique name of a Task capability.</text>
             </description>
           </leaf>
-          <uses name="lmap:registry-grouping"/>
+          <list name="function">
+            <uci:section name="function"/>
+            <uci:leaf-as-name name="uri"/>
+            <key value="uri"/>
+            <description>
+              <text>A list of entries in a registry identifying functions.</text>
+            </description>
+            <leaf name="uri">
+              <uci:option name="uri"/>
+              <type name="inet:uri"/>
+              <description>
+                <text>A URI identifying an entry in a registry.</text>
+              </description>
+            </leaf>
+            <leaf-list name="role">
+              <uci:option name="role"/>
+              <type name="string"/>
+              <description>
+                <text>A set of roles for the identified registry entry.</text>
+              </description>
+            </leaf-list>
+          </list>
           <leaf name="version">
             <uci:option name="version"/>
             <type name="string"/>
@@ -309,7 +334,28 @@ result in a runtime execution error.</text>
             <text>The unique name of a Task.</text>
           </description>
         </leaf>
-        <uses name="lmap:registry-grouping"/>
+        <list name="function">
+          <uci:section name="function"/>
+          <uci:leaf-as-name name="uri"/>
+          <key value="uri"/>
+          <description>
+            <text>A list of entries in a registry identifying functions.</text>
+          </description>
+          <leaf name="uri">
+            <uci:option name="uri"/>
+            <type name="inet:uri"/>
+            <description>
+              <text>A URI identifying an entry in a registry.</text>
+            </description>
+          </leaf>
+          <leaf-list name="role">
+            <uci:option name="role"/>
+            <type name="string"/>
+            <description>
+              <text>A set of roles for the identified registry entry.</text>
+            </description>
+          </leaf-list>
+        </list>
         <leaf name="program">
           <uci:option name="program"/>
           <type name="string"/>
@@ -321,11 +367,42 @@ will try to identify a suitable program based on
 the registry information present.</text>
           </description>
         </leaf>
-        <uses name="lmap:options-grouping">
+        <list name="option">
+          <uci:section name="option"/>
+          <uci:leaf-as-name name="id"/>
+          <key value="id"/>
+          <ordered-by value="user"/>
           <description>
-            <text>The list of Task-specific options.</text>
+            <text>A list of options passed to the Task.  It is a list of
+key/value pairs and may be used to model options.
+Options may be used to identify the role of a Task
+or to pass a Channel name to a Task.</text>
           </description>
-        </uses>
+          <leaf name="id">
+            <uci:option name="id"/>
+            <type name="lmap:identifier"/>
+            <description>
+              <text>An identifier uniquely identifying an option.  This
+identifier is required by YANG to uniquely identify
+a name/value pair, but it otherwise has no semantic
+value</text>
+            </description>
+          </leaf>
+          <leaf name="name">
+            <uci:option name="name"/>
+            <type name="string"/>
+            <description>
+              <text>The name of the option.</text>
+            </description>
+          </leaf>
+          <leaf name="value">
+            <uci:option name="value"/>
+            <type name="string"/>
+            <description>
+              <text>The value of the option.</text>
+            </description>
+          </leaf>
+        </list>
         <leaf-list name="tag">
           <uci:option name="tag"/>
           <type name="lmap:identifier"/>
@@ -561,12 +638,42 @@ the execution-mode of the Schedule.</text>
               <text>The Task invoked by this Action.</text>
             </description>
           </leaf>
-          <uses name="lmap:options-grouping">
+          <list name="option">
+            <uci:section name="option"/>
+            <uci:leaf-as-name name="id"/>
+            <key value="id"/>
+            <ordered-by value="user"/>
             <description>
-              <text>The list of Action-specific options that are
-appended to the list of Task-specific options.</text>
+              <text>A list of options passed to the Task.  It is a list of
+key/value pairs and may be used to model options.
+Options may be used to identify the role of a Task
+or to pass a Channel name to a Task.</text>
             </description>
-          </uses>
+            <leaf name="id">
+              <uci:option name="id"/>
+              <type name="lmap:identifier"/>
+              <description>
+                <text>An identifier uniquely identifying an option.  This
+identifier is required by YANG to uniquely identify
+a name/value pair, but it otherwise has no semantic
+value</text>
+              </description>
+            </leaf>
+            <leaf name="name">
+              <uci:option name="name"/>
+              <type name="string"/>
+              <description>
+                <text>The name of the option.</text>
+              </description>
+            </leaf>
+            <leaf name="value">
+              <uci:option name="value"/>
+              <type name="string"/>
+              <description>
+                <text>The value of the option.</text>
+              </description>
+            </leaf>
+          </list>
           <leaf-list name="destination">
             <uci:option name="destination"/>
             <type name="schedule-ref"/>
@@ -1044,7 +1151,28 @@ not exist.</text>
  'controller-timeout' seconds.</text>
           </description>
         </leaf>
-        <uses name="start-end-grouping"/>
+        <leaf name="start">
+          <uci:option name="start"/>
+          <type name="yang:date-and-time"/>
+          <description>
+            <text>The date and time when the Event object
+starts to create triggers.</text>
+          </description>
+        </leaf>
+        <leaf name="end">
+          <uci:option name="end"/>
+          <type name="yang:date-and-time"/>
+          <description>
+            <text>The date and time when the Event object
+stops to create triggers.
+
+It is generally a good idea to always configure
+an end time and to refresh the end time as needed
+to ensure that agents that lose connectivity to
+their Controller do not continue executing Schedules
+forever.</text>
+          </description>
+        </leaf>
       </list>
     </container>
   </container>
