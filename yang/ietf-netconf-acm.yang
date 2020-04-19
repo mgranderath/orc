@@ -409,55 +409,53 @@ module ietf-netconf-acm {
              object being accessed is defined in the module with the
              specified module name.";
         }
-        choice rule-type {
+
+        leaf rule-type {
+          uci:option "rule_type";
+          type uint32;
           description
             "This choice matches if all leafs present in the rule
              match the request.  If no leafs are present, the
              choice matches all requests.";
-          case protocol-operation {
-            leaf rpc-name {
-              uci:option "rpc-name";
-              type union {
-                type matchall-string-type;
-                type string;
-              }
-              description
-                "This leaf matches if it has the value '*' or if
-                 its value equals the requested protocol operation
-                 name.";
-            }
-          }
-          case notification {
-            leaf notification-name {
-              uci:option "notification-name";
-              type union {
-                type matchall-string-type;
-                type string;
-              }
-              description
-                "This leaf matches if it has the value '*' or if its
-                 value equals the requested notification name.";
-            }
-          }
-          case data-node {
-            leaf path {
-              uci:option "path";
-              type node-instance-identifier;
-              mandatory true;
-              description
-                "Data node instance-identifier associated with the
-                 data node, action, or notification controlled by
-                 this rule.
+        }
 
-                 Configuration data or state data
-                 instance-identifiers start with a top-level
-                 data node.  A complete instance-identifier is
-                 required for this type of path value.
-
-                 The special value '/' refers to all possible
-                 datastore contents.";
-            }
+        leaf rpc-name {
+          uci:option "rpc-name";
+          type union {
+            type matchall-string-type;
+            type string;
           }
+          description
+            "This leaf matches if it has the value '*' or if
+              its value equals the requested protocol operation
+              name.";
+        }
+        leaf notification-name {
+          uci:option "notification-name";
+          type union {
+            type matchall-string-type;
+            type string;
+          }
+          description
+            "This leaf matches if it has the value '*' or if its
+              value equals the requested notification name.";
+        }
+        leaf path {
+          uci:option "path";
+          type node-instance-identifier;
+          mandatory true;
+          description
+            "Data node instance-identifier associated with the
+              data node, action, or notification controlled by
+              this rule.
+
+              Configuration data or state data
+              instance-identifiers start with a top-level
+              data node.  A complete instance-identifier is
+              required for this type of path value.
+
+              The special value '/' refers to all possible
+              datastore contents.";
         }
 
         leaf access-operations {
