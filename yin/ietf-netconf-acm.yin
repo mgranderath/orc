@@ -211,7 +211,7 @@ The accessible tree includes actions and notifications tied
 to data nodes.</text>
     </description>
   </typedef>
-  <uci:package name="nacm"/>
+  <uci:package name="ietf-netconf-acm"/>
   <container name="nacm">
     <uci:section name="nacm"/>
     <uci:section-name name="nacm"/>
@@ -406,60 +406,56 @@ object being accessed is defined in the module with the
 specified module name.</text>
           </description>
         </leaf>
-        <choice name="rule-type">
+        <leaf name="rule-type">
+          <uci:option name="rule_type"/>
+          <type name="uint32"/>
           <description>
             <text>This choice matches if all leafs present in the rule
 match the request.  If no leafs are present, the
 choice matches all requests.</text>
           </description>
-          <case name="protocol-operation">
-            <leaf name="rpc-name">
-              <uci:option name="rpc-name"/>
-              <type name="union">
-                <type name="matchall-string-type"/>
-                <type name="string"/>
-              </type>
-              <description>
-                <text>This leaf matches if it has the value '*' or if
-its value equals the requested protocol operation
-name.</text>
-              </description>
-            </leaf>
-          </case>
-          <case name="notification">
-            <leaf name="notification-name">
-              <uci:option name="notification-name"/>
-              <type name="union">
-                <type name="matchall-string-type"/>
-                <type name="string"/>
-              </type>
-              <description>
-                <text>This leaf matches if it has the value '*' or if its
-value equals the requested notification name.</text>
-              </description>
-            </leaf>
-          </case>
-          <case name="data-node">
-            <leaf name="path">
-              <uci:option name="path"/>
-              <type name="node-instance-identifier"/>
-              <mandatory value="true"/>
-              <description>
-                <text>Data node instance-identifier associated with the
-data node, action, or notification controlled by
-this rule.
+        </leaf>
+        <leaf name="rpc-name">
+          <uci:option name="rpc-name"/>
+          <type name="union">
+            <type name="matchall-string-type"/>
+            <type name="string"/>
+          </type>
+          <description>
+            <text>This leaf matches if it has the value '*' or if
+ its value equals the requested protocol operation
+ name.</text>
+          </description>
+        </leaf>
+        <leaf name="notification-name">
+          <uci:option name="notification-name"/>
+          <type name="union">
+            <type name="matchall-string-type"/>
+            <type name="string"/>
+          </type>
+          <description>
+            <text>This leaf matches if it has the value '*' or if its
+ value equals the requested notification name.</text>
+          </description>
+        </leaf>
+        <leaf name="path">
+          <uci:option name="path"/>
+          <type name="node-instance-identifier"/>
+          <mandatory value="true"/>
+          <description>
+            <text>Data node instance-identifier associated with the
+ data node, action, or notification controlled by
+ this rule.
 
-Configuration data or state data
-instance-identifiers start with a top-level
-data node.  A complete instance-identifier is
-required for this type of path value.
+ Configuration data or state data
+ instance-identifiers start with a top-level
+ data node.  A complete instance-identifier is
+ required for this type of path value.
 
-The special value '/' refers to all possible
-datastore contents.</text>
-              </description>
-            </leaf>
-          </case>
-        </choice>
+ The special value '/' refers to all possible
+ datastore contents.</text>
+          </description>
+        </leaf>
         <leaf name="access-operations">
           <uci:option name="access-operations"/>
           <type name="union">

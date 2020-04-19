@@ -87,7 +87,7 @@ to the Counter32 type of the SMIv2.</text>
     </description>
     <reference>
       <text>RFC 2578: Structure of Management Information Version 2
-  (SMIv2)</text>
+         (SMIv2)</text>
     </reference>
   </typedef>
   <typedef name="zero-based-counter32">
@@ -114,7 +114,7 @@ to the ZeroBasedCounter32 textual convention of the SMIv2.</text>
     </description>
     <reference>
       <text>RFC 4502: Remote Network Monitoring Management Information
-  Base Version 2</text>
+         Base Version 2</text>
     </reference>
   </typedef>
   <typedef name="counter64">
@@ -146,7 +146,7 @@ to the Counter64 type of the SMIv2.</text>
     </description>
     <reference>
       <text>RFC 2578: Structure of Management Information Version 2
-  (SMIv2)</text>
+         (SMIv2)</text>
     </reference>
   </typedef>
   <typedef name="zero-based-counter64">
@@ -176,7 +176,7 @@ to the ZeroBasedCounter64 textual convention of the SMIv2.</text>
     </description>
     <reference>
       <text>RFC 2856: Textual Conventions for Additional High Capacity
-  Data Types</text>
+         Data Types</text>
     </reference>
   </typedef>
   <typedef name="gauge32">
@@ -200,7 +200,7 @@ to the Gauge32 type of the SMIv2.</text>
     </description>
     <reference>
       <text>RFC 2578: Structure of Management Information Version 2
-  (SMIv2)</text>
+         (SMIv2)</text>
     </reference>
   </typedef>
   <typedef name="gauge64">
@@ -225,7 +225,7 @@ in RFC 2856</text>
     </description>
     <reference>
       <text>RFC 2856: Textual Conventions for Additional High Capacity
-  Data Types</text>
+         Data Types</text>
     </reference>
   </typedef>
   <typedef name="object-identifier">
@@ -281,7 +281,7 @@ to the OBJECT IDENTIFIER type of the SMIv2.</text>
     </description>
     <reference>
       <text>RFC 2578: Structure of Management Information Version 2
-  (SMIv2)</text>
+         (SMIv2)</text>
     </reference>
   </typedef>
   <typedef name="yang-identifier">
@@ -303,7 +303,7 @@ sequence 'xml'.</text>
     </description>
     <reference>
       <text>RFC 6020: YANG - A Data Modeling Language for the Network
-  Configuration Protocol (NETCONF)</text>
+         Configuration Protocol (NETCONF)</text>
     </reference>
   </typedef>
   <typedef name="date-and-time">
@@ -366,7 +366,7 @@ to the TimeTicks type of the SMIv2.</text>
     </description>
     <reference>
       <text>RFC 2578: Structure of Management Information Version 2
-  (SMIv2)</text>
+         (SMIv2)</text>
     </reference>
   </typedef>
   <typedef name="timestamp">
@@ -422,7 +422,7 @@ to the MacAddress textual convention of the SMIv2.</text>
     </description>
     <reference>
       <text>IEEE 802: IEEE Standard for Local and Metropolitan Area
-  Networks: Overview and Architecture
+         Networks: Overview and Architecture
 RFC 2579: Textual Conventions for SMIv2</text>
     </reference>
   </typedef>
@@ -464,7 +464,7 @@ f81d4fae-7dec-11d0-a765-00a0c91e6bf6
     </description>
     <reference>
       <text>RFC 4122: A Universally Unique IDentifier (UUID) URN
-  Namespace</text>
+         Namespace</text>
     </reference>
   </typedef>
   <typedef name="dotted-quad">

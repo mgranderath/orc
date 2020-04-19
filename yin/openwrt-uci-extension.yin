@@ -7,7 +7,7 @@
   <contact>
     <text>Malte Granderath &lt;m.granderath@jacobs-university.de&gt;</text>
   </contact>
-  <revision date="2019-04-24">
+  <revision date="2019-09-14">
     <description>
       <text>initial revision</text>
     </description>
@@ -22,6 +22,9 @@
     <argument name="name"/>
   </extension>
   <extension name="section-name">
+    <argument name="name"/>
+  </extension>
+  <extension name="leaf-as-name">
     <argument name="name"/>
   </extension>
 </module>
