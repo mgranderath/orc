@@ -29,7 +29,8 @@ ALLOWED_TYPES = {
     "bits": "BITS",
     "yang:xpath1.0": "STRING",
     "counter32": "INT_32",
-    "leafref": "LEAF_REF"
+    "leafref": "LEAF_REF",
+    "empty": "EMPTY"
 }
 
 
@@ -133,7 +134,14 @@ def handle_typedef(typedefs):
             "leaf-type": typedefs["type"]["@name"]
         }
         if converted["leaf-type"] == "string" and "pattern" in typedefs["type"]:
-            converted["pattern"] = "^" + typedefs["type"]["pattern"]["@value"] + "$"
+            if isinstance(typedefs["type"]["pattern"], list):
+                regex = ""
+                for val in typedefs["type"]["pattern"]:
+                    regex += "({})|".format(val["@value"])
+                converted["pattern"] = "^({})$".format(regex[:len(regex)-1])
+                print(converted["pattern"])
+            else:
+                converted["pattern"] = "^" + typedefs["type"]["pattern"]["@value"] + "$"
         if range_allowed(converted["leaf-type"]) and "range" in typedefs["type"]:
             range_split = typedefs["type"]["range"]["@value"].split("..", 1)
             converted["from"] = range_split[0]
@@ -231,6 +239,7 @@ def main():
     modules = []
 
     for file in args.file:
+        print(file)
         with open(file) as yin:
             data = yin.read()
             js = convert_yin_to_json(data)
