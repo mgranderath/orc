@@ -16,7 +16,19 @@
         "lastname": "student",
         "age": 21,
         "major": "CS",
-        "grade": 75
+        "grade": 75,
+        "option": [
+          {
+            "id": "0",
+            "name": "example-name",
+            "more-options": [
+              {
+                "id": "1",
+                "value": "example-value"
+              }
+            ]
+          }
+        ]
       }
     ]
   }

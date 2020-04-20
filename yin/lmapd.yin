@@ -367,8 +367,8 @@ will try to identify a suitable program based on
 the registry information present.</text>
           </description>
         </leaf>
-        <list name="option">
-          <uci:section name="option"/>
+        <list name="task-option">
+          <uci:section name="task_option"/>
           <uci:leaf-as-name name="id"/>
           <key value="id"/>
           <ordered-by value="user"/>
@@ -638,8 +638,8 @@ the execution-mode of the Schedule.</text>
               <text>The Task invoked by this Action.</text>
             </description>
           </leaf>
-          <list name="option">
-            <uci:section name="option"/>
+          <list name="action-option">
+            <uci:section name="action_options"/>
             <uci:leaf-as-name name="id"/>
             <key value="id"/>
             <ordered-by value="user"/>

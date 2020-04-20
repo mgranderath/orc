@@ -1,10 +1,32 @@
 {
   "lmapd:lmap": {
     "agent": {
-      "agent-id": "550e8400-e29b-41d4-a716-446655440000",
-      "group-id": "network measurement at the north-pole",
-      "report-agent-id": true,
-      "report-group-id": false
+       "agent-id": "587d9c7e-c65e-4d9c-a9c6-9aac1774287b",
+       "report-group-id": true,
+       "group-id": "42",
+       "report-agent-id": false
+    },
+    "schedules": {
+      "schedule": [
+        {
+          "name": "demo",
+          "start": "every-minute",
+          "execution-mode": 1,
+          "action": [
+            {
+              "name": "mtr0",
+              "task": "mtr",
+              "destination": ["report-primary"],
+              "action-option": [
+                {
+                  "id": "www.ietf.org",
+                  "value": "www.ietf.org"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   }
 }

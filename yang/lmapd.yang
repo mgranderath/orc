@@ -379,11 +379,11 @@ module lmapd {
              the registry information present.";
         }
 
-        list option {
-          uci:section "option";
+        list task-option {
+          uci:section "task_option";
           uci:leaf-as-name "id";
 
-          key "id";
+          key id;
           ordered-by user;
           description
             "A list of options passed to the Task.  It is a list of
@@ -654,11 +654,11 @@ module lmapd {
               "The Task invoked by this Action.";
           }
 
-          list option {
-            uci:section "option";
+          list action-option {
+            uci:section "action_options";
             uci:leaf-as-name "id";
 
-            key "id";
+            key id;
             ordered-by user;
             description
               "A list of options passed to the Task.  It is a list of
