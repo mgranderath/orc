@@ -3,7 +3,6 @@
         xmlns="urn:ietf:params:xml:ns:yang:yin:1"
         xmlns:lmapd="urn:ietf:params:xml:ns:yang:lmapd"
         xmlns:yang="urn:ietf:params:xml:ns:yang:ietf-yang-types"
-        xmlns:inet="urn:ietf:params:xml:ns:yang:ietf-inet-types"
         xmlns:nacm="urn:ietf:params:xml:ns:yang:ietf-netconf-acm"
         xmlns:lmap="urn:ietf:params:xml:ns:yang:ietf-lmap-common"
         xmlns:uci="urn:jacobs:yang:openwrt-uci">
@@ -12,9 +11,6 @@
   <prefix value="lmapd"/>
   <import module="ietf-yang-types">
     <prefix value="yang"/>
-  </import>
-  <import module="ietf-inet-types">
-    <prefix value="inet"/>
   </import>
   <import module="ietf-netconf-acm">
     <prefix value="nacm"/>
@@ -79,6 +75,41 @@ a configured Task.</text>
       <text>This type is used by data models that need to reference
 a configured Schedule.</text>
     </description>
+  </typedef>
+  <typedef name="uri">
+    <type name="string"/>
+    <description>
+      <text>The uri type represents a Uniform Resource Identifier
+(URI) as defined by STD 66.
+Objects using the uri type MUST be in US-ASCII encoding,
+and MUST be normalized as described by RFC 3986 Sections
+6.2.1, 6.2.2.1, and 6.2.2.2.  All unnecessary
+percent-encoding is removed, and all case-insensitive
+characters are set to lowercase except for hexadecimal
+digits, which are normalized to uppercase as described in
+Section 6.2.2.1.
+The purpose of this normalization is to help provide
+unique URIs.  Note that this normalization is not
+sufficient to provide uniqueness.  Two URIs that are
+textually distinct after this normalization may still be
+equivalent.
+Objects using the uri type may restrict the schemes that
+they permit.  For example, 'data:' and 'urn:' schemes
+might not be appropriate.
+A zero-length URI is not a valid URI.  This can be used to
+express 'URI absent' where required.
+In the value set and its semantics, this type is equivalent
+to the Uri SMIv2 textual convention defined in RFC 5017.</text>
+    </description>
+    <reference>
+      <text>RFC 3986: Uniform Resource Identifier (URI): Generic Syntax
+RFC 3305: Report from the Joint W3C/IETF URI Planning Interest
+          Group: Uniform Resource Identifiers (URIs), URLs,
+          and Uniform Resource Names (URNs): Clarifications
+          and Recommendations
+RFC 5017: MIB Textual Conventions for Uniform Resource
+          Identifiers (URIs)</text>
+    </reference>
   </typedef>
   <grouping name="start-end-grouping">
     <description>
@@ -170,7 +201,7 @@ the Measurement Agent.</text>
             </description>
             <leaf name="uri">
               <uci:option name="uri"/>
-              <type name="inet:uri"/>
+              <type name="uri"/>
               <description>
                 <text>A URI identifying an entry in a registry.</text>
               </description>
@@ -343,7 +374,7 @@ result in a runtime execution error.</text>
           </description>
           <leaf name="uri">
             <uci:option name="uri"/>
-            <type name="inet:uri"/>
+            <type name="uri"/>
             <description>
               <text>A URI identifying an entry in a registry.</text>
             </description>

@@ -139,7 +139,6 @@ def handle_typedef(typedefs):
                 for val in typedefs["type"]["pattern"]:
                     regex += "({})|".format(val["@value"])
                 converted["pattern"] = "^({})$".format(regex[:len(regex)-1])
-                print(converted["pattern"])
             else:
                 converted["pattern"] = "^" + typedefs["type"]["pattern"]["@value"] + "$"
         if range_allowed(converted["leaf-type"]) and "range" in typedefs["type"]:

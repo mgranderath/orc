@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a f_array=("openwrt-uci-extension" "ietf-yang-types" "ietf-inet-types" "ietf-netconf-acm" "ietf-lmap-common" "lmapd" "restconf-example")
+declare -a f_array=("openwrt-uci-extension" "ietf-yang-types" "ietf-netconf-acm" "ietf-lmap-common" "lmapd" "restconf-example")
 
 for val in ${f_array[@]}; do
     echo "pyang -f yin ./yang/$val.yang -p ./yang -o ./yin/$val.yin"
