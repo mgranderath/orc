@@ -238,7 +238,6 @@ def main():
     modules = []
 
     for file in args.file:
-        print(file)
         with open(file) as yin:
             data = yin.read()
             js = convert_yin_to_json(data)
