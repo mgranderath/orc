@@ -17,6 +17,12 @@
         "age": 21,
         "major": "CS",
         "grade": 75,
+        "contact-option": [
+          {
+            "email": "d_terzikj_jacobs_university_de",
+            "example-leaf": "example-leaf-example"
+          }
+        ],
         "option": [
           {
             "id": "0",

@@ -110,6 +110,8 @@ forever.</text>
   </grouping>
   <uci:package name="lmapd"/>
   <container name="lmap">
+    <uci:section name="lmap"/>
+    <uci:section-name name="lmap"/>
     <description>
       <text>Configuration and control of a Measurement Agent.</text>
     </description>

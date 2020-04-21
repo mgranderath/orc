@@ -114,6 +114,8 @@ module lmapd {
 
   uci:package "lmapd";
   container lmap {
+    uci:section "lmap";
+    uci:section-name "lmap";
     description
       "Configuration and control of a Measurement Agent.";
 
