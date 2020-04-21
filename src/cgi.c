@@ -57,7 +57,6 @@ char *get_content() {
   char *length_str;
   char *trailing;
   char *file_path;
-  char buffer[MAX_BUFFER_SIZE];
   unsigned long length;
 
   length_str = getenv("CONTENT_LENGTH");
@@ -82,11 +81,9 @@ char *get_content() {
       return NULL;
     }
 
-    while (fread(buffer, sizeof(char), MAX_BUFFER_SIZE, fp) == MAX_BUFFER_SIZE) {
-      strcat(post_data, buffer);
+    if (fread(post_data, sizeof(char), size, fp) == size) {
+      post_data[size] = '\0';
     }
-    strcat(post_data, buffer);
-    post_data[size] = '\0';
     fclose(fp);
 
   } else {
