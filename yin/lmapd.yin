@@ -639,7 +639,7 @@ the execution-mode of the Schedule.</text>
             </description>
           </leaf>
           <list name="action-option">
-            <uci:section name="action_options"/>
+            <uci:section name="action_option"/>
             <uci:leaf-as-name name="id"/>
             <key value="id"/>
             <ordered-by value="user"/>

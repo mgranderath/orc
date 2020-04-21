@@ -655,7 +655,7 @@ module lmapd {
           }
 
           list action-option {
-            uci:section "action_options";
+            uci:section "action_option";
             uci:leaf-as-name "id";
 
             key id;
