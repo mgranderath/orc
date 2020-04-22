@@ -19,6 +19,7 @@ static UciWritePair **verify_content_yang(struct json_object *content,
                                           int root, int check_exists) {
   UciWritePair **command_list = NULL;
   const char *child_type = NULL;
+  struct UciPath *old_path = NULL;
   if (!(child_type = json_get_string(yang_node, YANG_TYPE))) {
     *err = YANG_SCHEMA_ERROR;
     return NULL;
@@ -96,12 +97,19 @@ static UciWritePair **verify_content_yang(struct json_object *content,
         struct json_object *tmp = json_object_array_get_idx(content, index);
         path->index = pos;
         path->where = 1;
+        old_path = (struct UciPath *) malloc(sizeof(struct UciPath));
+        if (!old_path) {
+          return NULL;
+        }
+        memcpy(old_path, path, sizeof(struct UciPath));
         UciWritePair **tmp_list =
             verify_content_yang(tmp, yang_node, path, err, 0, check_exists);
         if (*err != RE_OK) {
           free_uci_write_list(tmp_list);
           return NULL;
         }
+        memcpy(path, old_path, sizeof(struct UciPath));
+        free(old_path);
         for (size_t i = 0; i < vector_size(tmp_list); i++) {
           vector_push_back(command_list, tmp_list[i]);
         }
