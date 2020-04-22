@@ -120,10 +120,33 @@ def extract_type_statements(generated, key, value, imported):
         type_name = {
             "leaf-type": type_name,
             "from": range_split[0],
-            "to": range_split[1]
+            "to": get_to_range(range_split[0], range_split[1], type_name)
         }
     generated["leaf-type"] = type_name
 
+def get_to_range(lower_bound, upper_bound, t):
+    print (lower_bound, upper_bound, t)
+    if isinstance(upper_bound, int):
+        return upper_bound
+    if upper_bound == "max":
+        if t == "int8":
+            return (2**7)-1
+        elif t == "int16":
+            return (2**15)-1
+        elif t == "int32":
+            return (2**31)-1
+        elif t == "int64":
+            return (2**63)-1
+        elif t == "uint8":
+            return (2**8)-1
+        elif t == "uint16":
+            return (2**16)-1
+        elif t == "uint32":
+            return (2**32)-1
+        else:
+            return (2**64)-1
+    else:
+        return lower_bound
 
 def handle_typedef(typedefs):
     if isinstance(typedefs, dict):
@@ -144,7 +167,7 @@ def handle_typedef(typedefs):
         if range_allowed(converted["leaf-type"]) and "range" in typedefs["type"]:
             range_split = typedefs["type"]["range"]["@value"].split("..", 1)
             converted["from"] = range_split[0]
-            converted["to"] = range_split[1]
+            converted["to"] = get_to_range(range_split[0], range_split[1], converted["leaf-type"])
         types[typedefs["@name"]] = converted
     elif isinstance(typedefs, list):
         for item in typedefs:
@@ -222,7 +245,7 @@ def process_imported_types(args, imported):
                             if range_allowed(converted["leaf-type"]) and "range" in item["type"]:
                                 range_split = item["type"]["range"]["@value"].split("..", 1)
                                 converted["from"] = range_split[0]
-                                converted["to"] = range_split[1]
+                                converted["to"] = get_to_range(range_split[0], range_split[1], converted["leaf-type"])
                             types[val["type_name"]] = converted
 
 
