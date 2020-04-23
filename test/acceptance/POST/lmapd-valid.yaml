@@ -5,6 +5,7 @@
             {
                "name":"demo",
                "start":"every-minute",
+               "execution-mode": "sequential",
                "action":[
                   {
                      "name":"mtr0",
