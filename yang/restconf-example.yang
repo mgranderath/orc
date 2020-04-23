@@ -18,6 +18,34 @@ module restconf-example {
     }
   }
 
+  grouping student-data {
+    leaf firstname {
+      uci:option "firstname";
+      type string;
+    }
+    leaf lastname {
+      uci:option "lastname";
+      type string;
+    }
+    leaf age {
+      uci:option "age";
+      type uint8 {
+        range "1..120";
+      }
+    }
+  }
+
+  grouping instructor-data {
+    leaf name {
+      uci:option "name";
+      type string;
+    }
+    leaf email {
+      uci:option "email";
+      type email;
+    }
+  }
+
   uci:package "restconf-example";
   container course {
     uci:section-name "course";
