@@ -76,10 +76,12 @@ class Grouping:
             return
         self.tree[name] = value
         self.current_size += 1
-    
-    def print_tree(self):
-        print(self.tree)
 
+    def find(self, name):
+        if name in self.tree:
+            return self.tree[name]["map"]
+        return None
+    
 def convert_yin_to_json(data):
     val = xmltodict.parse(data)
     return json.loads(json.dumps(val))
@@ -237,6 +239,20 @@ def handle_grouping(value, imported, groupings):
         for val in value:
             handle_grouping(val, imported, groupings)
 
+def extract_uses(generated, value, imported, groupings):
+    if "@name" not in value:
+        print("Invalid use of 'uses': {}".format(value))
+        return
+    name = value["@name"]
+    grouping = groupings.find(name)
+    if grouping == None:
+        print("Could not find {} in groupings".format(name))
+        return
+    for key, val in grouping.items():
+        if key in generated["map"].keys():
+            print("A node with name '{}' already exists".format(key))
+            continue
+        generated["map"][key] = val
 
 def convert(level, imported, groupings, object_type=None):
     generated = {}
@@ -267,6 +283,8 @@ def convert(level, imported, groupings, object_type=None):
             generated["unique"] = to_be_split.split()
         if key in ["container", "leaf", "leaf-list", "list"]:
             process_node(generated, key, value, imported, groupings)
+        if key == "uses":
+            extract_uses(generated, value, imported, groupings)
     return generated
 
 
@@ -320,7 +338,6 @@ def main():
             groupings = Grouping()
             imported = Imported()
             js = convert(js, imported, groupings)
-            groupings.print_tree()
             modules.append((os.path.basename(file).split('.')[0], js))
 
     process_imported_types(args, imported)
