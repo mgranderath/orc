@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="openwrt-uci-extension"
+        xmlns="urn:ietf:params:xml:ns:yang:yin:1"
+        xmlns:ouci="urn:jacobs:yang:openwrt-uci">
+  <namespace uri="urn:jacobs:yang:openwrt-uci"/>
+  <prefix value="ouci"/>
+  <contact>
+    <text>Malte Granderath &lt;m.granderath@jacobs-university.de&gt;</text>
+  </contact>
+  <revision date="2019-09-14">
+    <description>
+      <text>initial revision</text>
+    </description>
+  </revision>
+  <extension name="package">
+    <argument name="name"/>
+  </extension>
+  <extension name="section">
+    <argument name="name"/>
+  </extension>
+  <extension name="option">
+    <argument name="name"/>
+  </extension>
+  <extension name="section-name">
+    <argument name="name"/>
+  </extension>
+  <extension name="leaf-as-name">
+    <argument name="name"/>
+  </extension>
+</module>

@@ -1,0 +1,1138 @@
+module lmapd {
+
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:lmapd";
+  prefix "lmapd";
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import ietf-netconf-acm {
+    prefix nacm;
+  }
+  import ietf-lmap-common {
+    prefix lmap;
+  }
+  import openwrt-uci-extension {
+    prefix uci;
+  }
+
+  organization
+    "IETF Large-Scale Measurement of Broadband Performance
+     Working Group";
+
+  contact
+    "WG Web:   <https://datatracker.ietf.org/wg/lmap>
+     WG List:  <mailto:lmap@ietf.org>
+
+     Editor:   Juergen Schoenwaelder
+               <j.schoenwaelder@jacobs-university.de>
+
+     Editor:   Vaibhav Bajpai
+               <bajpaiv@in.tum.de>";
+
+  description
+    "This module defines a data model for controlling Measurement
+     Agents that are part of a Large-Scale Measurement Platform
+     (LMAP).  This data model is expected to be implemented by
+     Measurement Agents.";
+
+  revision "2017-08-08" {
+    description
+      "Initial version";
+    reference
+      "RFC 8194: A YANG Data Model for LMAP Measurement Agents";
+  }
+
+  /*
+   * Typedefs
+   */
+
+  typedef event-ref {
+    type leafref {
+      path "/lmap/events/event/name";
+    }
+    description
+      "This type is used by data models that need to reference
+       a configured event source.";
+  }
+
+  typedef task-ref {
+    type leafref {
+      path "/lmap/tasks/task/name";
+    }
+    description
+      "This type is used by data models that need to reference
+       a configured Task.";
+  }
+
+  typedef schedule-ref {
+    type leafref {
+      path "/lmap/schedules/schedule/name";
+    }
+    description
+      "This type is used by data models that need to reference
+       a configured Schedule.";
+  }
+
+  /*
+   * Groupings
+   */
+
+  grouping start-end-grouping {
+    description
+      "A grouping that provides start and end times for
+       Event objects.";
+    leaf start {
+      uci:option "start";
+      type yang:date-and-time;
+      description
+        "The date and time when the Event object
+         starts to create triggers.";
+    }
+    leaf end {
+      uci:option "end";
+      type yang:date-and-time;
+      description
+        "The date and time when the Event object
+         stops to create triggers.
+
+         It is generally a good idea to always configure
+         an end time and to refresh the end time as needed
+         to ensure that agents that lose connectivity to
+         their Controller do not continue executing Schedules
+         forever.";
+    }
+  }
+
+  grouping registry-grouping {
+    description
+      "This grouping models a list of entries in a registry
+       that identify functions of a Task.";
+
+    list function {
+      uci:section "function";
+      uci:leaf-as-name "uri";
+
+      key uri;
+      description
+        "A list of entries in a registry identifying functions.";
+
+      leaf uri {
+        uci:option "uri";
+        type inet:uri;
+        description
+          "A URI identifying an entry in a registry.";
+      }
+
+      leaf-list role {
+        uci:option "role";
+        type string;
+        description
+          "A set of roles for the identified registry entry.";
+      }
+    }
+  }
+
+  grouping options-grouping {
+    description
+      "A list of options of a Task.  Each option is a name/value
+       pair (where the value may be absent).";
+
+    list option {
+      uci:section "task_option";
+      uci:leaf-as-name "id";
+
+      key "id";
+      ordered-by user;
+      description
+        "A list of options passed to the Task.  It is a list of
+         key/value pairs and may be used to model options.
+         Options may be used to identify the role of a Task
+         or to pass a Channel name to a Task.";
+
+      leaf id {
+        uci:option "id";
+
+        type lmap:identifier;
+        description
+          "An identifier uniquely identifying an option.  This
+           identifier is required by YANG to uniquely identify
+           a name/value pair, but it otherwise has no semantic
+           value";
+      }
+
+      leaf name {
+        uci:option "name";
+
+        type string;
+        description
+          "The name of the option.";
+      }
+
+      leaf value {
+        uci:option "value";
+
+        type string;
+        description
+          "The value of the option.";
+      }
+    }
+  }
+
+  /*
+   * Capability, configuration, and state data nodes
+   */
+
+  uci:package "lmapd";
+  container lmap {
+    uci:section "lmap";
+    uci:section-name "lmap";
+    description
+      "Configuration and control of a Measurement Agent.";
+
+    container capabilities {
+      uci:section "capabilities";
+      uci:section-name "capabilities";
+      config false;
+      description
+        "Agent capabilities including a list of supported Tasks.";
+
+      leaf version {
+        uci:option "version";
+        type string;
+        config false;
+        mandatory true;
+        description
+          "A short description of the software implementing the
+           Measurement Agent.  This should include the version
+           number of the Measurement Agent software.";
+      }
+
+      leaf-list tag {
+        uci:option "tag";
+        type lmap:tag;
+        config false;
+        description
+          "An optional unordered set of tags that provide
+           additional information about the capabilities of
+           the Measurement Agent.";
+      }
+
+      container tasks {
+        uci:section "tasks";
+        uci:section-name "tasks";
+        description
+          "A list of Tasks that the Measurement Agent supports.";
+
+        list task {
+          uci:section "task";
+          uci:leaf-as-name "name";
+          key name;
+          description
+            "The list of Tasks supported by the Measurement Agent.";
+
+          leaf name {
+            uci:option "name";
+            type lmap:identifier;
+            description
+              "The unique name of a Task capability.";
+          }
+
+          uses registry-grouping;
+
+          leaf version {
+            uci:option "version";
+            type string;
+
+            description
+              "A short description of the software implementing
+               the Task.  This should include the version
+               number of the Measurement Task software.";
+          }
+
+          leaf program {
+            uci:option "program";
+            type string;
+            description
+              "The (local) program to invoke in order to execute
+               the Task.";
+          }
+        }
+      }
+    }
+
+    /*
+     * Agent Configuration
+     */
+
+    container agent {
+      uci:section "agent";
+      uci:section-name "agent";
+      description
+        "Configuration of parameters affecting the whole
+         Measurement Agent.";
+
+      leaf agent-id {
+        uci:option "agent_id";
+        type yang:uuid;
+        description
+          "The agent-id identifies a Measurement Agent with
+           a very low probability of collision.  In certain
+           deployments, the agent-id may be considered
+           sensitive, and hence this object is optional.";
+      }
+
+      leaf group-id {
+        uci:option "group_id";
+        type string;
+        description
+          "The group-id identifies a group of Measurement
+           Agents.  In certain deployments, the group-id
+           may be considered less sensitive than the
+           agent-id.";
+      }
+
+      leaf measurement-point {
+        uci:option "measurement_point";
+        type string;
+        description
+          "The measurement point indicating where the
+            Measurement Agent is located on a path.";
+        reference
+          "RFC 7398: A Reference Path and Measurement Points
+                     for Large-Scale Measurement of Broadband
+                     Performance";
+      }
+
+      leaf report-agent-id {
+        uci:option "report_agent_id";
+        type boolean;
+        must '. != "true" or ../agent-id' {
+          description
+            "An agent-id must exist for this to be set
+             to true.";
+        }
+        default false;
+        description
+          "The 'report-agent-id' controls whether the
+           'agent-id' is reported to Collectors.";
+      }
+
+      leaf report-group-id {
+        uci:option "report_group_id";
+        type boolean;
+        must '. != "true" or ../group-id' {
+          description
+            "A group-id must exist for this to be set
+             to true.";
+        }
+        default false;
+        description
+          "The 'report-group-id' controls whether the
+           'group-id' is reported to Collectors.";
+      }
+
+      leaf report-measurement-point {
+        uci:option "report_measurement_point";
+        type boolean;
+        must '. != "true" or ../measurement-point' {
+          description
+            "A measurement-point must exist for this to be
+             set to true.";
+        }
+        default false;
+        description
+          "The 'report-measurement-point' controls whether
+           the 'measurement-point' is reported to Collectors.";
+      }
+
+      leaf controller-timeout {
+        uci:option "controller_timeout";
+        type uint32;
+        units "seconds";
+        description
+          "A timer is started after each successful contact
+           with a Controller.  When the timer reaches the
+           controller-timeout, an event (controller-lost) is
+           raised indicating that connectivity to the Controller
+           has been lost.";
+      }
+
+      leaf last-started {
+        uci:option "last_started";
+        type yang:date-and-time;
+        config false;
+        mandatory true;
+        description
+          "The date and time the Measurement Agent last started.";
+      }
+    }
+
+    /*
+     * Task Configuration
+     */
+
+    container tasks {
+      uci:section "tasks";
+      uci:section-name "tasks";
+      description
+        "Configuration of LMAP Tasks.";
+
+      list task {
+        uci:section "task";
+        uci:leaf-as-name "name";
+        key name;
+        description
+          "The list of Tasks configured on the Measurement
+           Agent.  Note that a configured Task MUST resolve to a
+           Task listed in the capabilities.  Attempts to execute
+           a configured Task that is not listed in the capabilities
+           result in a runtime execution error.";
+
+        leaf name {
+          uci:option "name";
+          type lmap:identifier;
+          description
+            "The unique name of a Task.";
+        }
+
+        uses registry-grouping;
+
+        leaf program {
+          uci:option "program";
+          type string;
+          nacm:default-deny-write;
+
+          description
+            "The (local) program to invoke in order to execute
+             the Task.  If this leaf is not set, then the system
+             will try to identify a suitable program based on
+             the registry information present.";
+        }
+
+        uses options-grouping;
+
+        leaf-list tag {
+          uci:option "tag";
+          type lmap:identifier;
+          description
+            "A set of Task-specific tags that are reported
+             together with the measurement results to a Collector.
+             A tag can be used, for example, to carry the
+             Measurement Cycle ID.";
+        }
+      }
+    }
+
+    /*
+     * Schedule Instructions
+     */
+
+    container schedules {
+      uci:section "schedules";
+      uci:section-name "schedules";
+      description
+        "Configuration of LMAP Schedules.  Schedules control
+         which Tasks are executed by the LMAP implementation.";
+
+      list schedule {
+        uci:section "schedule";
+        uci:leaf-as-name "name";
+        key name;
+        description
+          "Configuration of a particular Schedule.";
+
+        leaf name {
+          uci:option "name";
+          type lmap:identifier;
+          description
+            "The locally unique, administratively assigned name
+             for this Schedule.";
+        }
+
+        leaf start {
+          uci:option "start";
+          type event-ref;
+          mandatory true;
+
+          description
+            "The event source controlling the start of the
+             scheduled Actions.";
+        }
+
+        leaf end {
+          uci:option "end";
+          type event-ref;
+          description
+            "The event source controlling the graceful
+              forced termination of the scheduled Actions.";
+        }
+
+        leaf duration {
+          uci:option "duration";
+          type uint32;
+          units "seconds";
+          description
+            "The duration controlling the graceful forced
+              termination of the scheduled Actions.";
+        }
+
+        leaf execution-mode {
+          uci:option "execution_mode";
+          type enumeration {
+            enum sequential {
+              value 1;
+              description
+                "The Actions of the Schedule are executed
+                 sequentially.";
+            }
+            enum parallel {
+              value 2;
+              description
+                "The Actions of the Schedule are executed
+                 concurrently.";
+            }
+            enum pipelined {
+              value 3;
+
+              description
+                "The Actions of the Schedule are executed in a
+                 pipelined mode.  Output created by an Action is
+                 passed as input to the subsequent Action.";
+            }
+          }
+          default pipelined;
+          description
+            "The execution mode of this Schedule determines in
+             which order the Actions of the Schedule are executed.";
+        }
+
+        leaf-list tag {
+          uci:option "tag";
+          type lmap:tag;
+          description
+            "A set of Schedule-specific tags that are reported
+             together with the measurement results to a Collector.";
+        }
+
+        leaf-list suppression-tag {
+          uci:option "suppression_tag";
+          type lmap:tag;
+          description
+            "A set of Suppression tags that are used to select
+             Schedules to be suppressed.";
+        }
+
+        leaf state {
+          uci:option "state";
+          type enumeration {
+            enum enabled {
+              value 1;
+              description
+                "The value 'enabled' indicates that the
+                 Schedule is currently enabled.";
+            }
+            enum disabled {
+              value 2;
+              description
+                "The value 'disabled' indicates that the
+                 Schedule is currently disabled.";
+            }
+            enum running {
+              value 3;
+              description
+                "The value 'running' indicates that the
+                 Schedule is currently running.";
+            }
+            enum suppressed {
+              value 4;
+              description
+                "The value 'suppressed' indicates that the
+                 Schedule is currently suppressed.";
+            }
+          }
+          config false;
+          mandatory true;
+          description
+            "The current state of the Schedule.";
+        }
+
+        leaf storage {
+          uci:option "storage";
+          type yang:gauge64;
+          units "bytes";
+          config false;
+          mandatory true;
+          description
+            "The amount of secondary storage (e.g., allocated in a
+             file system) holding temporary data allocated to the
+             Schedule in bytes.  This object reports the amount of
+             allocated physical storage and not the storage used
+             by logical data records.";
+        }
+
+        leaf invocations {
+          uci:option "invocations";
+          type yang:counter32;
+          config false;
+          mandatory true;
+          description
+            "Number of invocations of this Schedule.  This counter
+             does not include suppressed invocations or invocations
+             that were prevented due to an overlap with a previous
+             invocation of this Schedule.";
+        }
+
+        leaf suppressions {
+          uci:option "suppressions";
+          type yang:counter32;
+          config false;
+          mandatory true;
+          description
+            "Number of suppressed executions of this Schedule.";
+        }
+
+        leaf overlaps {
+          uci:option "overlaps";
+          type yang:counter32;
+          config false;
+          mandatory true;
+
+          description
+            "Number of executions prevented due to overlaps with
+             a previous invocation of this Schedule.";
+        }
+
+        leaf failures {
+          uci:option "failures";
+          type yang:counter32;
+          config false;
+          mandatory true;
+          description
+            "Number of failed executions of this Schedule.  A
+             failed execution is an execution where at least
+             one Action failed.";
+        }
+
+        leaf last-invocation {
+          uci:option "last_invocation";
+          type yang:date-and-time;
+          config false;
+          description
+            "The date and time of the last invocation of
+             this Schedule.";
+        }
+
+        list action {
+          uci:section "action";
+          uci:leaf-as-name "name";
+          key name;
+          description
+            "An Action describes a Task that is invoked by the
+             Schedule.  Multiple Actions are invoked according to
+             the execution-mode of the Schedule.";
+
+          leaf name {
+            uci:option "name";
+            type lmap:identifier;
+            description
+              "The unique identifier for this Action.";
+          }
+
+          leaf task {
+            uci:option "task";
+            type task-ref;
+            mandatory true;
+            description
+              "The Task invoked by this Action.";
+          }
+
+          uses options-grouping;
+
+          leaf-list destination {
+            uci:option "destination";
+            type schedule-ref;
+            description
+              "A set of Schedules receiving the output produced
+               by this Action.  The output is stored temporarily
+               since the Destination Schedules will in general
+               not be running when output is passed to them.  The
+               behavior of an Action passing data to its own
+               Schedule is implementation specific.
+
+               Data passed to a sequential or pipelined Schedule
+               is received by the Schedule's first Action.  Data
+               passed to a parallel Schedule is received by all
+               Actions of the Schedule.";
+          }
+
+          leaf-list tag {
+            uci:option "tag";
+            type lmap:tag;
+            description
+              "A set of Action-specific tags that are reported
+               together with the measurement results to a
+               Collector.";
+          }
+
+          leaf-list suppression-tag {
+            uci:option "suppression_tag";
+            type lmap:tag;
+            description
+              "A set of Suppression tags that are used to select
+               Actions to be suppressed.";
+          }
+
+          leaf state {
+            uci:option "state";
+            type enumeration {
+              enum enabled {
+                value 1;
+                description
+                  "The value 'enabled' indicates that the
+                   Action is currently enabled.";
+              }
+              enum disabled {
+                value 2;
+                description
+                  "The value 'disabled' indicates that the
+                   Action is currently disabled.";
+              }
+              enum running {
+                value 3;
+                description
+                  "The value 'running' indicates that the
+                   Action is currently running.";
+              }
+              enum suppressed {
+                value 4;
+                description
+                  "The value 'suppressed' indicates that the
+                   Action is currently suppressed.";
+              }
+            }
+            config false;
+            mandatory true;
+            description
+              "The current state of the Action.";
+          }
+
+          leaf storage {
+            uci:option "storage";
+            type yang:gauge64;
+            units "bytes";
+            config false;
+            mandatory true;
+            description
+              "The amount of secondary storage (e.g., allocated in a
+               file system) holding temporary data allocated to the
+               Schedule in bytes.  This object reports the amount of
+               allocated physical storage and not the storage used
+               by logical data records.";
+          }
+
+          leaf invocations {
+            uci:option "invocations";
+            type yang:counter32;
+            config false;
+            mandatory true;
+
+            description
+              "Number of invocations of this Action.  This counter
+               does not include suppressed invocations or invocations
+               that were prevented due to an overlap with a previous
+               invocation of this Action.";
+          }
+
+          leaf suppressions {
+            uci:option "suppressions";
+            type yang:counter32;
+            config false;
+            mandatory true;
+            description
+              "Number of suppressed executions of this Action.";
+          }
+
+          leaf overlaps {
+            uci:option "overlaps";
+            type yang:counter32;
+            config false;
+            mandatory true;
+            description
+              "Number of executions prevented due to overlaps with
+               a previous invocation of this Action.";
+          }
+
+          leaf failures {
+            uci:option "failures";
+            type yang:counter32;
+            config false;
+            mandatory true;
+            description
+              "Number of failed executions of this Action.";
+          }
+
+          leaf last-invocation {
+            uci:option "last_invocation";
+            type yang:date-and-time;
+            config false;
+            mandatory true;
+            description
+              "The date and time of the last invocation of
+               this Action.";
+          }
+
+          leaf last-completion {
+            uci:option "last_completion";
+            type yang:date-and-time;
+            config false;
+            mandatory true;
+            description
+              "The date and time of the last completion of
+               this Action.";
+          }
+
+          leaf last-status {
+            uci:option "last_status";
+            type lmap:status-code;
+            config false;
+            mandatory true;
+            description
+              "The status code returned by the last execution of
+               this Action.";
+          }
+
+          leaf last-message {
+            uci:option "last_message";
+            type string;
+            config false;
+            mandatory true;
+            description
+              "The status message produced by the last execution
+               of this Action.";
+          }
+
+          leaf last-failed-completion {
+            uci:option "last_failed_completion";
+            type yang:date-and-time;
+            config false;
+            mandatory true;
+            description
+              "The date and time of the last failed completion
+               of this Action.";
+          }
+
+          leaf last-failed-status {
+            uci:option "last_failed_status";
+            type lmap:status-code;
+            config false;
+            mandatory true;
+            description
+              "The status code returned by the last failed
+               execution of this Action.";
+          }
+
+          leaf last-failed-message {
+            uci:option "last_failed_message";
+            type string;
+            config false;
+            mandatory true;
+            description
+              "The status message produced by the last failed
+               execution of this Action.";
+          }
+        }
+      }
+    }
+
+    /*
+     * Suppression Instructions
+     */
+
+    container suppressions {
+      uci:section "suppressions";
+      uci:section-name "suppressions";
+      description
+        "Suppression information to prevent Schedules or
+         certain Actions from starting.";
+
+      list suppression {
+        uci:section "suppression";
+        uci:leaf-as-name "name";
+        key name;
+        description
+          "Configuration of a particular Suppression.";
+
+        leaf name {
+          uci:option "name";
+          type lmap:identifier;
+          description
+            "The locally unique, administratively assigned name
+             for this Suppression.";
+        }
+
+        leaf start {
+          uci:option "start";
+          type event-ref;
+          description
+            "The event source controlling the start of the
+             Suppression period.";
+        }
+
+        leaf end {
+          uci:option "end";
+          type event-ref;
+          description
+            "The event source controlling the end of the
+             Suppression period.  If not present, Suppression
+             continues indefinitely.";
+        }
+
+        leaf-list match {
+          uci:option "match";
+          type lmap:glob-pattern;
+          description
+            "A set of Suppression match patterns.  The Suppression
+             will apply to all Schedules (and their Actions) that
+             have a matching value in their suppression-tags
+             and to all Actions that have a matching value in
+             their suppression-tags.";
+        }
+
+        leaf stop-running {
+          uci:option "stop_running";
+          type boolean;
+          default false;
+          description
+            "If 'stop-running' is true, running Schedules and
+             Actions matching the Suppression will be terminated
+             when Suppression is activated.  If 'stop-running' is
+             false, running Schedules and Actions will not be
+             affected if Suppression is activated.";
+        }
+
+        leaf state {
+          uci:option "state";
+          type enumeration {
+            enum enabled {
+              value 1;
+              description
+                "The value 'enabled' indicates that the
+                 Suppression is currently enabled.";
+            }
+            enum disabled {
+              value 2;
+              description
+                "The value 'disabled' indicates that the
+                 Suppression is currently disabled.";
+            }
+            enum active {
+              value 3;
+              description
+                "The value 'active' indicates that the
+                 Suppression is currently active.";
+            }
+          }
+          config false;
+          mandatory true;
+          description
+            "The current state of the Suppression.";
+        }
+      }
+    }
+
+    /*
+     * Event Instructions
+     */
+
+    container events {
+      uci:section "events";
+      uci:section-name "events";
+      description
+        "Configuration of LMAP events.
+
+         Implementations may be forced to delay acting
+         upon the occurrence of events in the face of local
+         constraints.  An Action triggered by an event
+         therefore should not rely on the accuracy
+         provided by the scheduler implementation.";
+
+      list event {
+        uci:section "event";
+        uci:leaf-as-name "name";
+        key name;
+        description
+          "The list of event sources configured on the
+           Measurement Agent.";
+
+        leaf name {
+          uci:option "name";
+          type lmap:identifier;
+          description
+            "The unique name of an event source.";
+        }
+
+        leaf random-spread {
+          uci:option "random_spread";
+          type uint32;
+          units seconds;
+          description
+            "This optional leaf adds a random spread to the
+             computation of the event's trigger time.  The
+             random spread is a uniformly distributed random
+             number taken from the interval [0:random-spread].";
+        }
+
+        leaf cycle-interval {
+          uci:option "cycle_interval";
+          type uint32;
+          units seconds;
+          description
+            "The optional cycle-interval defines the duration
+             of the time interval in seconds that is used to
+             calculate cycle numbers.  No cycle number is
+             calculated if the optional cycle-interval does
+             not exist.";
+        }
+
+        leaf event-type {
+          uci:option "event_type";
+          type uint32;
+          description
+            "Different types of events.";
+        }
+
+        leaf interval {
+          uci:option "interval";
+          type uint32 {
+            range "1..max";
+          }
+          units "seconds";
+          mandatory true;
+          description
+            "The number of seconds between two triggers
+              generated by this periodic timing object.";
+        }
+
+        leaf-list month {
+          uci:option "month";
+          type lmap:month-or-all;
+          min-elements 1;
+          description
+            "A set of months at which this calendar timing
+              will trigger.  The wildcard means all months.";
+        }
+
+        leaf-list day-of-month {
+          uci:option "day_of_month";
+          type lmap:day-of-months-or-all;
+          min-elements 1;
+          description
+            "A set of days of the month at which this
+              calendar timing will trigger.  The wildcard means
+              all days of a month.";
+        }
+
+        leaf-list day-of-week {
+          uci:option "day_of_week";
+          type lmap:weekday-or-all;
+          min-elements 1;
+          description
+            "A set of weekdays at which this calendar timing
+              will trigger.  The wildcard means all weekdays.";
+        }
+
+        leaf-list hour {
+          uci:option "hour";
+          type lmap:hour-or-all;
+          min-elements 1;
+          description
+            "A set of hours at which this calendar timing will
+              trigger.  The wildcard means all hours of a day.";
+        }
+
+        leaf-list minute {
+          uci:option "minute";
+          type lmap:minute-or-all;
+          min-elements 1;
+          description
+            "A set of minutes at which this calendar timing
+              will trigger.  The wildcard means all minutes of
+              an hour.";
+        }
+
+        leaf-list second {
+          uci:option "second";
+          type lmap:second-or-all;
+          min-elements 1;
+          description
+            "A set of seconds at which this calendar timing
+              will trigger.  The wildcard means all seconds of
+              a minute.";
+        }
+
+        leaf timezone-offset {
+          uci:option "timezone_offset";
+          type lmap:timezone-offset;
+          description
+            "The time zone in which this calendar timing
+              object will be evaluated.  If not present,
+              the system's local time zone will be used.";
+        }
+
+        leaf time {
+          uci:option "time";
+          type yang:date-and-time;
+          mandatory true;
+          description
+            "This one-off timing object triggers once at
+              the configured date and time.";
+        }
+
+        leaf immediate {
+          uci:option "immediate";
+          type empty;
+          mandatory true;
+          description
+            "This immediate Event object triggers immediately
+              when it is configured.";
+        }
+
+        leaf startup {
+          uci:option "startup";
+          type empty;
+          mandatory true;
+          description
+            "This startup Event object triggers whenever the
+              Measurement Agent (re)starts.";
+        }
+
+        leaf controller-lost {
+          uci:option "controller_lost";
+          type empty;
+          mandatory true;
+          description
+            "The controller-lost Event object triggers when
+              the connectivity to the Controller has been lost
+              for at least 'controller-timeout' seconds.";
+        }
+
+        leaf controller-connected {
+          uci:option "controller_connected";
+          type empty;
+          mandatory true;
+          description
+            "The controller-connected Event object triggers
+              when the connectivity to the Controller has been
+              restored after it was lost for at least
+              'controller-timeout' seconds.";
+        }
+        uses start-end-grouping;
+      }
+    }
+  }
+}

@@ -4,6 +4,8 @@
 #include "restconf.h"
 #include "yang-util.h"
 
+#define DEBUG
+
 /**
  * Return json_object's value as a string
  * @param jobj input object to be searched
@@ -166,13 +168,13 @@ error json_yang_verify_list(struct json_object* list,
         return KEY_NOT_PRESENT;
       }
     }
-
+#ifndef DEBUG
     if (mandatory_exist) {
       if (check_mandatory_values(mandatory, list_item) != RE_OK) {
         return MANDATORY_NOT_PRESENT;
       }
     }
-
+#endif
     for (size_t verify_i = list_i + 1;
          verify_i < json_object_array_length(list) && keys_exist; verify_i++) {
       int different = 0;

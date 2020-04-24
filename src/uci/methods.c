@@ -1,6 +1,6 @@
 #include "methods.h"
 #include <string.h>
-#include <uci.h>
+#include <uci/uci.h>
 #include "http.h"
 #include "uci-util.h"
 #include "util.h"

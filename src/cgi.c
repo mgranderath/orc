@@ -5,6 +5,8 @@
 #include "cgi.h"
 #include "restconf.h"
 
+#define MAX_BUFFER_SIZE 1024
+
 /**
  * Create the cgi_context from environment variables
  * @return cgi_context
@@ -54,19 +56,46 @@ char *get_content() {
   char *post_data;
   char *length_str;
   char *trailing;
+  char *file_path;
   unsigned long length;
 
   length_str = getenv("CONTENT_LENGTH");
-  if (!length_str || !*length_str) return NULL;
+  if (!length_str || !*length_str) {
+    file_path = getenv("CONTENT_FILE_PATH");
+    if (!file_path || !*file_path) {
+      return NULL;
+    }
 
-  length = strtoul(length_str, &trailing, 10);
-  if (*trailing != '\0' || !length || length > 1024UL * 1024UL) return NULL;
+    FILE *fp = fopen(file_path, "rb");
+    if (!fp) {
+      return NULL;
+    }
 
-  post_data = (char *)malloc(length + 1);
-  if (!post_data) return NULL;
+    fseek(fp, 0L, SEEK_END);
+    long size = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
 
-  if (fread(post_data, sizeof(char), length, stdin) == length) {
-    post_data[length] = '\0';
+    post_data = (char *) malloc(sizeof(char) * size);
+    if (!post_data) {
+      fclose(fp);
+      return NULL;
+    }
+
+    if (fread(post_data, sizeof(char), size, fp) == size) {
+      post_data[size] = '\0';
+    }
+    fclose(fp);
+
+  } else {
+    length = strtoul(length_str, &trailing, 10);
+    if (*trailing != '\0' || !length || length > 1024UL * 1024UL) return NULL;
+
+    post_data = (char *)malloc(length + 1);
+    if (!post_data) return NULL;
+
+    if (fread(post_data, sizeof(char), length, stdin) == length) {
+      post_data[length] = '\0';
+    }
   }
 
   return post_data;

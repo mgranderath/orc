@@ -206,7 +206,10 @@ static int yang_verify_value_type(struct json_object* type, const char* value) {
   yang_type converted = str_to_yang_type(leaf_type);
   switch (converted) {
     case BOOLEAN:
-      if (strcmp(value, "true") != 0 && strcmp(value, "false") != 0) return 1;
+      if (strcmp(value, "true") != 0 && strcmp(value, "false") != 0 &&
+          strcmp(value, "1") != 0 && strcmp(value, "0") != 0) {
+        return 1;
+      }
       break;
     case EMPTY:
       break;

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 include_directories(src)
 
 find_path(JSON_C_INCLUDE_DIR json-c/json.h)
-find_path(UCI_INCLUDE_DIR uci.h)
+find_path(UCI_INCLUDE_DIR uci/uci.h)
 include_directories(${JSON_C_INCLUDE_DIR})
 include_directories(${UCI_INCLUDE_DIR})
 

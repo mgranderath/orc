@@ -6,3 +6,4 @@ cmake-build-debug
 scratch
 .idea
 cgi-bin
+generated
