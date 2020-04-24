@@ -240,6 +240,10 @@ def handle_grouping(value, imported, groupings):
             handle_grouping(val, imported, groupings)
 
 def extract_uses(generated, value, imported, groupings):
+    if isinstance(value, list):
+        for val in value:
+            extract_uses(generated, val, imported, groupings)
+        return
     if "@name" not in value:
         print("Invalid use of 'uses': {}".format(value))
         return

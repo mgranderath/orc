@@ -108,6 +108,81 @@ module lmapd {
     }
   }
 
+  grouping registry-grouping {
+    description
+      "This grouping models a list of entries in a registry
+       that identify functions of a Task.";
+
+    list function {
+      uci:section "function";
+      uci:leaf-as-name "uri";
+
+      key uri;
+      description
+        "A list of entries in a registry identifying functions.";
+
+      leaf uri {
+        uci:option "uri";
+        type inet:uri;
+        description
+          "A URI identifying an entry in a registry.";
+      }
+
+      leaf-list role {
+        uci:option "role";
+        type string;
+        description
+          "A set of roles for the identified registry entry.";
+      }
+    }
+  }
+
+  grouping options-grouping {
+    description
+      "A list of options of a Task.  Each option is a name/value
+       pair (where the value may be absent).";
+
+    list option {
+      uci:section "task_option";
+      uci:leaf-as-name "id";
+
+      key "id";
+      ordered-by user;
+      description
+        "A list of options passed to the Task.  It is a list of
+         key/value pairs and may be used to model options.
+         Options may be used to identify the role of a Task
+         or to pass a Channel name to a Task.";
+
+      leaf id {
+        uci:option "id";
+
+        type lmap:identifier;
+        description
+          "An identifier uniquely identifying an option.  This
+           identifier is required by YANG to uniquely identify
+           a name/value pair, but it otherwise has no semantic
+           value";
+      }
+
+      leaf name {
+        uci:option "name";
+
+        type string;
+        description
+          "The name of the option.";
+      }
+
+      leaf value {
+        uci:option "value";
+
+        type string;
+        description
+          "The value of the option.";
+      }
+    }
+  }
+
   /*
    * Capability, configuration, and state data nodes
    */
@@ -167,28 +242,7 @@ module lmapd {
               "The unique name of a Task capability.";
           }
 
-          list function {
-            uci:section "function";
-            uci:leaf-as-name "uri";
-
-            key uri;
-            description
-              "A list of entries in a registry identifying functions.";
-
-            leaf uri {
-              uci:option "uri";
-              type inet:uri;
-              description
-                "A URI identifying an entry in a registry.";
-            }
-
-            leaf-list role {
-              uci:option "role";
-              type string;
-              description
-                "A set of roles for the identified registry entry.";
-            }
-          }
+          uses registry-grouping;
 
           leaf version {
             uci:option "version";
@@ -346,28 +400,7 @@ module lmapd {
             "The unique name of a Task.";
         }
 
-        list function {
-          uci:section "function";
-          uci:leaf-as-name "uri";
-
-          key uri;
-          description
-            "A list of entries in a registry identifying functions.";
-
-          leaf uri {
-            uci:option "uri";
-            type inet:uri;
-            description
-              "A URI identifying an entry in a registry.";
-          }
-
-          leaf-list role {
-            uci:option "role";
-            type string;
-            description
-              "A set of roles for the identified registry entry.";
-          }
-        }
+        uses registry-grouping;
 
         leaf program {
           uci:option "program";
@@ -381,45 +414,7 @@ module lmapd {
              the registry information present.";
         }
 
-        list task-option {
-          uci:section "task_option";
-          uci:leaf-as-name "id";
-
-          key id;
-          ordered-by user;
-          description
-            "A list of options passed to the Task.  It is a list of
-            key/value pairs and may be used to model options.
-            Options may be used to identify the role of a Task
-            or to pass a Channel name to a Task.";
-
-          leaf id {
-            uci:option "id";
-
-            type lmap:identifier;
-            description
-              "An identifier uniquely identifying an option.  This
-              identifier is required by YANG to uniquely identify
-              a name/value pair, but it otherwise has no semantic
-              value";
-          }
-
-          leaf name {
-            uci:option "name";
-
-            type string;
-            description
-              "The name of the option.";
-          }
-
-          leaf value {
-            uci:option "value";
-
-            type string;
-            description
-              "The value of the option.";
-          }
-        }
+        uses options-grouping;
 
         leaf-list tag {
           uci:option "tag";
@@ -656,45 +651,7 @@ module lmapd {
               "The Task invoked by this Action.";
           }
 
-          list action-option {
-            uci:section "action_option";
-            uci:leaf-as-name "id";
-
-            key id;
-            ordered-by user;
-            description
-              "A list of options passed to the Task.  It is a list of
-              key/value pairs and may be used to model options.
-              Options may be used to identify the role of a Task
-              or to pass a Channel name to a Task.";
-
-            leaf id {
-              uci:option "id";
-
-              type lmap:identifier;
-              description
-                "An identifier uniquely identifying an option.  This
-                identifier is required by YANG to uniquely identify
-                a name/value pair, but it otherwise has no semantic
-                value";
-            }
-
-            leaf name {
-              uci:option "name";
-
-              type string;
-              description
-                "The name of the option.";
-            }
-
-            leaf value {
-              uci:option "value";
-
-              type string;
-              description
-                "The value of the option.";
-            }
-          }
+          uses options-grouping;
 
           leaf-list destination {
             uci:option "destination";
@@ -1174,28 +1131,7 @@ module lmapd {
               restored after it was lost for at least
               'controller-timeout' seconds.";
         }
-
-        leaf start {
-          uci:option "start";
-          type yang:date-and-time;
-          description
-            "The date and time when the Event object
-            starts to create triggers.";
-        }
-
-        leaf end {
-          uci:option "end";
-          type yang:date-and-time;
-          description
-            "The date and time when the Event object
-            stops to create triggers.
-
-            It is generally a good idea to always configure
-            an end time and to refresh the end time as needed
-            to ensure that agents that lose connectivity to
-            their Controller do not continue executing Schedules
-            forever.";
-        }
+        uses start-end-grouping;
       }
     }
   }
